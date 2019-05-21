@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>ADJUST_FIELD_TEXT_VIEW</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Set texts in other fields to the current language.</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>ADJUST_VIEW_DICTIONARY</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Adjusts the view with the data dictionary.</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>CHECK_CHANGES_DICT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Check if there are changes between the view and the dictiona</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>CHECK_EXIT_CLASS</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Check exit class</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>CHECK_VIEW_DDIC</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Checks if view is correct in DDIC</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>CHECK_VIEW_INSERT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Check view for insert</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>CHECK_VIEW_READ</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Check view when is reading</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>DELETE_VIEW</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Delete a view</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>GET_FIELDS_VIEW</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Gets the view fields</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>GET_VIEW_DDIC</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Gets the view data dictionary.</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>INSERT_VIEW</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Create a view</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>JOIN_FIELDS_ALV</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Join the data of fields in the internal table of ALV</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>READ_TEXT_OF_VIEW</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Read the texts of fields the view.</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>READ_VIEW</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Read view</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>SAVE_TEXT_OF_VIEW</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Save the texts of fields the view.</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>SAVE_VIEW</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Save view</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>SAVE_VIEW_DDIC</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Save the data in ddic format</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
+     <CMPNAME>SPLIT_FIELDS_ALV</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Split the fields of alv in two internal tables.</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

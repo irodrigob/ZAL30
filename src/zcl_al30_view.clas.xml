@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>CHECK_AUTHORIZATION</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Check authorization for editing or viewing</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>CREATE_IT_DATA_VIEW</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Create the internal table for display data of the view</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>CREATE_IT_EDIT_DATA_VIEW</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Create the internal table for editing data of the view</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>EXIT_AFTER_SAVE_DATA</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Exit after save data</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>EXIT_BEFORE_PROCESS_DATA</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>exit before processing the data records</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>EXIT_BEFORE_SAVE_DATA</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Exit before save data</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>EXIT_CHECK_AUTH_DATA_RECORD</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Exit checks authorization for recording data</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>EXIT_IN_PROCESS_DATA_RECORD</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>exit while processing the data records</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>EXIT_SAVE_DATA</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Exit save data</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>EXIT_VERIFY_CHANGE_ROW_DATA</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Exit for Verify and change row data</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>EXIT_VERIFY_FIELD_DATA</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Exit for verify field data</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>GET_FIELDCAT_EDIT_VIEW</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Get fieldcat for the view editing</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>GET_FIELDCAT_VIEW</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Get fieldcat for the display the view</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>READ_DATA</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Read data of view</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>RESET_DATA</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>update reset fields</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>SAVE_DATA</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Save the data in the view.</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>TRANSPORT_ENTRIES</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Transport table entries</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>VERIFY_CHANGE_ROW_DATA</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Verify and change row data</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>VERIFY_FIELD_DATA</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Check the contents of field</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>
