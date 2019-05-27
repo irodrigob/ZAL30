@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_INTF" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOINTERF>
+    <CLSNAME>ZIF_AL30_EXIT_CLASS</CLSNAME>
+    <LANGU>S</LANGU>
+    <DESCRIPT>AL30 - Interface for exit</DESCRIPT>
+    <EXPOSURE>2</EXPOSURE>
+    <STATE>1</STATE>
+    <UNICODE>X</UNICODE>
+   </VSEOINTERF>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_AL30_EXIT_CLASS</CLSNAME>
+     <CMPNAME>EXIT_AFTER_SAVE_DATA</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Exit after save data</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_AL30_EXIT_CLASS</CLSNAME>
+     <CMPNAME>EXIT_BEFORE_PROCESS_DATA</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Exit before processing the data records</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_AL30_EXIT_CLASS</CLSNAME>
+     <CMPNAME>EXIT_BEFORE_SAVE_DATA</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Exit before save data</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_AL30_EXIT_CLASS</CLSNAME>
+     <CMPNAME>EXIT_CHECK_AUTH_DATA_RECORD</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Exit checks authorization for recording data</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_AL30_EXIT_CLASS</CLSNAME>
+     <CMPNAME>EXIT_IN_PROCESS_DATA_RECORD</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Exit while processing the data records</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_AL30_EXIT_CLASS</CLSNAME>
+     <CMPNAME>EXIT_VERIFY_CHANGE_ROW_DATA</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Exit verify and change row data</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZIF_AL30_EXIT_CLASS</CLSNAME>
+     <CMPNAME>EXIT_VERIFY_FIELD_DATA</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Exit verify field data</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>
