@@ -5,7 +5,7 @@
    <VSEOCLASS>
     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>View configuration</DESCRIPT>
+    <DESCRIPT>AL30 - View configuration</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>
@@ -68,12 +68,6 @@
     </SEOCOMPOTX>
     <SEOCOMPOTX>
      <CLSNAME>ZCL_AL30_CONF</CLSNAME>
-     <CMPNAME>SAVE_TEXT_OF_VIEW</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>Save the texts of fields the view.</DESCRIPT>
-    </SEOCOMPOTX>
-    <SEOCOMPOTX>
-     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
      <CMPNAME>SAVE_VIEW</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Save view</DESCRIPT>
@@ -83,12 +77,6 @@
      <CMPNAME>SAVE_VIEW_DDIC</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Save the data in ddic format</DESCRIPT>
-    </SEOCOMPOTX>
-    <SEOCOMPOTX>
-     <CLSNAME>ZCL_AL30_CONF</CLSNAME>
-     <CMPNAME>SPLIT_FIELDS_ALV</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>Split the fields of alv in two internal tables.</DESCRIPT>
     </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>

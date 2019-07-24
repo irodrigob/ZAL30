@@ -4,7 +4,7 @@
   <asx:values>
    <DD04V>
     <ROLLNAME>ZAL30_E_EXIT_CLASS</ROLLNAME>
-    <DDLANGUAGE>S</DDLANGUAGE>
+    <DDLANGUAGE>E</DDLANGUAGE>
     <DOMNAME>SEOCLSNAME</DOMNAME>
     <HEADLEN>30</HEADLEN>
     <SCRLEN1>10</SCRLEN1>
@@ -15,9 +15,22 @@
     <SCRTEXT_S>Exit Class</SCRTEXT_S>
     <SCRTEXT_M>Exit Class</SCRTEXT_M>
     <SCRTEXT_L>Exit Class</SCRTEXT_L>
-    <DTELMASTER>S</DTELMASTER>
+    <DTELMASTER>E</DTELMASTER>
     <REFKIND>D</REFKIND>
    </DD04V>
+   <I18N_LANGS>
+    <LANGU>S</LANGU>
+   </I18N_LANGS>
+   <DD04_TEXTS>
+    <item>
+     <DDLANGUAGE>S</DDLANGUAGE>
+     <DDTEXT>AL30 - Exit Class</DDTEXT>
+     <REPTEXT>Exit Class</REPTEXT>
+     <SCRTEXT_S>Exit Class</SCRTEXT_S>
+     <SCRTEXT_M>Exit Class</SCRTEXT_M>
+     <SCRTEXT_L>Exit Class</SCRTEXT_L>
+    </item>
+   </DD04_TEXTS>
   </asx:values>
  </asx:abap>
 </abapGit>

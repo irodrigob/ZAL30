@@ -1,84 +1,89 @@
-CLASS zcl_al30_util DEFINITION
-  PUBLIC
-  FINAL
-  CREATE PUBLIC .
+class ZCL_AL30_UTIL definition
+  public
+  final
+  create public .
 
-  PUBLIC SECTION.
+public section.
+
+  types:
 *"* public components of class ZCL_AL30_DATA
 *"* do not include other source files here!!!
-    TYPES tt_keys TYPE STANDARD TABLE OF trobj_name.
+    tt_keys TYPE STANDARD TABLE OF trobj_name .
 
-    CLASS-METHODS fill_return
-      IMPORTING
-        !iv_type         TYPE any
-        !iv_number       TYPE any
-        !iv_message_v1   TYPE any OPTIONAL
-        !iv_message_v2   TYPE any OPTIONAL
-        !iv_message_v3   TYPE any OPTIONAL
-        !iv_message_v4   TYPE any OPTIONAL
-        !iv_id           TYPE symsgid OPTIONAL
-      RETURNING
-        VALUE(rs_return) TYPE bapiret2 .
-    CLASS-METHODS f4_view
-      IMPORTING
-        !iv_program     TYPE syrepid
-        !iv_dynpro      TYPE sydynnr
-        !iv_dynprofield TYPE help_info-dynprofld
-      EXPORTING
-        VALUE(ev_view)  TYPE tabname
-      RAISING
-        zcx_al30 .
-    CLASS-METHODS get_fcat_control_edit_view
-      RETURNING
-        VALUE(rt_fieldcat_control) TYPE lvc_t_fcat .
-    CLASS-METHODS get_key_value_domain
-      IMPORTING
-        iv_domain TYPE domname
-        iv_langu  TYPE sylangu DEFAULT sy-langu
-      EXPORTING
-        et_values TYPE zif_al30_data=>tt_key_value.
-    CLASS-METHODS get_fields_struc
-      IMPORTING
-        iv_struc         TYPE any
-      RETURNING
-        VALUE(rt_fields) TYPE string_t.
-    CLASS-METHODS allowed_transport
-      RETURNING VALUE(rv_allowed) TYPE sap_bool.
-    CLASS-METHODS allowed_modify_data
-      RETURNING VALUE(rv_allowed) TYPE sap_bool.
-
-    CLASS-METHODS check_select_transport_order
-      IMPORTING
-                iv_category TYPE e070-korrdev
-      EXPORTING
-                es_return   TYPE bapiret2
-      CHANGING  cv_order    TYPE e070-trkorr.
-
-    CLASS-METHODS check_transport_order
-      IMPORTING
-                iv_category TYPE e070-korrdev
-      EXPORTING
-                es_return   TYPE bapiret2
-      CHANGING  cv_order    TYPE e070-trkorr.
-    CLASS-METHODS values_itab_2_transport_order
-      IMPORTING
-                it_values  TYPE ANY TABLE
-                iv_tabname TYPE tabname
-                iv_objfunc TYPE objfunc DEFAULT zif_al30_data=>cs_order_objfunc-key_value
-      EXPORTING
-                es_return  TYPE bapiret2
-      CHANGING  cv_order   TYPE e070-trkorr.
-    CLASS-METHODS transport_entries
-      IMPORTING
-                iv_tabname TYPE tabname
-                it_keys    TYPE tt_keys
-                iv_objfunc TYPE objfunc
-      EXPORTING
-                es_return  TYPE bapiret2
-      CHANGING  cv_order   TYPE e070-trkorr
-      RAISING   zcx_al30.
-
-
+  class-methods FILL_RETURN
+    importing
+      !IV_TYPE type ANY
+      !IV_NUMBER type ANY
+      !IV_MESSAGE_V1 type ANY optional
+      !IV_MESSAGE_V2 type ANY optional
+      !IV_MESSAGE_V3 type ANY optional
+      !IV_MESSAGE_V4 type ANY optional
+      !IV_ID type SYMSGID optional
+    returning
+      value(RS_RETURN) type BAPIRET2 .
+  class-methods F4_VIEW
+    importing
+      !IV_PROGRAM type SYREPID
+      !IV_DYNPRO type SYDYNNR
+      !IV_DYNPROFIELD type HELP_INFO-DYNPROFLD
+    exporting
+      value(EV_VIEW) type TABNAME
+    raising
+      ZCX_AL30 .
+  class-methods GET_FCAT_CONTROL_EDIT_VIEW
+    returning
+      value(RT_FIELDCAT_CONTROL) type LVC_T_FCAT .
+  class-methods GET_KEY_VALUE_DOMAIN
+    importing
+      !IV_DOMAIN type DOMNAME
+      !IV_LANGU type SYLANGU default SY-LANGU
+    exporting
+      !ET_VALUES type ZIF_AL30_DATA=>TT_KEY_VALUE .
+  class-methods GET_FIELDS_STRUC
+    importing
+      !IV_STRUC type ANY
+    returning
+      value(RT_FIELDS) type ETSTRING_TAB .
+  class-methods ALLOWED_TRANSPORT
+    returning
+      value(RV_ALLOWED) type SAP_BOOL .
+  class-methods ALLOWED_MODIFY_DATA
+    returning
+      value(RV_ALLOWED) type SAP_BOOL .
+  class-methods CHECK_SELECT_TRANSPORT_ORDER
+    importing
+      !IV_CATEGORY type E070-KORRDEV
+    exporting
+      !ES_RETURN type BAPIRET2
+    changing
+      !CV_ORDER type E070-TRKORR .
+  class-methods CHECK_TRANSPORT_ORDER
+    importing
+      !IV_CATEGORY type E070-KORRDEV
+    exporting
+      !ES_RETURN type BAPIRET2
+    changing
+      !CV_ORDER type E070-TRKORR .
+  class-methods VALUES_ITAB_2_TRANSPORT_ORDER
+    importing
+      !IT_VALUES type ANY TABLE
+      !IV_TABNAME type TABNAME
+      !IV_OBJFUNC type OBJFUNC default ZIF_AL30_DATA=>CS_ORDER_OBJFUNC-KEY_VALUE
+    exporting
+      !ES_RETURN type BAPIRET2
+    changing
+      !CV_ORDER type E070-TRKORR .
+  class-methods TRANSPORT_ENTRIES
+    importing
+      !IV_TABNAME type TABNAME
+      !IT_KEYS type TT_KEYS
+      !IV_OBJFUNC type OBJFUNC
+    exporting
+      !ES_RETURN type BAPIRET2
+    changing
+      !CV_ORDER type E070-TRKORR
+    raising
+      ZCX_AL30 .
   PROTECTED SECTION.
 
     CLASS-METHODS conv_data_2_keys_trkorr
@@ -106,136 +111,27 @@ ENDCLASS.
 
 
 
-CLASS zcl_al30_util IMPLEMENTATION.
+CLASS ZCL_AL30_UTIL IMPLEMENTATION.
 
 
-  METHOD f4_view.
-    TYPES: BEGIN OF ty_values,
-             tabname TYPE tabname,
-             text    TYPE as4text,
-           END OF ty_values.
+  METHOD allowed_modify_data.
+    DATA ld_transp_state  TYPE t000-cccoractiv.
+    DATA ld_cliindep_state  TYPE t000-ccnocliind.
+    DATA ld_client_state  TYPE t000-cccategory.
 
-    DATA lt_values TYPE STANDARD TABLE OF ty_values.
-    DATA lt_return_tab TYPE TABLE OF ddshretval.
-    FIELD-SYMBOLS <ls_return_tab> TYPE ddshretval.
-    FIELD-SYMBOLS <ls_values> TYPE ty_values.
-
-    SELECT a~tabname b~ddtext INTO TABLE lt_values
-           FROM zal30_t_view AS a LEFT OUTER JOIN dd02t AS b ON
-                b~tabname = a~tabname
-                AND b~ddlanguage = sy-langu.
-
-    IF sy-subrc = 0.
-      CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'
-        EXPORTING
-          retfield    = 'TABNAME'
-          dynpprog    = iv_program
-          dynpnr      = iv_dynpro
-          dynprofield = iv_dynprofield
-          value_org   = 'S'
-        TABLES
-          value_tab   = lt_values
-          return_tab  = lt_return_tab[].
-
-* Miro que registro se ha seleccionado y lo devuelvo al parámetro.
-      READ TABLE lt_return_tab ASSIGNING <ls_return_tab> INDEX 1.
-      IF sy-subrc = 0.
-        READ TABLE lt_values ASSIGNING <ls_values> INDEX <ls_return_tab>-recordpos.
-        IF sy-subrc = 0.
-          ev_view = <ls_values>-tabname.
-        ENDIF.
-      ENDIF.
-
-    ELSE.
-      RAISE EXCEPTION TYPE zcx_al30
-        EXPORTING
-          textid = zcx_al30=>no_values_f4_view.
-
-    ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD fill_return.
-
-    CLEAR rs_return.
-
-    rs_return-type = iv_type.
-
-    rs_return-id = COND #( WHEN iv_id IS NOT INITIAL THEN iv_id ELSE zif_al30_data=>cv_msg_id ).
-    rs_return-number = iv_number.
-    rs_return-message_v1 = iv_message_v1.
-    rs_return-message_v2 = iv_message_v2.
-    rs_return-message_v3 = iv_message_v3.
-    rs_return-message_v4 = iv_message_v4.
-
-
-    CALL FUNCTION 'BAPI_MESSAGE_GETDETAIL'
-      EXPORTING
-        id         = rs_return-id
-        number     = rs_return-number
-        language   = sy-langu
-        textformat = 'ASC'
-        message_v1 = rs_return-message_v1
-        message_v2 = rs_return-message_v2
-        message_v3 = rs_return-message_v3
-        message_v4 = rs_return-message_v4
+    CALL FUNCTION 'VIEW_GET_CLIENT_STATE'
       IMPORTING
-        message    = rs_return-message.
+        transp_state   = ld_transp_state
+        cliindep_state = ld_cliindep_state
+        client_state   = ld_client_state.
 
-  ENDMETHOD.
-
-
-  METHOD get_fcat_control_edit_view.
-
-    DATA ls_fieldcat TYPE LINE OF lvc_t_fcat.
-
-* Operación del registro: 'I' -> Insertar. 'U' -> Actualizar. 'D' -> Borrar.
-    ls_fieldcat-fieldname = zif_al30_data=>cv_field_updkz.
-    ls_fieldcat-rollname = 'CDCHNGIND'.
-    ls_fieldcat-tech = 'X'.
-    APPEND ls_fieldcat TO rt_fieldcat_control.
-    CLEAR ls_fieldcat.
-
-* Línea del registro según la lectura en el diccionario
-* Este campo se usa sobretodo para saber si un registro viene del diccionario, o no.
-    ls_fieldcat-fieldname = zif_al30_data=>cv_field_tabix_ddic.
-    ls_fieldcat-rollname = 'SYTABIX'.
-    ls_fieldcat-ref_table = 'SYST'.
-    ls_fieldcat-ref_field = 'TABIX'.
-    ls_fieldcat-tech = 'X'.
-    APPEND ls_fieldcat TO rt_fieldcat_control.
-    CLEAR ls_fieldcat.
-
-  ENDMETHOD.
-  METHOD get_key_value_domain.
-    DATA lt_valores TYPE STANDARD TABLE OF dd07v.
-
-    CLEAR: et_values.
-
-    CALL FUNCTION 'DDIF_DOMA_GET'
-      EXPORTING
-        name      = iv_domain
-        langu     = iv_langu
-      TABLES
-        dd07v_tab = lt_valores[].
-
-    IF sy-subrc = 0.
-
-      et_values = VALUE #( FOR <ls_valores> IN lt_valores ( key = <ls_valores>-domvalue_l value = <ls_valores>-ddtext ) ).
-
+    IF ld_cliindep_state = space.
+      rv_allowed = abap_true.
+    ELSE.
+      rv_allowed = abap_false.
     ENDIF.
   ENDMETHOD.
 
-  METHOD get_fields_struc.
-
-    CLEAR rt_fields.
-
-    DATA(lo_struc) = CAST cl_abap_structdescr( cl_abap_typedescr=>describe_by_name( iv_struc ) ).
-
-    rt_fields = VALUE #( FOR <components> IN lo_struc->get_components( ) ( <components>-name ) ).
-
-  ENDMETHOD.
 
   METHOD allowed_transport.
     DATA ld_transp_state  TYPE t000-cccoractiv.
@@ -258,23 +154,6 @@ CLASS zcl_al30_util IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-  METHOD allowed_modify_data.
-    DATA ld_transp_state  TYPE t000-cccoractiv.
-    DATA ld_cliindep_state  TYPE t000-ccnocliind.
-    DATA ld_client_state  TYPE t000-cccategory.
-
-    CALL FUNCTION 'VIEW_GET_CLIENT_STATE'
-      IMPORTING
-        transp_state   = ld_transp_state
-        cliindep_state = ld_cliindep_state
-        client_state   = ld_client_state.
-
-    IF ld_cliindep_state = space.
-      rv_allowed = abap_true.
-    ELSE.
-      rv_allowed = abap_false.
-    ENDIF.
-  ENDMETHOD.
 
   METHOD check_select_transport_order.
 
@@ -305,6 +184,7 @@ CLASS zcl_al30_util IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+
 
   METHOD check_transport_order.
     DATA lt_req_head TYPE trwbo_request_headers.
@@ -393,30 +273,6 @@ CLASS zcl_al30_util IMPLEMENTATION.
       ENDIF.
 
     ENDIF.
-  ENDMETHOD.
-
-  METHOD values_itab_2_transport_order.
-
-    CLEAR es_return.
-
-    TRY.
-        " Se convierte los valores a una clave para poder asignarla a una orden de transporte
-        conv_data_2_keys_trkorr( EXPORTING it_values = it_values iv_tabname = iv_tabname IMPORTING et_keys_trkorr = DATA(lt_keys) ).
-
-        transport_entries(
-                EXPORTING
-                  iv_tabname = iv_tabname
-                  it_keys    = lt_keys
-                  iv_objfunc = iv_objfunc
-                IMPORTING
-                  es_return  = es_return
-                CHANGING
-                cv_order = cv_order   ).
-
-      CATCH zcx_al30.
-        es_return = fill_return( iv_type = zif_al30_data=>cs_msg_type-error iv_number = '029' iv_message_v1 = cv_order ).
-    ENDTRY.
-
   ENDMETHOD.
 
 
@@ -535,6 +391,138 @@ CLASS zcl_al30_util IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD f4_view.
+    TYPES: BEGIN OF ty_values,
+             tabname TYPE tabname,
+             text    TYPE as4text,
+           END OF ty_values.
+
+    DATA lt_values TYPE STANDARD TABLE OF ty_values.
+    DATA lt_return_tab TYPE TABLE OF ddshretval.
+    FIELD-SYMBOLS <ls_return_tab> TYPE ddshretval.
+    FIELD-SYMBOLS <ls_values> TYPE ty_values.
+
+    SELECT a~tabname b~ddtext INTO TABLE lt_values
+           FROM zal30_t_view AS a LEFT OUTER JOIN dd02t AS b ON
+                b~tabname = a~tabname
+                AND b~ddlanguage = sy-langu.
+
+    IF sy-subrc = 0.
+      CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'
+        EXPORTING
+          retfield    = 'TABNAME'
+          dynpprog    = iv_program
+          dynpnr      = iv_dynpro
+          dynprofield = iv_dynprofield
+          value_org   = 'S'
+        TABLES
+          value_tab   = lt_values
+          return_tab  = lt_return_tab[].
+
+* Miro que registro se ha seleccionado y lo devuelvo al parámetro.
+      READ TABLE lt_return_tab ASSIGNING <ls_return_tab> INDEX 1.
+      IF sy-subrc = 0.
+        READ TABLE lt_values ASSIGNING <ls_values> INDEX <ls_return_tab>-recordpos.
+        IF sy-subrc = 0.
+          ev_view = <ls_values>-tabname.
+        ENDIF.
+      ENDIF.
+
+    ELSE.
+      RAISE EXCEPTION TYPE zcx_al30
+        EXPORTING
+          textid = zcx_al30=>no_values_f4_view.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD fill_return.
+
+    CLEAR rs_return.
+
+    rs_return-type = iv_type.
+
+    rs_return-id = COND #( WHEN iv_id IS NOT INITIAL THEN iv_id ELSE zif_al30_data=>cv_msg_id ).
+    rs_return-number = iv_number.
+    rs_return-message_v1 = iv_message_v1.
+    rs_return-message_v2 = iv_message_v2.
+    rs_return-message_v3 = iv_message_v3.
+    rs_return-message_v4 = iv_message_v4.
+
+
+    CALL FUNCTION 'BAPI_MESSAGE_GETDETAIL'
+      EXPORTING
+        id         = rs_return-id
+        number     = rs_return-number
+        language   = sy-langu
+        textformat = 'ASC'
+        message_v1 = rs_return-message_v1
+        message_v2 = rs_return-message_v2
+        message_v3 = rs_return-message_v3
+        message_v4 = rs_return-message_v4
+      IMPORTING
+        message    = rs_return-message.
+
+  ENDMETHOD.
+
+
+  METHOD get_fcat_control_edit_view.
+
+    DATA ls_fieldcat TYPE LINE OF lvc_t_fcat.
+
+* Operación del registro: 'I' -> Insertar. 'U' -> Actualizar. 'D' -> Borrar.
+    ls_fieldcat-fieldname = zif_al30_data=>cv_field_updkz.
+    ls_fieldcat-rollname = 'CDCHNGIND'.
+    ls_fieldcat-tech = 'X'.
+    APPEND ls_fieldcat TO rt_fieldcat_control.
+    CLEAR ls_fieldcat.
+
+* Línea del registro según la lectura en el diccionario
+* Este campo se usa sobretodo para saber si un registro viene del diccionario, o no.
+    ls_fieldcat-fieldname = zif_al30_data=>cv_field_tabix_ddic.
+    ls_fieldcat-rollname = 'SYTABIX'.
+    ls_fieldcat-ref_table = 'SYST'.
+    ls_fieldcat-ref_field = 'TABIX'.
+    ls_fieldcat-tech = 'X'.
+    APPEND ls_fieldcat TO rt_fieldcat_control.
+    CLEAR ls_fieldcat.
+
+  ENDMETHOD.
+
+
+  METHOD get_fields_struc.
+
+    CLEAR rt_fields.
+
+    DATA(lo_struc) = CAST cl_abap_structdescr( cl_abap_typedescr=>describe_by_name( iv_struc ) ).
+
+    rt_fields = VALUE #( FOR <components> IN lo_struc->get_components( ) ( <components>-name ) ).
+
+  ENDMETHOD.
+
+
+  METHOD get_key_value_domain.
+    DATA lt_valores TYPE STANDARD TABLE OF dd07v.
+
+    CLEAR: et_values.
+
+    CALL FUNCTION 'DDIF_DOMA_GET'
+      EXPORTING
+        name      = iv_domain
+        langu     = iv_langu
+      TABLES
+        dd07v_tab = lt_valores[].
+
+    IF sy-subrc = 0.
+
+      et_values = VALUE #( FOR <ls_valores> IN lt_valores ( key = <ls_valores>-domvalue_l value = <ls_valores>-ddtext ) ).
+
+    ENDIF.
+  ENDMETHOD.
+
+
   METHOD transport_entries.
     DATA lt_e071k TYPE STANDARD TABLE OF e071k.
     DATA lt_e071 TYPE STANDARD TABLE OF e071.
@@ -600,4 +588,28 @@ CLASS zcl_al30_util IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD values_itab_2_transport_order.
+
+    CLEAR es_return.
+
+    TRY.
+        " Se convierte los valores a una clave para poder asignarla a una orden de transporte
+        conv_data_2_keys_trkorr( EXPORTING it_values = it_values iv_tabname = iv_tabname IMPORTING et_keys_trkorr = DATA(lt_keys) ).
+
+        transport_entries(
+                EXPORTING
+                  iv_tabname = iv_tabname
+                  it_keys    = lt_keys
+                  iv_objfunc = iv_objfunc
+                IMPORTING
+                  es_return  = es_return
+                CHANGING
+                cv_order = cv_order   ).
+
+      CATCH zcx_al30.
+        es_return = fill_return( iv_type = zif_al30_data=>cs_msg_type-error iv_number = '029' iv_message_v1 = cv_order ).
+    ENDTRY.
+
+  ENDMETHOD.
 ENDCLASS.

@@ -1,208 +1,191 @@
-CLASS zcl_al30_conf DEFINITION
-  PUBLIC
-  CREATE PUBLIC .
+class ZCL_AL30_CONF definition
+  public
+  create public .
 
-  PUBLIC SECTION.
+public section.
 *"* public components of class ZCL_AL30_CONF
 *"* do not include other source files here!!!
-    TYPE-POOLS abap .
+  type-pools ABAP .
 
-    METHODS read_view
-      IMPORTING
-        !iv_name_view    TYPE tabname
-        !iv_all_language TYPE sap_bool DEFAULT abap_false
-        !iv_langu        TYPE sylangu DEFAULT sy-langu
-        !iv_read_ddic    TYPE sap_bool DEFAULT abap_true
-      EXPORTING
-        !ev_text_view    TYPE as4text
-        !es_return       TYPE bapiret2
-        !es_view         TYPE zal30_t_view
-        !et_fields       TYPE zif_al30_data=>tt_fields_view
-        !et_fields_text  TYPE zif_al30_data=>tt_fields_text_view
-        !et_fields_ddic  TYPE dd03ptab .
-    METHODS check_view_ddic
-      IMPORTING
-        !iv_name_view TYPE tabname
-      EXPORTING
-        !e_return     TYPE bapiret2
-        !e_text_view  TYPE as4text .
-    METHODS insert_view
-      IMPORTING
-        !iv_name_view          TYPE tabname
-        !iv_use_default_values TYPE sap_bool DEFAULT abap_false
-        !is_default_values     TYPE zif_al30_data=>ts_default_values_create OPTIONAL
-      EXPORTING
-        !es_return             TYPE bapiret2
-        !et_fields             TYPE zif_al30_data=>tt_fields_view
-        !et_fields_text        TYPE zif_al30_data=>tt_fields_text_view
-        !es_view               TYPE zal30_t_view
-        !et_fields_ddic        TYPE dd03ptab .
-    METHODS delete_view
-      IMPORTING
-        !iv_name_view    TYPE tabname
-      RETURNING
-        VALUE(rs_return) TYPE bapiret2 .
-    METHODS save_view
-      IMPORTING
-        !is_view         TYPE zal30_t_view
-        !it_fields       TYPE zif_al30_data=>tt_fields_view
-        !it_fields_text  TYPE zif_al30_data=>tt_fields_text_view OPTIONAL
-      RETURNING
-        VALUE(rs_return) TYPE bapiret2 .
-    METHODS check_view_insert
-      IMPORTING
-        !iv_name_view TYPE tabname
-      EXPORTING
-        !es_return    TYPE bapiret2
-        !ev_text_view TYPE as4text .
-    METHODS check_view_read
-      IMPORTING
-        !iv_name_view TYPE tabname
-      EXPORTING
-        !es_return    TYPE bapiret2
-        !ev_text_view TYPE as4text .
-    METHODS check_changes_dict
-      IMPORTING
-        !it_fields      TYPE zif_al30_data=>tt_fields_view OPTIONAL
-        !it_fields_text TYPE zif_al30_data=>tt_fields_text_view OPTIONAL
-        !is_view        TYPE zal30_t_view
-        !iv_langu       TYPE sylangu DEFAULT sy-langu
-      EXPORTING
-        ev_diff_fields  TYPE sap_bool
-        ev_diff_text    TYPE sap_bool.
-    METHODS adjust_view_dictionary
-      IMPORTING
-        !iv_keep_text        TYPE sap_bool DEFAULT abap_true
-      EXPORTING
-        VALUE(es_return)     TYPE bapiret2
-        !ev_text_view        TYPE as4text
-      CHANGING
-        !ct_fields_view      TYPE zif_al30_data=>tt_fields_view
-        !ct_fields_text_view TYPE zif_al30_data=>tt_fields_text_view
-        !cs_view             TYPE zal30_t_view.
-    METHODS check_exit_class
-      IMPORTING
-        !iv_exit_class   TYPE zal30_e_exit_class
-      RETURNING
-        VALUE(rs_return) TYPE bapiret2 .
-    METHODS get_logon_languages
-      IMPORTING
-        iv_langu  TYPE sylangu DEFAULT sy-langu
-      EXPORTING
-        et_lang   TYPE zif_al30_data=>tt_logon_lang
-        et_r_lang TYPE zif_al30_data=>tt_r_lang.
-    METHODS get_fields_view_ddic
-      IMPORTING
-        iv_name_view     TYPE any
-        iv_langu         TYPE sylangu DEFAULT sy-langu
-        iv_add_texttable TYPE sap_bool DEFAULT abap_false
-        iv_all_language  TYPE sap_bool DEFAULT abap_false
-      EXPORTING
-        es_dd02v         TYPE dd02v
-        et_fields        TYPE zif_al30_data=>tt_fields_view
-        et_fields_text   TYPE zif_al30_data=>tt_fields_text_view
-        ev_texttable     TYPE tabname
-        et_fields_ddic   TYPE dd03ptab
-      RAISING
-        zcx_al30 .
+  methods READ_VIEW
+    importing
+      !IV_NAME_VIEW type TABNAME
+      !IV_ALL_LANGUAGE type SAP_BOOL default ABAP_FALSE
+      !IV_LANGU type SYLANGU default SY-LANGU
+      !IV_READ_DDIC type SAP_BOOL default ABAP_TRUE
+    exporting
+      !EV_TEXT_VIEW type AS4TEXT
+      !ES_RETURN type BAPIRET2
+      !ES_VIEW type ZAL30_T_VIEW
+      !ET_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW
+      !ET_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW
+      !ET_FIELDS_DDIC type DD03PTAB .
+  methods CHECK_VIEW_DDIC
+    importing
+      !IV_NAME_VIEW type TABNAME
+    exporting
+      !E_RETURN type BAPIRET2
+      !E_TEXT_VIEW type AS4TEXT .
+  methods INSERT_VIEW
+    importing
+      !IV_NAME_VIEW type TABNAME
+      !IV_USE_DEFAULT_VALUES type SAP_BOOL default ABAP_FALSE
+      !IS_DEFAULT_VALUES type ZIF_AL30_DATA=>TS_DEFAULT_VALUES_CREATE optional
+    exporting
+      !ES_RETURN type BAPIRET2
+      !ET_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW
+      !ET_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW
+      !ES_VIEW type ZAL30_T_VIEW
+      !ET_FIELDS_DDIC type DD03PTAB .
+  methods DELETE_VIEW
+    importing
+      !IV_NAME_VIEW type TABNAME
+    returning
+      value(RS_RETURN) type BAPIRET2 .
+  methods SAVE_VIEW
+    importing
+      !IS_VIEW type ZAL30_T_VIEW
+      !IT_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW
+      !IT_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW optional
+    returning
+      value(RS_RETURN) type BAPIRET2 .
+  methods CHECK_VIEW_INSERT
+    importing
+      !IV_NAME_VIEW type TABNAME
+    exporting
+      !ES_RETURN type BAPIRET2
+      !EV_TEXT_VIEW type AS4TEXT .
+  methods CHECK_VIEW_READ
+    importing
+      !IV_NAME_VIEW type TABNAME
+    exporting
+      !ES_RETURN type BAPIRET2
+      !EV_TEXT_VIEW type AS4TEXT .
+  methods CHECK_CHANGES_DICT
+    importing
+      !IT_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW optional
+      !IT_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW optional
+      !IS_VIEW type ZAL30_T_VIEW
+      !IV_LANGU type SYLANGU default SY-LANGU
+    exporting
+      !EV_DIFF_FIELDS type SAP_BOOL
+      !EV_DIFF_TEXT type SAP_BOOL .
+  methods ADJUST_VIEW_DICTIONARY
+    importing
+      !IV_KEEP_TEXT type SAP_BOOL default ABAP_TRUE
+    exporting
+      value(ES_RETURN) type BAPIRET2
+      !EV_TEXT_VIEW type AS4TEXT
+    changing
+      !CT_FIELDS_VIEW type ZIF_AL30_DATA=>TT_FIELDS_VIEW
+      !CT_FIELDS_TEXT_VIEW type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW
+      !CS_VIEW type ZAL30_T_VIEW .
+  methods CHECK_EXIT_CLASS
+    importing
+      !IV_EXIT_CLASS type ZAL30_E_EXIT_CLASS
+    returning
+      value(RS_RETURN) type BAPIRET2 .
+  methods GET_LOGON_LANGUAGES
+    importing
+      !IV_LANGU type SYLANGU default SY-LANGU
+    exporting
+      !ET_LANG type ZIF_AL30_DATA=>TT_LOGON_LANG
+      !ET_R_LANG type ZIF_AL30_DATA=>TT_R_LANG .
+  methods GET_FIELDS_VIEW_DDIC
+    importing
+      !IV_NAME_VIEW type ANY
+      !IV_LANGU type SYLANGU default SY-LANGU
+      !IV_ADD_TEXTTABLE type SAP_BOOL default ABAP_FALSE
+      !IV_ALL_LANGUAGE type SAP_BOOL default ABAP_FALSE
+    exporting
+      !ES_DD02V type DD02V
+      !ET_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW
+      !ET_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW
+      !EV_TEXTTABLE type TABNAME
+      !ET_FIELDS_DDIC type DD03PTAB
+    raising
+      ZCX_AL30 .
+  methods TRANSPORT_VIEW
+    importing
+      !IS_VIEW type ZAL30_T_VIEW
+      !IT_FIELDS_VIEW type ZIF_AL30_DATA=>TT_FIELDS_VIEW
+      !IT_FIELDS_TEXT_VIEW type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW optional
+    exporting
+      !ES_RETURN type BAPIRET2
+    changing
+      !CV_ORDER type E070-TRKORR .
+  methods READ_SINGLE_VIEW_DDIC
+    importing
+      !IV_NAME_VIEW type ANY
+      !IV_LANGU type SYLANGU default SY-LANGU
+    exporting
+      !ES_DD02V type DD02V
+      !ET_DD03P type DD03PTAB
+      !ET_DD05M type DD05MTTYP
+    raising
+      ZCX_AL30 .
+protected section.
 
-    METHODS transport_view
-      IMPORTING
-                is_view             TYPE zal30_t_view
-                it_fields_view      TYPE zif_al30_data=>tt_fields_view
-                it_fields_text_view TYPE zif_al30_data=>tt_fields_text_view OPTIONAL
-      EXPORTING
-                es_return           TYPE bapiret2
-      CHANGING  cv_order            TYPE e070-trkorr  .
-    METHODS read_single_view_ddic
-      IMPORTING
-        iv_name_view TYPE any
-        iv_langu     TYPE sylangu DEFAULT sy-langu
-      EXPORTING
-        es_dd02v     TYPE dd02v
-        et_dd03p     TYPE dd03ptab
-        et_dd05m     TYPE dd05mttyp
-      RAISING
-        zcx_al30 .
-
-
-  PROTECTED SECTION.
 *"* protected components of class ZCL_AL30_CONF
 *"* do not include other source files here!!!
+  data MT_LOGON_LANG type ZIF_AL30_DATA=>TT_LOGON_LANG .
+  data MT_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW .
+  data MT_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW .
+  data MT_FIELDS_DDIC type DD03PTAB .
+  data MS_VIEW type ZAL30_T_VIEW .
 
-    DATA mt_logon_lang TYPE zif_al30_data=>tt_logon_lang.
-    DATA mt_fields TYPE zif_al30_data=>tt_fields_view.
-    DATA mt_fields_text TYPE zif_al30_data=>tt_fields_text_view.
-    DATA mt_fields_ddic TYPE dd03ptab.
-    DATA ms_view TYPE zal30_t_view.
-
-
-
-    METHODS save_text_of_view
-      IMPORTING
-        !iv_text_fields  TYPE zal30_i_fieldst
-      RETURNING
-        VALUE(rs_return) TYPE bapiret2 .
-    METHODS save_view_ddic
-      IMPORTING
-        !is_view        TYPE zal30_t_view
-        !it_fields      TYPE zif_al30_data=>tt_fields_view
-        !it_fields_text TYPE zif_al30_data=>tt_fields_text_view OPTIONAL
-      RAISING
-        zcx_al30 .
-    METHODS split_fields_alv
-      IMPORTING
-        !it_fields_view TYPE zal30_i_fields_view
-      EXPORTING
-        !et_fields      TYPE zal30_i_fields
-        !et_fields_text TYPE zal30_i_fieldst .
-
-    METHODS read_view_ddic_all_lang
-      IMPORTING
-        iv_name_view TYPE any
-        iv_langu     TYPE sylangu DEFAULT sy-langu
-      EXPORTING
-        es_dd02v     TYPE dd02v
-        et_dd03p     TYPE dd03ptab
-        et_dd05m     TYPE dd05mttyp.
-
-    METHODS read_text_view
-      IMPORTING
-        !iv_name_view    TYPE tabname
-        !iv_all_language TYPE sap_bool DEFAULT abap_false
-        !iv_langu        TYPE sylangu DEFAULT sy-langu
-      EXPORTING
-        et_fields_text   TYPE zif_al30_data=>tt_fields_text_view .
-    METHODS get_texttable_view
-      IMPORTING
-        iv_name_view     TYPE any
-        iv_langu         TYPE sylangu DEFAULT sy-langu
-        !iv_all_language TYPE sap_bool DEFAULT abap_false
-      EXPORTING
-        ev_texttable     TYPE tabname
-        et_fields        TYPE zif_al30_data=>tt_fields_view
-        et_fields_text   TYPE zif_al30_data=>tt_fields_text_view
-        et_fields_ddic   TYPE dd03ptab .
-    METHODS adjust_fields_text
-      IMPORTING
-        it_fields      TYPE zif_al30_data=>tt_fields_view
-        it_fields_ddic TYPE dd03ptab
-      CHANGING
-        ct_fields_text TYPE zif_al30_data=>tt_fields_text_view .
-    METHODS fill_default_values_fields
-      CHANGING
-        cs_fields TYPE zif_al30_data=>ts_fields_view.
-    METHODS fill_default_values_view
-      IMPORTING
-        is_default_values     TYPE zif_al30_data=>ts_default_values_create OPTIONAL
-        iv_use_default_values TYPE sap_bool DEFAULT abap_false
-      CHANGING
-        cs_view               TYPE zal30_t_view.
-    METHODS is_field_checkbox
-      IMPORTING
-        iv_rollname      TYPE domname
-      RETURNING
-        VALUE(rv_result) TYPE zal30_s_fields_attr_general-checkbox.
+  methods SAVE_VIEW_DDIC
+    importing
+      !IS_VIEW type ZAL30_T_VIEW
+      !IT_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW
+      !IT_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW optional
+    raising
+      ZCX_AL30 .
+  methods READ_VIEW_DDIC_ALL_LANG
+    importing
+      !IV_NAME_VIEW type ANY
+      !IV_LANGU type SYLANGU default SY-LANGU
+    exporting
+      !ES_DD02V type DD02V
+      !ET_DD03P type DD03PTAB
+      !ET_DD05M type DD05MTTYP .
+  methods READ_TEXT_VIEW
+    importing
+      !IV_NAME_VIEW type TABNAME
+      !IV_ALL_LANGUAGE type SAP_BOOL default ABAP_FALSE
+      !IV_LANGU type SYLANGU default SY-LANGU
+    exporting
+      !ET_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW .
+  methods GET_TEXTTABLE_VIEW
+    importing
+      !IV_NAME_VIEW type ANY
+      !IV_LANGU type SYLANGU default SY-LANGU
+      !IV_ALL_LANGUAGE type SAP_BOOL default ABAP_FALSE
+    exporting
+      !EV_TEXTTABLE type TABNAME
+      !ET_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW
+      !ET_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW
+      !ET_FIELDS_DDIC type DD03PTAB .
+  methods ADJUST_FIELDS_TEXT
+    importing
+      !IT_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW
+      !IT_FIELDS_DDIC type DD03PTAB
+    changing
+      !CT_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW .
+  methods FILL_DEFAULT_VALUES_FIELDS
+    changing
+      !CS_FIELDS type ZIF_AL30_DATA=>TS_FIELDS_VIEW .
+  methods FILL_DEFAULT_VALUES_VIEW
+    importing
+      !IS_DEFAULT_VALUES type ZIF_AL30_DATA=>TS_DEFAULT_VALUES_CREATE optional
+      !IV_USE_DEFAULT_VALUES type SAP_BOOL default ABAP_FALSE
+    changing
+      !CS_VIEW type ZAL30_T_VIEW .
+  methods IS_FIELD_CHECKBOX
+    importing
+      !IV_ROLLNAME type DOMNAME
+    returning
+      value(RV_RESULT) type ZAL30_S_FIELDS_ATTR_GENERAL-CHECKBOX .
   PRIVATE SECTION.
 
 *"* private components of class ZCL_AL30_CONF
@@ -211,10 +194,38 @@ ENDCLASS.
 
 
 
-CLASS zcl_al30_conf IMPLEMENTATION.
+CLASS ZCL_AL30_CONF IMPLEMENTATION.
 
 
+  METHOD adjust_fields_text.
+    DATA ls_fields_text TYPE LINE OF zif_al30_data=>tt_fields_text_view.
 
+    LOOP AT it_fields ASSIGNING FIELD-SYMBOL(<ls_fields>).
+
+      " Si el texto se introduce manual solo tendré que actualizar la posición donde debe salir, que será la misma que la del campo
+      CASE <ls_fields>-source_text.
+        WHEN zif_al30_data=>cs_source_text-manual.
+          LOOP AT ct_fields_text ASSIGNING FIELD-SYMBOL(<ls_fields_text>) WHERE fieldname = <ls_fields>-fieldname.
+            <ls_fields_text>-pos_ddic = <ls_fields>-pos_ddic.
+          ENDLOOP.
+
+          " Si viene del diccionario se añade el texto que proviene del mismo
+        WHEN zif_al30_data=>cs_source_text-dictionary.
+
+          LOOP AT it_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WHERE fieldname = <ls_fields>-fieldname.
+
+            MOVE-CORRESPONDING <ls_fields_ddic> TO ls_fields_text.
+            ls_fields_text-spras = <ls_fields_ddic>-ddlanguage.
+            ls_fields_text-pos_ddic = <ls_fields>-pos_ddic.
+            APPEND ls_fields_text TO ct_fields_text.
+            CLEAR ls_fields_text.
+
+          ENDLOOP.
+      ENDCASE.
+    ENDLOOP..
+
+
+  ENDMETHOD.
 
 
   METHOD adjust_view_dictionary.
@@ -574,6 +585,23 @@ CLASS zcl_al30_conf IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD fill_default_values_fields.
+    cs_fields-source_text = zif_al30_data=>cs_source_text-dictionary.
+  ENDMETHOD.
+
+
+  METHOD fill_default_values_view.
+
+    " Si el parámetro de valores por defecto esta informado los usaré para informar la estructura de la vista
+    IF iv_use_default_values = abap_true.
+      cs_view = CORRESPONDING #( is_default_values ).
+    ELSE.
+      cs_view-auth_user = abap_false. " El acceso a la tabla se validará por usuario
+      cs_view-change_log = abap_true. " Se guardará log de cambios en las modificaciones
+    ENDIF.
+  ENDMETHOD.
+
+
   METHOD get_fields_view_ddic.
     DATA ls_fields LIKE LINE OF et_fields.
     DATA ls_fields_text LIKE LINE OF et_fields_text.
@@ -720,33 +748,61 @@ CLASS zcl_al30_conf IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD read_single_view_ddic.
-    DATA lv_name TYPE ddobjname .
+  METHOD get_logon_languages.
 
-    CLEAR: es_dd02v, et_dd03p, et_dd05m.
+    CLEAR et_lang.
 
-    lv_name = iv_name_view.
+    IF mt_logon_lang IS INITIAL.
 
-* Leo los campos de la tabla
-    CALL FUNCTION 'DDIF_TABL_GET'
+      SELECT t002t~sprsl t002t~sptxt
+        INTO TABLE mt_logon_lang
+        FROM     t002t JOIN  t002c ON
+                 t002t~sprsl = t002c~spras
+        WHERE    t002t~spras = iv_langu
+        AND      t002c~lainst = abap_true
+        ORDER BY t002t~sptxt.
+
+    ENDIF.
+
+    et_lang = mt_logon_lang.
+
+    et_r_lang = VALUE #( FOR <ls_logon_lang> IN mt_logon_lang ( sign = 'I' option = 'EQ' low = <ls_logon_lang>-lang ) ).
+
+  ENDMETHOD.
+
+
+  METHOD get_texttable_view.
+    DATA lv_tabname TYPE tabname.
+    DATA lv_texttable TYPE tabname.
+
+    CLEAR: ev_texttable, et_fields, et_fields_text.
+
+    lv_tabname = iv_name_view.
+
+    CALL FUNCTION 'DDUT_TEXTTABLE_GET'
       EXPORTING
-        name          = lv_name
-        state         = 'A' " Active version
-        langu         = iv_langu
+        tabname   = lv_tabname
       IMPORTING
-        dd02v_wa      = es_dd02v
-      TABLES
-        dd03p_tab     = et_dd03p[]
-        dd05m_tab     = et_dd05m[]
-      EXCEPTIONS
-        illegal_input = 1
-        OTHERS        = 2.
+        texttable = lv_texttable.
 
-    IF sy-subrc NE 0 OR et_dd03p IS INITIAL.
+    ev_texttable = lv_texttable.
 
-      RAISE EXCEPTION TYPE zcx_al30
-        EXPORTING
-          textid = zcx_al30=>view_dont_exist.
+    IF ev_texttable IS NOT INITIAL.
+
+      TRY.
+          get_fields_view_ddic(
+            EXPORTING
+              iv_name_view     = ev_texttable
+              iv_langu         = iv_langu
+              iv_all_language = iv_all_language
+            IMPORTING
+              et_fields        = et_fields
+              et_fields_text   =  et_fields_text
+              et_fields_ddic = et_fields_ddic ).
+
+
+        CATCH zcx_al30.
+      ENDTRY.
 
     ENDIF.
 
@@ -803,6 +859,78 @@ CLASS zcl_al30_conf IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD is_field_checkbox.
+
+    rv_result = abap_false.
+    " Se recupera los valores del dominio asociado al alemento de datos
+    DATA(lt_values) = CAST cl_abap_elemdescr( cl_abap_typedescr=>describe_by_name( iv_rollname ) )->get_ddic_fixed_values( ).
+
+    IF lines( lt_values ) = 2. " Tiene que tener dos valores para el ' ' y 'X'.
+      " Para el false o el no tanto el campo low como el high ha de estar en blanco. Nota, como los campos tienen nombre esopecial para SAP
+      " hay que ponerlos de esa manera para que funcione.
+      READ TABLE lt_values TRANSPORTING NO FIELDS WITH KEY ('LOW') = space
+                                                           ('HIGH') = space.
+      IF sy-subrc = 0.
+        " El true o si tiene que tener el campo low una X y el high en blanco.
+        READ TABLE lt_values TRANSPORTING NO FIELDS WITH KEY ('LOW') = 'X'
+                                                                 ('HIGH') = space.
+        IF sy-subrc = 0.
+          rv_result = abap_true.
+        ENDIF.
+      ENDIF.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD read_single_view_ddic.
+    DATA lv_name TYPE ddobjname .
+
+    CLEAR: es_dd02v, et_dd03p, et_dd05m.
+
+    lv_name = iv_name_view.
+
+* Leo los campos de la tabla
+    CALL FUNCTION 'DDIF_TABL_GET'
+      EXPORTING
+        name          = lv_name
+        state         = 'A' " Active version
+        langu         = iv_langu
+      IMPORTING
+        dd02v_wa      = es_dd02v
+      TABLES
+        dd03p_tab     = et_dd03p[]
+        dd05m_tab     = et_dd05m[]
+      EXCEPTIONS
+        illegal_input = 1
+        OTHERS        = 2.
+
+    IF sy-subrc NE 0 OR et_dd03p IS INITIAL.
+
+      RAISE EXCEPTION TYPE zcx_al30
+        EXPORTING
+          textid = zcx_al30=>view_dont_exist.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD read_text_view.
+
+    CLEAR et_fields_text.
+
+    "
+    IF iv_all_language = abap_true. " Se obtienen todos los idiomas de logon
+      get_logon_languages( IMPORTING et_r_lang = DATA(lt_r_lang) ).
+    ELSE.
+      INSERT VALUE #( sign = 'I' option = 'EQ' low = iv_langu ) INTO TABLE lt_r_lang.
+    ENDIF.
+
+    SELECT * INTO CORRESPONDING FIELDS OF TABLE et_fields_text FROM zal30_t_fieldst WHERE spras IN lt_r_lang.
+
+  ENDMETHOD.
 
 
   METHOD read_view.
@@ -882,20 +1010,37 @@ CLASS zcl_al30_conf IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD save_text_of_view.
-    FIELD-SYMBOLS <ls_fields_text> TYPE zal30_t_fieldst.
-    CLEAR rs_return.
+  METHOD read_view_ddic_all_lang.
 
-    IF iv_text_fields[] IS NOT INITIAL.
+    CLEAR: es_dd02v, et_dd03p.
 
-      INSERT zal30_t_fieldst FROM TABLE iv_text_fields.
-      IF sy-subrc = 0.
-        COMMIT WORK.
-      ELSE.
-        READ TABLE iv_text_fields ASSIGNING <ls_fields_text> INDEX 1.
-        rs_return = zcl_al30_util=>fill_return( iv_type = 'E' iv_number = '014' iv_message_v1 = <ls_fields_text>-tabname ).
-      ENDIF.
-    ENDIF.
+* Se obtiene todos los idioma de logon
+    get_logon_languages( IMPORTING et_lang = DATA(lt_lang) ).
+
+    LOOP AT lt_lang ASSIGNING FIELD-SYMBOL(<ls_lang>).
+
+      TRY.
+          read_single_view_ddic(
+            EXPORTING
+              iv_name_view = iv_name_view
+              iv_langu     = <ls_lang>-lang
+            IMPORTING
+              es_dd02v     = DATA(ls_dd02v)
+              et_dd03p     = DATA(lt_dd03p)
+              et_dd05m = DATA(lt_dd05m) ).
+
+          " Los datos de cabecera pongo el idioma de logon. De esta manera el nombre de la tabla saldrá en el idioma de conexion.
+          " Hago lo mismo para las claves externas de la tabla.
+          IF <ls_lang>-lang = iv_langu.
+            es_dd02v = ls_dd02v.
+            et_dd05m = lt_dd05m.
+          ENDIF.
+
+          INSERT LINES OF lt_dd03p INTO TABLE et_dd03p.
+
+        CATCH zcx_al30.
+      ENDTRY.
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -974,165 +1119,6 @@ CLASS zcl_al30_conf IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD split_fields_alv.
-    DATA ls_fields TYPE zal30_t_fields.
-    DATA ls_fields_text TYPE zal30_t_fieldst.
-    FIELD-SYMBOLS <ls_fields_view> TYPE LINE OF zal30_i_fields_view.
-
-    CLEAR: et_fields, et_fields_text.
-
-    LOOP AT it_fields_view ASSIGNING <ls_fields_view>.
-      MOVE-CORRESPONDING <ls_fields_view> TO ls_fields.
-      MOVE-CORRESPONDING <ls_fields_view> TO ls_fields_text.
-      APPEND ls_fields TO et_fields.
-      APPEND ls_fields_text TO et_fields_text.
-    ENDLOOP.
-
-  ENDMETHOD.
-  METHOD get_logon_languages.
-
-    CLEAR et_lang.
-
-    IF mt_logon_lang IS INITIAL.
-
-      SELECT t002t~sprsl t002t~sptxt
-        INTO TABLE mt_logon_lang
-        FROM     t002t JOIN  t002c ON
-                 t002t~sprsl = t002c~spras
-        WHERE    t002t~spras = iv_langu
-        AND      t002c~lainst = abap_true
-        ORDER BY t002t~sptxt.
-
-    ENDIF.
-
-    et_lang = mt_logon_lang.
-
-    et_r_lang = VALUE #( FOR <ls_logon_lang> IN mt_logon_lang ( sign = 'I' option = 'EQ' low = <ls_logon_lang>-lang ) ).
-
-  ENDMETHOD.
-
-
-  METHOD read_text_view.
-
-    CLEAR et_fields_text.
-
-    "
-    IF iv_all_language = abap_true. " Se obtienen todos los idiomas de logon
-      get_logon_languages( IMPORTING et_r_lang = DATA(lt_r_lang) ).
-    ELSE.
-      INSERT VALUE #( sign = 'I' option = 'EQ' low = iv_langu ) INTO TABLE lt_r_lang.
-    ENDIF.
-
-    SELECT * INTO CORRESPONDING FIELDS OF TABLE et_fields_text FROM zal30_t_fieldst WHERE spras IN lt_r_lang.
-
-  ENDMETHOD.
-
-  METHOD read_view_ddic_all_lang.
-
-    CLEAR: es_dd02v, et_dd03p.
-
-* Se obtiene todos los idioma de logon
-    get_logon_languages( IMPORTING et_lang = DATA(lt_lang) ).
-
-    LOOP AT lt_lang ASSIGNING FIELD-SYMBOL(<ls_lang>).
-
-      TRY.
-          read_single_view_ddic(
-            EXPORTING
-              iv_name_view = iv_name_view
-              iv_langu     = <ls_lang>-lang
-            IMPORTING
-              es_dd02v     = DATA(ls_dd02v)
-              et_dd03p     = DATA(lt_dd03p)
-              et_dd05m = DATA(lt_dd05m) ).
-
-          " Los datos de cabecera pongo el idioma de logon. De esta manera el nombre de la tabla saldrá en el idioma de conexion.
-          " Hago lo mismo para las claves externas de la tabla.
-          IF <ls_lang>-lang = iv_langu.
-            es_dd02v = ls_dd02v.
-            et_dd05m = lt_dd05m.
-          ENDIF.
-
-          INSERT LINES OF lt_dd03p INTO TABLE et_dd03p.
-
-        CATCH zcx_al30.
-      ENDTRY.
-    ENDLOOP.
-
-  ENDMETHOD.
-
-  METHOD get_texttable_view.
-    DATA lv_tabname TYPE tabname.
-    DATA lv_texttable TYPE tabname.
-
-    CLEAR: ev_texttable, et_fields, et_fields_text.
-
-    lv_tabname = iv_name_view.
-
-    CALL FUNCTION 'DDUT_TEXTTABLE_GET'
-      EXPORTING
-        tabname   = lv_tabname
-      IMPORTING
-        texttable = lv_texttable.
-
-    ev_texttable = lv_texttable.
-
-    IF ev_texttable IS NOT INITIAL.
-
-      TRY.
-          get_fields_view_ddic(
-            EXPORTING
-              iv_name_view     = ev_texttable
-              iv_langu         = iv_langu
-              iv_all_language = iv_all_language
-            IMPORTING
-              et_fields        = et_fields
-              et_fields_text   =  et_fields_text
-              et_fields_ddic = et_fields_ddic ).
-
-
-        CATCH zcx_al30.
-      ENDTRY.
-
-    ENDIF.
-
-  ENDMETHOD.
-
-  METHOD adjust_fields_text.
-    DATA ls_fields_text TYPE LINE OF zif_al30_data=>tt_fields_text_view.
-
-    LOOP AT it_fields ASSIGNING FIELD-SYMBOL(<ls_fields>).
-
-      " Si el texto se introduce manual solo tendré que actualizar la posición donde debe salir, que será la misma que la del campo
-      CASE <ls_fields>-source_text.
-        WHEN zif_al30_data=>cs_source_text-manual.
-          LOOP AT ct_fields_text ASSIGNING FIELD-SYMBOL(<ls_fields_text>) WHERE fieldname = <ls_fields>-fieldname.
-            <ls_fields_text>-pos_ddic = <ls_fields>-pos_ddic.
-          ENDLOOP.
-
-          " Si viene del diccionario se añade el texto que proviene del mismo
-        WHEN zif_al30_data=>cs_source_text-dictionary.
-
-          LOOP AT it_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WHERE fieldname = <ls_fields>-fieldname.
-
-            MOVE-CORRESPONDING <ls_fields_ddic> TO ls_fields_text.
-            ls_fields_text-spras = <ls_fields_ddic>-ddlanguage.
-            ls_fields_text-pos_ddic = <ls_fields>-pos_ddic.
-            APPEND ls_fields_text TO ct_fields_text.
-            CLEAR ls_fields_text.
-
-          ENDLOOP.
-      ENDCASE.
-    ENDLOOP..
-
-
-  ENDMETHOD.
-
-
-  METHOD fill_default_values_fields.
-    cs_fields-source_text = zif_al30_data=>cs_source_text-dictionary.
-  ENDMETHOD.
-
   METHOD transport_view.
     DATA lt_view TYPE STANDARD TABLE OF zal30_t_view.
     DATA lt_fields_ddic TYPE STANDARD TABLE OF zal30_t_fields.
@@ -1188,42 +1174,4 @@ CLASS zcl_al30_conf IMPLEMENTATION.
 
     ENDIF.
   ENDMETHOD.
-
-
-  METHOD fill_default_values_view.
-
-    " Si el parámetro de valores por defecto esta informado los usaré para informar la estructura de la vista
-    IF iv_use_default_values = abap_true.
-      cs_view = CORRESPONDING #( is_default_values ).
-    ELSE.
-      cs_view-auth_user = abap_false. " El acceso a la tabla se validará por usuario
-      cs_view-change_log = abap_true. " Se guardará log de cambios en las modificaciones
-    ENDIF.
-  ENDMETHOD.
-
-
-  METHOD is_field_checkbox.
-
-    rv_result = abap_false.
-    " Se recupera los valores del dominio asociado al alemento de datos
-    DATA(lt_values) = CAST cl_abap_elemdescr( cl_abap_typedescr=>describe_by_name( iv_rollname ) )->get_ddic_fixed_values( ).
-
-    IF lines( lt_values ) = 2. " Tiene que tener dos valores para el ' ' y 'X'.
-      " Para el false o el no tanto el campo low como el high ha de estar en blanco. Nota, como los campos tienen nombre esopecial para SAP
-      " hay que ponerlos de esa manera para que funcione.
-      READ TABLE lt_values TRANSPORTING NO FIELDS WITH KEY ('LOW') = space
-                                                           ('HIGH') = space.
-      IF sy-subrc = 0.
-        " El true o si tiene que tener el campo low una X y el high en blanco.
-        READ TABLE lt_values TRANSPORTING NO FIELDS WITH KEY ('LOW') = 'X'
-                                                                 ('HIGH') = space.
-        IF sy-subrc = 0.
-          rv_result = abap_true.
-        ENDIF.
-      ENDIF.
-
-    ENDIF.
-
-  ENDMETHOD.
-
 ENDCLASS.

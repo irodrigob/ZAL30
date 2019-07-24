@@ -6,7 +6,7 @@
     <NAME>ZAL30_MAIN_VIEW</NAME>
     <SUBC>1</SUBC>
     <RSTAT>K</RSTAT>
-    <RLOAD>S</RLOAD>
+    <RLOAD>E</RLOAD>
     <FIXPT>X</FIXPT>
     <UCCHECK>X</UCCHECK>
    </PROGDIR>
@@ -470,68 +470,26 @@
      <ID>I</ID>
      <KEY>001</KEY>
      <ENTRY>Transportation content table</ENTRY>
-     <LENGTH>52</LENGTH>
+     <LENGTH>50</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>002</KEY>
      <ENTRY>Do you want to transport the selected table entries?</ENTRY>
-     <LENGTH>104</LENGTH>
+     <LENGTH>52</LENGTH>
+    </item>
+    <item>
+     <ID>R</ID>
+     <ENTRY>AL30 - Maintance view</ENTRY>
+     <LENGTH>22</LENGTH>
     </item>
     <item>
      <ID>S</ID>
      <KEY>P_VIEW</KEY>
-     <ENTRY>View name</ENTRY>
-     <LENGTH>17</LENGTH>
-    </item>
-    <item>
-     <ID>R</ID>
-     <ENTRY>AL30 - Mantenimiento tablas</ENTRY>
-     <LENGTH>27</LENGTH>
+     <ENTRY>View</ENTRY>
+     <LENGTH>12</LENGTH>
     </item>
    </TPOOL>
-   <I18N_TPOOL>
-    <item>
-     <LANGUAGE>E</LANGUAGE>
-     <TEXTPOOL>
-      <item>
-       <ID>I</ID>
-       <KEY>001</KEY>
-       <ENTRY>Transport table entries</ENTRY>
-       <LENGTH>26</LENGTH>
-      </item>
-      <item>
-       <ID>I</ID>
-       <KEY>002</KEY>
-       <ENTRY>Do you want to transport the selected table entries?</ENTRY>
-       <LENGTH>52</LENGTH>
-      </item>
-      <item>
-       <ID>R</ID>
-       <ENTRY>Maintance view of AL30</ENTRY>
-       <LENGTH>22</LENGTH>
-      </item>
-      <item>
-       <ID>S</ID>
-       <KEY>P_DISP</KEY>
-       <ENTRY>Display</ENTRY>
-       <LENGTH>15</LENGTH>
-      </item>
-      <item>
-       <ID>S</ID>
-       <KEY>P_EDIT</KEY>
-       <ENTRY>Change</ENTRY>
-       <LENGTH>14</LENGTH>
-      </item>
-      <item>
-       <ID>S</ID>
-       <KEY>P_VIEW</KEY>
-       <ENTRY>View</ENTRY>
-       <LENGTH>12</LENGTH>
-      </item>
-     </TEXTPOOL>
-    </item>
-   </I18N_TPOOL>
   </asx:values>
  </asx:abap>
 </abapGit>
