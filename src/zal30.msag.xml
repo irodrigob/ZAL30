@@ -30,7 +30,7 @@
      <SPRSL>S</SPRSL>
      <ARBGB>ZAL30</ARBGB>
      <MSGNR>003</MSGNR>
-     <TEXT>The table/view don&apos;t have a maintenance dialog</TEXT>
+     <TEXT>The table/view does not allow data maintenance</TEXT>
     </T100>
     <T100>
      <SPRSL>S</SPRSL>
@@ -84,31 +84,31 @@
      <SPRSL>S</SPRSL>
      <ARBGB>ZAL30</ARBGB>
      <MSGNR>012</MSGNR>
-     <TEXT>Errors in the general attributes tab</TEXT>
+     <TEXT>Error in obtaining the field catalog for the ALV</TEXT>
     </T100>
     <T100>
      <SPRSL>S</SPRSL>
      <ARBGB>ZAL30</ARBGB>
      <MSGNR>013</MSGNR>
-     <TEXT>Errors in the text attributes tab</TEXT>
+     <TEXT>Failed to get fields from table/view &amp;.</TEXT>
     </T100>
     <T100>
      <SPRSL>S</SPRSL>
      <ARBGB>ZAL30</ARBGB>
      <MSGNR>014</MSGNR>
-     <TEXT>Failed to deleted the text fields of view &amp;</TEXT>
+     <TEXT>Error adding the table/view text &amp;.</TEXT>
     </T100>
     <T100>
      <SPRSL>S</SPRSL>
      <ARBGB>ZAL30</ARBGB>
      <MSGNR>015</MSGNR>
-     <TEXT>No entries</TEXT>
+     <TEXT>Errors in the general attributes tab.</TEXT>
     </T100>
     <T100>
      <SPRSL>S</SPRSL>
      <ARBGB>ZAL30</ARBGB>
      <MSGNR>016</MSGNR>
-     <TEXT>Failed to get the table/view &amp; fields</TEXT>
+     <TEXT>Error in the texts tab.</TEXT>
     </T100>
     <T100>
      <SPRSL>S</SPRSL>
@@ -132,7 +132,7 @@
      <SPRSL>S</SPRSL>
      <ARBGB>ZAL30</ARBGB>
      <MSGNR>020</MSGNR>
-     <TEXT>SQL Error:</TEXT>
+     <TEXT>SQL Error: &amp;</TEXT>
     </T100>
     <T100>
      <SPRSL>S</SPRSL>
@@ -144,7 +144,7 @@
      <SPRSL>S</SPRSL>
      <ARBGB>ZAL30</ARBGB>
      <MSGNR>022</MSGNR>
-     <TEXT>Failed to modify table data &amp;</TEXT>
+     <TEXT>There was an error saving the data</TEXT>
     </T100>
     <T100>
      <SPRSL>S</SPRSL>
@@ -156,19 +156,19 @@
      <SPRSL>S</SPRSL>
      <ARBGB>ZAL30</ARBGB>
      <MSGNR>024</MSGNR>
-     <TEXT>There are differences in the texts of view &amp; and the table/view</TEXT>
+     <TEXT>Exists differences between the fields of the configuration and dictionary</TEXT>
     </T100>
     <T100>
      <SPRSL>S</SPRSL>
      <ARBGB>ZAL30</ARBGB>
      <MSGNR>025</MSGNR>
-     <TEXT>There is no difference</TEXT>
+     <TEXT>No configuration differences in the view &amp;</TEXT>
     </T100>
     <T100>
      <SPRSL>S</SPRSL>
      <ARBGB>ZAL30</ARBGB>
      <MSGNR>026</MSGNR>
-     <TEXT>Failed to updated the view &amp;</TEXT>
+     <TEXT>Failed to instantiate the exit class &amp;</TEXT>
     </T100>
     <T100>
      <SPRSL>S</SPRSL>
@@ -198,13 +198,85 @@
      <SPRSL>S</SPRSL>
      <ARBGB>ZAL30</ARBGB>
      <MSGNR>031</MSGNR>
-     <TEXT>The interface &amp; is not implement in the class</TEXT>
+     <TEXT>The interface &amp; is not implemented in the class</TEXT>
     </T100>
     <T100>
      <SPRSL>S</SPRSL>
      <ARBGB>ZAL30</ARBGB>
      <MSGNR>032</MSGNR>
      <TEXT>You are not authorized to view certain records</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZAL30</ARBGB>
+     <MSGNR>033</MSGNR>
+     <TEXT>Action canceled</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZAL30</ARBGB>
+     <MSGNR>034</MSGNR>
+     <TEXT>Field mandatory</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZAL30</ARBGB>
+     <MSGNR>035</MSGNR>
+     <TEXT>The view configuration has auto-adjusted</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZAL30</ARBGB>
+     <MSGNR>036</MSGNR>
+     <TEXT>There are differences in the fields of view &amp; and the table/view</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZAL30</ARBGB>
+     <MSGNR>037</MSGNR>
+     <TEXT>Failed to save the view &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZAL30</ARBGB>
+     <MSGNR>038</MSGNR>
+     <TEXT>There was an error deleting the data</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZAL30</ARBGB>
+     <MSGNR>039</MSGNR>
+     <TEXT>No data changed</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZAL30</ARBGB>
+     <MSGNR>040</MSGNR>
+     <TEXT>The operation &amp; is not valid</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZAL30</ARBGB>
+     <MSGNR>041</MSGNR>
+     <TEXT>You do not have authorization</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZAL30</ARBGB>
+     <MSGNR>042</MSGNR>
+     <TEXT>You only have query permissions</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZAL30</ARBGB>
+     <MSGNR>043</MSGNR>
+     <TEXT>There is already an entry with the same key</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZAL30</ARBGB>
+     <MSGNR>044</MSGNR>
+     <TEXT>No data selected</TEXT>
     </T100>
    </T100>
   </asx:values>

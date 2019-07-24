@@ -10,33 +10,49 @@ CLASS zcl_al30_controller DEFINITION
     METHODS constructor .
     METHODS read_view
       IMPORTING
-        !iv_name_view TYPE tabname
+        !iv_name_view        TYPE tabname
+        !iv_read_ddic        TYPE sap_bool DEFAULT abap_true
+        !iv_all_language     TYPE sap_bool DEFAULT abap_false
+        !iv_langu            TYPE sylangu DEFAULT sy-langu
       EXPORTING
-        !ev_text_view TYPE as4text
-        !es_return    TYPE bapiret2
-        !es_view      TYPE zal30_t_view
-        !et_fields    TYPE zal30_i_fields_view .
+        !ev_text_view        TYPE as4text
+        !es_return           TYPE bapiret2
+        !es_view             TYPE zal30_t_view
+        !et_fields_view      TYPE zif_al30_data=>tt_fields_view
+        !et_fields_text_view TYPE zif_al30_data=>tt_fields_text_view
+        !et_fields_ddic      TYPE dd03ptab.
     METHODS read_view_alv
       IMPORTING
-        !iv_name_view TYPE tabname
+        !iv_name_view            TYPE tabname
+        !iv_read_ddic            TYPE sap_bool DEFAULT abap_true
+        !iv_all_language         TYPE sap_bool DEFAULT abap_false
+        !iv_langu                TYPE sylangu DEFAULT sy-langu
       EXPORTING
-        !ev_text_view TYPE as4text
-        !es_return    TYPE bapiret2
-        !es_view      TYPE zal30_t_view
-        !et_fields    TYPE zal30_i_fields_alv .
+        !ev_text_view            TYPE as4text
+        !es_return               TYPE bapiret2
+        !es_view                 TYPE zal30_t_view
+        !et_fields_view_alv      TYPE zif_al30_data=>tt_fields_view_alv
+        !et_fields_text_view_alv TYPE zif_al30_data=>tt_fields_text_view_alv
+        !et_fields_ddic          TYPE dd03ptab.
     METHODS check_view
       IMPORTING
         !iv_name_view TYPE tabname
-        !iv_operation TYPE char01
+        !iv_operation TYPE zif_al30_data=>tv_operation
       EXPORTING
         !es_return    TYPE bapiret2
         !ev_text_view TYPE as4text .
     METHODS create_view
       IMPORTING
-        !iv_name_view TYPE tabname
+        !iv_name_view            TYPE tabname
+        !iv_use_default_values   TYPE sap_bool DEFAULT abap_false
+        !is_default_values       TYPE zif_al30_data=>ts_default_values_create OPTIONAL
       EXPORTING
-        !es_return    TYPE bapiret2
-        !ev_text_view TYPE as4text .
+        !es_return               TYPE bapiret2
+        !ev_text_view            TYPE as4text
+        !et_fields_view_alv      TYPE zif_al30_data=>tt_fields_view_alv
+        !et_fields_text_view_alv TYPE zif_al30_data=>tt_fields_text_view_alv
+        !et_fields_ddic          TYPE dd03ptab
+        !es_view                 TYPE zal30_t_view.
     METHODS delete_view
       IMPORTING
         !iv_name_view    TYPE tabname
@@ -44,93 +60,82 @@ CLASS zcl_al30_controller DEFINITION
         VALUE(rs_return) TYPE bapiret2 .
     METHODS save_view
       IMPORTING
-        !is_view         TYPE zal30_t_view
-        !it_fields       TYPE zal30_i_fields_view
+        !is_view             TYPE zal30_t_view
+        !it_fields_view      TYPE zif_al30_data=>tt_fields_view
+        !it_fields_text_view TYPE zif_al30_data=>tt_fields_text_view
       RETURNING
-        VALUE(rs_return) TYPE bapiret2 .
+        VALUE(rs_return)     TYPE bapiret2 .
     METHODS save_view_alv
       IMPORTING
-        !is_view         TYPE zal30_t_view
-        !it_fields       TYPE zal30_i_fields_alv
+        !is_view                 TYPE zal30_t_view
+        !it_fields_text_view_alv TYPE zif_al30_data=>tt_fields_text_view_alv
+        !it_fields_view_alv      TYPE zif_al30_data=>tt_fields_view_alv
       RETURNING
-        VALUE(rs_return) TYPE bapiret2 .
+        VALUE(rs_return)         TYPE bapiret2 .
     METHODS read_data
-      IMPORTING
-        !it_fields TYPE zal30_i_fields_alv
-        !is_view   TYPE zal30_t_view
       EXPORTING
         !es_return TYPE bapiret2
-        !et_data   TYPE STANDARD TABLE .
-    METHODS get_fieldcat_edit_view
-      IMPORTING
-        !it_fields       TYPE zal30_i_fields_alv
-        !is_view         TYPE zal30_t_view
-      EXPORTING
-        !es_return       TYPE bapiret2
-        !et_fieldcat     TYPE lvc_t_fcat
-        !et_fieldcat_key TYPE lvc_t_fcat .
+      CHANGING
+        !co_data   TYPE REF TO data.
     METHODS get_fieldcat_view
       IMPORTING
-        !it_fields       TYPE zal30_i_fields_alv
-        !is_view         TYPE zal30_t_view
+        !iv_mode     TYPE char1
       EXPORTING
-        !es_return       TYPE bapiret2
-        !et_fieldcat     TYPE lvc_t_fcat
-        !et_fieldcat_key TYPE lvc_t_fcat .
+        !es_return   TYPE bapiret2
+        !et_fieldcat TYPE lvc_t_fcat.
     METHODS create_it_data_view
       IMPORTING
-        !is_view   TYPE zal30_t_view
+        !iv_mode   TYPE char1
       EXPORTING
         !et_data   TYPE REF TO data
         !es_return TYPE bapiret2 .
-    METHODS create_it_edit_data_view
-      IMPORTING
-        !is_view   TYPE zal30_t_view
-      EXPORTING
-        !et_data   TYPE REF TO data
-        !es_return TYPE bapiret2 .
+
     METHODS save_data
       IMPORTING
-        !iv_view      TYPE zal30_t_view
+        iv_allow_request TYPE sap_bool DEFAULT abap_false
       EXPORTING
-        !es_return    TYPE bapiret2
+        !es_return       TYPE bapiret2
       CHANGING
-        !ct_datos_del TYPE STANDARD TABLE
-        !ct_datos     TYPE STANDARD TABLE .
+        !ct_datos_del    TYPE STANDARD TABLE
+        !ct_datos        TYPE STANDARD TABLE
+        !cv_order        TYPE e070-trkorr.
     METHODS verify_field_data
       IMPORTING
         !iv_fieldname    TYPE any
-        !it_fields       TYPE zal30_i_fields_alv
         !iv_value        TYPE any
-        !iv_exit_class   TYPE zal30_e_exit_class
       RETURNING
         VALUE(rs_return) TYPE bapiret2 .
-    TYPE-POOLS abap .
     METHODS adjust_view_dictionary
       IMPORTING
-        !iv_view         TYPE zal30_t_view
-        !iv_keep_text    TYPE sap_bool DEFAULT abap_true
+        !iv_keep_text            TYPE sap_bool DEFAULT abap_true
       EXPORTING
-        VALUE(es_return) TYPE bapiret2
-        !ev_text_view    TYPE as4text
+        VALUE(es_return)         TYPE bapiret2
+        !ev_text_view            TYPE as4text
       CHANGING
-        !ct_fields       TYPE zal30_i_fields_alv .
+        !ct_fields_view_alv      TYPE zif_al30_data=>tt_fields_view_alv OPTIONAL
+        !ct_fields_text_view_alv TYPE zif_al30_data=>tt_fields_text_view_alv OPTIONAL
+        !cs_view                 TYPE zal30_t_view.
     METHODS check_changes_dict_view
       IMPORTING
-        !it_fields     TYPE zal30_i_fields_alv OPTIONAL
-        !iv_view_name  TYPE tabname
-      RETURNING
-        VALUE(rv_diff) TYPE sap_bool .
+        !it_fields_view_alv      TYPE zif_al30_data=>tt_fields_view_alv OPTIONAL
+        !it_fields_text_view_alv TYPE zif_al30_data=>tt_fields_text_view_alv OPTIONAL
+        !is_view                 TYPE zal30_t_view
+        !iv_langu                TYPE sylangu DEFAULT sy-langu
+        !iv_read_view            TYPE sap_bool DEFAULT abap_false
+      EXPORTING
+        ev_diff_fields           TYPE sap_bool
+        ev_diff_text             TYPE sap_bool.
     METHODS check_authorization
       IMPORTING
         !iv_view_name   TYPE tabname
-        !iv_view_action TYPE any DEFAULT 'U'
+        !iv_view_action TYPE any DEFAULT zif_al30_data=>cs_action_auth-update
       RAISING
         zcx_al30 .
-    METHODS transport_entries
+    METHODS transport_data_entries
       IMPORTING
-        !iv_name_view    TYPE tabname
-        !it_keys         TYPE STANDARD TABLE
+        !it_data         TYPE STANDARD TABLE
+      CHANGING
+        cv_order         TYPE e070-trkorr
       RETURNING
         VALUE(rs_return) TYPE bapiret2 .
     METHODS check_exit_class
@@ -139,26 +144,91 @@ CLASS zcl_al30_controller DEFINITION
       RETURNING
         VALUE(rs_return) TYPE bapiret2 .
     METHODS verify_change_row_data
-      IMPORTING
-        !iv_exit_class TYPE zal30_e_exit_class
       EXPORTING
-        !es_return     TYPE bapiret2
+        !es_return   TYPE bapiret2
       CHANGING
-        !cs_row_data   TYPE any .
+        !cs_row_data TYPE any .
+    METHODS get_logon_languages
+      IMPORTING
+        !iv_langu TYPE sylangu DEFAULT sy-langu
+      EXPORTING
+        et_lang   TYPE zif_al30_data=>tt_logon_lang
+        et_r_lang TYPE zif_al30_data=>tt_r_lang.
+    METHODS allowed_transport
+      RETURNING VALUE(rv_allowed) TYPE sap_bool.
+    METHODS transport_view_alv
+      IMPORTING
+                is_view                 TYPE zal30_t_view
+                iv_spras                TYPE sylangu DEFAULT sy-langu
+                it_fields_view_alv      TYPE zif_al30_data=>tt_fields_view_alv
+                it_fields_text_view_alv TYPE zif_al30_data=>tt_fields_text_view_alv
+      EXPORTING
+                es_return               TYPE bapiret2
+      CHANGING  cv_order                TYPE e070-trkorr.
+    METHODS check_select_transport_order
+      IMPORTING
+                iv_category TYPE e070-korrdev
+      EXPORTING
+                es_return   TYPE bapiret2
+      CHANGING  cv_order    TYPE e070-trkorr.
+    METHODS view_have_user_auth
+      IMPORTING iv_view        TYPE tabname
+      RETURNING VALUE(rv_have) TYPE sap_bool.
+    METHODS view_have_sap_auth
+      IMPORTING iv_view        TYPE tabname
+      RETURNING VALUE(rv_have) TYPE sap_bool.
+    METHODS view_have_auto_adjust
+      IMPORTING iv_view        TYPE tabname
+      RETURNING VALUE(rv_have) TYPE sap_bool.
+    METHODS get_level_auth_view
+      IMPORTING
+        !iv_view             TYPE tabname
+        !iv_user             TYPE syuname DEFAULT sy-uname
+      RETURNING
+        VALUE(rv_level_auth) TYPE zal30_e_level_auth.
+    METHODS auto_adjust_view_ddic
+      IMPORTING
+        !iv_name_view            TYPE tabname
+        !iv_read_view            TYPE sap_bool DEFAULT abap_false
+      EXPORTING
+        es_return                TYPE bapiret2
+        !et_fields_view_alv      TYPE zif_al30_data=>tt_fields_view_alv
+        !et_fields_text_view_alv TYPE zif_al30_data=>tt_fields_text_view_alv
+        !es_view                 TYPE zal30_t_view..
+    METHODS lock_view
+      RAISING zcx_al30.
+    METHODS instance_exit_class
+      IMPORTING
+                !iv_exit_class   TYPE zal30_e_exit_class
+      RETURNING VALUE(rs_return) TYPE bapiret2.
+    METHODS set_data_conf_view
+      IMPORTING
+        it_fields_view_alv      TYPE zif_al30_data=>tt_fields_view_alv
+        it_fields_text_view_alv TYPE zif_al30_data=>tt_fields_text_view_alv
+        it_fields_ddic          TYPE dd03ptab
+        is_view                 TYPE zal30_t_view.
+
   PROTECTED SECTION.
 *"* private components of class ZCL_AL30_CONTROLLER
 *"* do not include other source files here!!!
 
+    DATA mo_view TYPE REF TO zcl_al30_view.
+    DATA mo_conf TYPE REF TO zcl_al30_conf.
+
     METHODS conv_view_from_alv
       IMPORTING
-         it_fields_alv        TYPE zal30_i_fields_alv
-      RETURNING
-        VALUE(rt_fields_view) TYPE zal30_i_fields_view .
+        it_fields_view_alv      TYPE zif_al30_data=>tt_fields_view_alv OPTIONAL
+        it_fields_text_view_alv TYPE zif_al30_data=>tt_fields_text_view_alv OPTIONAL
+      EXPORTING
+        et_fields_view          TYPE zif_al30_data=>tt_fields_view
+        et_fields_text_view     TYPE zif_al30_data=>tt_fields_text_view.
     METHODS conv_view_to_alv
       IMPORTING
-         it_fields_view      TYPE zal30_i_fields_view
-      RETURNING
-        value(rt_fields_alv) TYPE zal30_i_fields_alv .
+        it_fields_view          TYPE zif_al30_data=>tt_fields_view OPTIONAL
+        it_fields_text_view     TYPE zif_al30_data=>tt_fields_text_view OPTIONAL
+      EXPORTING
+        et_fields_view_alv      TYPE zif_al30_data=>tt_fields_view_alv
+        et_fields_text_view_alv TYPE zif_al30_data=>tt_fields_text_view_alv.
 *"* protected components of class ZCL_AL30_CONTROLLER
 *"* do not include other source files here!!!
   PRIVATE SECTION.
@@ -172,43 +242,78 @@ CLASS zcl_al30_controller IMPLEMENTATION.
 
 
   METHOD adjust_view_dictionary.
-    DATA lt_fields_view TYPE zal30_i_fields_view.
 
-    DATA lo_conf TYPE REF TO zcl_al30_conf.
+* Convierto los datos del alv a un formato compatible con la vista
+    conv_view_from_alv( EXPORTING it_fields_view_alv = ct_fields_view_alv
+                                  it_fields_text_view_alv = ct_fields_text_view_alv
+                        IMPORTING et_fields_view = DATA(lt_fields_view)
+                                 et_fields_text_view = DATA(lt_fields_text_view) ).
+
+    mo_conf->adjust_view_dictionary(
+      EXPORTING
+        iv_keep_text        = iv_keep_text
+      IMPORTING
+        es_return           = es_return
+        ev_text_view        =  ev_text_view
+      CHANGING
+        ct_fields_view      = lt_fields_view
+        ct_fields_text_view = lt_fields_text_view
+        cs_view             = cs_view ).
+
+* Al reves una vez modificados los datos
+    conv_view_to_alv( EXPORTING it_fields_view = lt_fields_view
+                                it_fields_text_view = lt_fields_text_view
+                      IMPORTING et_fields_view_alv = ct_fields_view_alv
+                                et_fields_text_view_alv = ct_fields_text_view_alv ).
+
+  ENDMETHOD.
+
+
+  METHOD allowed_transport.
+    rv_allowed = zcl_al30_util=>allowed_transport( ).
+  ENDMETHOD.
+
+
+  METHOD auto_adjust_view_ddic.
 
     CLEAR es_return.
 
-    CREATE OBJECT lo_conf.
+    " Se leen los campos de la vista si se ha indicado
+    IF iv_read_view = abap_true.
+      read_view_alv(
+        EXPORTING
+          iv_name_view        = iv_name_view
+          iv_read_ddic = abap_false
+        IMPORTING
+          es_return           = es_return
+          es_view             = es_view
+          et_fields_view_alv      = et_fields_view_alv
+          et_fields_text_view_alv =  et_fields_text_view_alv ).
 
+    ENDIF.
 
-* Convierto los datos del alv a un formato compatible con la vista
-    lt_fields_view = conv_view_from_alv( ct_fields ).
+    " Si no hay errores se hace el ajuste
+    IF es_return-type NE zif_al30_data=>cs_msg_type-error.
 
-    CALL METHOD lo_conf->adjust_view_dictionary
-      EXPORTING
-        iv_view      = iv_view
-        iv_keep_text = iv_keep_text
-      IMPORTING
-        es_return    = es_return
-      CHANGING
-        ct_fields    = lt_fields_view.
+      adjust_view_dictionary(
+        EXPORTING
+          iv_keep_text            = abap_true
+        IMPORTING
+          es_return               = es_return
+        CHANGING
+          ct_fields_view_alv      = et_fields_view_alv
+          ct_fields_text_view_alv = et_fields_text_view_alv
+          cs_view                 = es_view ).
 
-* Al reves una vez modificados los datos
-    ct_fields = conv_view_to_alv( lt_fields_view ).
-
-    FREE lo_conf.
-
+    ENDIF.
   ENDMETHOD.
 
 
   METHOD check_authorization.
 
-    DATA lo_view TYPE REF TO zcl_al30_view.
-
-    CREATE OBJECT lo_view.
 
     TRY.
-        CALL METHOD lo_view->check_authorization
+        CALL METHOD mo_view->check_authorization
           EXPORTING
             iv_view_name   = iv_view_name
             iv_view_action = iv_view_action.
@@ -220,155 +325,141 @@ CLASS zcl_al30_controller IMPLEMENTATION.
 
 
 
-    FREE lo_view.
+
 
   ENDMETHOD.
 
 
   METHOD check_changes_dict_view.
-    DATA lt_fields_view TYPE zal30_i_fields_view.
 
-    DATA lo_conf TYPE REF TO zcl_al30_conf.
-
-    CREATE OBJECT lo_conf.
-
-
+* Si los campos de la vista no se pasán por parámetro se obtiene la vista por completo
+    IF iv_read_view = abap_false.
 * Convierto los datos del alv a un formato compatible con la vista
-    lt_fields_view = conv_view_from_alv( it_fields ).
+      conv_view_from_alv( EXPORTING it_fields_view_alv = it_fields_view_alv
+                                    it_fields_text_view_alv = it_fields_text_view_alv
+                          IMPORTING et_fields_text_view = DATA(lt_fields_text_view)
+                                    et_fields_view = DATA(lt_fields_view) ).
+      DATA(ls_view) = is_view.
+    ELSE.
+      read_view(
+        EXPORTING
+          iv_name_view        = is_view-tabname
+          iv_read_ddic        = abap_false
+        IMPORTING
+          es_view = ls_view
+          et_fields_view      = lt_fields_view
+          et_fields_text_view =  lt_fields_text_view ).
 
-    rv_diff = lo_conf->check_changes_dict( iv_view_name = iv_view_name
-                                          it_fields  = lt_fields_view ).
-
-    FREE lo_conf.
+    ENDIF.
+    mo_conf->check_changes_dict( EXPORTING is_view = ls_view
+                                                        it_fields  = lt_fields_view
+                                                        it_fields_text = lt_fields_text_view
+                                                        iv_langu = iv_langu
+                                              IMPORTING ev_diff_fields = ev_diff_fields
+                                                        ev_diff_text = ev_diff_text ).
 
   ENDMETHOD.
 
 
   METHOD check_exit_class.
-    DATA lo_conf TYPE REF TO zcl_al30_conf.
 
-    CLEAR rs_return.
+    rs_return = mo_conf->check_exit_class( iv_exit_class = iv_exit_class ).
 
-    CREATE OBJECT lo_conf.
+  ENDMETHOD.
 
-    rs_return = lo_conf->check_exit_class( iv_exit_class = iv_exit_class ).
 
-    FREE lo_conf.
+  METHOD check_select_transport_order.
+
+    NEW zcl_al30_util( )->check_select_transport_order(
+      EXPORTING
+        iv_category = iv_category
+      IMPORTING
+        es_return   = es_return
+      CHANGING
+        cv_order    = cv_order ).
+
   ENDMETHOD.
 
 
   METHOD check_view.
 
-    DATA lo_conf TYPE REF TO zcl_al30_conf.
-
-    CLEAR es_return.
-
-    CREATE OBJECT lo_conf.
-
     CASE iv_operation.
 
-      WHEN 'I'. " Insert new view
+      WHEN zif_al30_data=>cv_operation_insert. " Insert new view
 
-        lo_conf->check_view_insert( EXPORTING iv_name_view = iv_name_view
+        mo_conf->check_view_insert( EXPORTING iv_name_view = iv_name_view
                                      IMPORTING es_return = es_return
                                                ev_text_view = ev_text_view ).
 
-      WHEN 'R'. " Read the view existing
+      WHEN zif_al30_data=>cv_operation_read. " Read the view existing
 
-        lo_conf->check_view_read( EXPORTING iv_name_view = iv_name_view
+        mo_conf->check_view_read( EXPORTING iv_name_view = iv_name_view
                                      IMPORTING es_return = es_return
                                                ev_text_view = ev_text_view ).
 
       WHEN OTHERS.
-        es_return = zcl_al30_data=>fill_return( iv_type = 'E' iv_number = '019' ).
+        es_return = zcl_al30_util=>fill_return( iv_type = 'E' iv_number = '040' iv_message_v1 = iv_operation ).
     ENDCASE.
-
-    FREE lo_conf.
 
   ENDMETHOD.
 
 
   METHOD constructor.
+
+    " Se instancias las clases encargadas de gestionar la configuración y la vista
+    mo_conf = NEW zcl_al30_conf( ).
+    mo_view = NEW zcl_al30_view( ).
+
   ENDMETHOD.
 
 
   METHOD conv_view_from_alv.
-    FIELD-SYMBOLS <ls_fields_alv> TYPE LINE OF zal30_i_fields_alv.
-    DATA ls_fields_view TYPE LINE OF zal30_i_fields_view.
 
-    CLEAR rt_fields_view.
-    LOOP AT it_fields_alv ASSIGNING <ls_fields_alv>.
-      MOVE-CORRESPONDING <ls_fields_alv> TO ls_fields_view.
-      APPEND ls_fields_view TO rt_fields_view.
-      CLEAR ls_fields_view.
-    ENDLOOP.
+    IF it_fields_view_alv IS SUPPLIED.
+      CLEAR et_fields_view.
+      et_fields_view = CORRESPONDING #( it_fields_view_alv ).
+    ENDIF.
+
+    IF it_fields_text_view_alv IS SUPPLIED.
+      CLEAR et_fields_text_view.
+      et_fields_text_view = CORRESPONDING #( it_fields_text_view_alv ).
+    ENDIF.
 
 
   ENDMETHOD.
 
 
   METHOD conv_view_to_alv.
-    DATA ls_fields_alv TYPE LINE OF zal30_i_fields_alv.
-    FIELD-SYMBOLS <ls_fields_view> TYPE LINE OF zal30_i_fields_view.
 
-    CLEAR rt_fields_alv.
-    LOOP AT it_fields_view ASSIGNING <ls_fields_view>.
-      MOVE-CORRESPONDING <ls_fields_view> TO ls_fields_alv.
-      APPEND ls_fields_alv TO rt_fields_alv.
-      CLEAR ls_fields_alv.
-    ENDLOOP.
+    IF it_fields_view IS SUPPLIED.
+      CLEAR et_fields_view_alv.
+      et_fields_view_alv = CORRESPONDING #( it_fields_view ).
+    ENDIF.
 
+    IF it_fields_text_view IS SUPPLIED.
+      CLEAR et_fields_text_view_alv.
+      et_fields_text_view_alv = CORRESPONDING #( it_fields_text_view ).
+    ENDIF.
 
   ENDMETHOD.
 
 
   METHOD create_it_data_view.
-    CLEAR es_return.
 
-    DATA lo_view TYPE REF TO zcl_al30_view.
-
-    CLEAR es_return.
-
-    CREATE OBJECT lo_view.
-
-    CALL METHOD lo_view->create_it_data_view
+    CALL METHOD mo_view->create_it_data_view
       EXPORTING
-        is_view   = is_view
+        iv_mode   = iv_mode
       IMPORTING
         es_return = es_return
         et_data   = et_data.
 
-    FREE lo_view.
   ENDMETHOD.
 
 
-  METHOD create_it_edit_data_view.
-    CLEAR es_return.
 
-    DATA lo_view TYPE REF TO zcl_al30_view.
-
-    CLEAR es_return.
-
-    CREATE OBJECT lo_view.
-
-    CALL METHOD lo_view->create_it_edit_data_view
-      EXPORTING
-        is_view   = is_view
-      IMPORTING
-        es_return = es_return
-        et_data   = et_data.
-
-    FREE lo_view.
-  ENDMETHOD.
 
 
   METHOD create_view.
-
-    DATA lo_conf TYPE REF TO zcl_al30_conf.
-
-    CLEAR es_return.
-
-    CREATE OBJECT lo_conf.
 
 * Primero verifico que la vista sea correcta
     check_view( EXPORTING iv_name_view = iv_name_view
@@ -376,247 +467,258 @@ CLASS zcl_al30_controller IMPLEMENTATION.
                 IMPORTING es_return = es_return
                           ev_text_view = ev_text_view ).
 
-    IF es_return-type NE 'E'.
+    IF es_return-type NE zif_al30_data=>cs_msg_type-error.
 
 * Ahora llamo a la creación
-      lo_conf->insert_view( EXPORTING iv_name_view = iv_name_view
-                                   IMPORTING es_return = es_return ).
+      mo_conf->insert_view( EXPORTING iv_name_view = iv_name_view
+                                      iv_use_default_values = iv_use_default_values
+                                      is_default_values = is_default_values
+                                   IMPORTING es_return = es_return
+                                              et_fields      = DATA(lt_fields)
+                                              et_fields_text = DATA(lt_fields_text)
+                                              et_fields_ddic = et_fields_ddic
+                                              es_view = es_view ).
+
+      " Conversión a formato ALV
+      conv_view_to_alv(
+        EXPORTING
+          it_fields_view          = lt_fields
+          it_fields_text_view     = lt_fields_text
+        IMPORTING
+          et_fields_view_alv      = et_fields_view_alv
+          et_fields_text_view_alv =  et_fields_text_view_alv ).
 
     ENDIF.
-
-    FREE lo_conf.
 
   ENDMETHOD.
 
 
   METHOD delete_view.
 
-    DATA lo_conf TYPE REF TO zcl_al30_conf.
-
-    CLEAR rs_return.
-
-    CREATE OBJECT lo_conf.
-
-    rs_return = lo_conf->delete_view( iv_name_view ).
-
-
-    FREE lo_conf.
-
-  ENDMETHOD.
-
-
-  METHOD get_fieldcat_edit_view.
-    CLEAR es_return.
-
-    DATA lo_view TYPE REF TO zcl_al30_view.
-
-    CLEAR es_return.
-
-    CREATE OBJECT lo_view.
-
-    CALL METHOD lo_view->get_fieldcat_edit_view
-      EXPORTING
-        is_view         = is_view
-        it_fields       = it_fields
-      IMPORTING
-        es_return       = es_return
-        et_fieldcat     = et_fieldcat
-        et_fieldcat_key = et_fieldcat_key.
-
-    FREE lo_view.
+    rs_return = mo_conf->delete_view( iv_name_view ).
 
   ENDMETHOD.
 
 
   METHOD get_fieldcat_view.
-    CLEAR es_return.
 
-    DATA lo_view TYPE REF TO zcl_al30_view.
-
-    CLEAR es_return.
-
-    CREATE OBJECT lo_view.
-
-    CALL METHOD lo_view->get_fieldcat_view
+    mo_view->get_fieldcat_view(
       EXPORTING
-        is_view         = is_view
-        it_fields       = it_fields
+        iv_mode = iv_mode
       IMPORTING
         es_return       = es_return
-        et_fieldcat     = et_fieldcat
-        et_fieldcat_key = et_fieldcat_key.
+        et_fieldcat     = et_fieldcat ).
 
-    FREE lo_view.
+  ENDMETHOD.
+
+
+  METHOD get_level_auth_view.
+    rv_level_auth = mo_view->get_level_auth_view( iv_view = iv_view iv_user = iv_user ).
+  ENDMETHOD.
+
+
+  METHOD get_logon_languages.
+
+    mo_conf->get_logon_languages( EXPORTING iv_langu  = iv_langu
+                                               IMPORTING et_lang   = et_lang
+                                                         et_r_lang = et_r_lang ).
 
   ENDMETHOD.
 
 
   METHOD read_data.
-    DATA lo_view TYPE REF TO zcl_al30_view.
 
     CLEAR es_return.
 
-    CREATE OBJECT lo_view.
-
-    CALL METHOD lo_view->read_data
-      EXPORTING
-        is_view   = is_view
-        it_fields = it_fields
-      IMPORTING
-        es_return = es_return
-        et_data   = et_data.
-
-    FREE lo_view.
+    mo_view->read_data( IMPORTING es_return = es_return
+                                     CHANGING co_data = co_data ).
 
   ENDMETHOD.
 
 
   METHOD read_view.
 
-    DATA lo_conf TYPE REF TO zcl_al30_conf.
-
     CLEAR es_return.
 
-    CREATE OBJECT lo_conf.
-
 * Leo los datos de la vista
-    CALL METHOD lo_conf->read_view
+    CALL METHOD mo_conf->read_view
       EXPORTING
-        iv_name_view   = iv_name_view
+        iv_name_view    = iv_name_view
+        iv_read_ddic    = iv_read_ddic
+        iv_langu        = iv_langu
+        iv_all_language = iv_all_language
       IMPORTING
-        ev_text_view   = ev_text_view
-        es_return      = es_return
-        es_view        = es_view
-        et_fields_view = et_fields.
-
-    FREE lo_conf.
+        ev_text_view    = ev_text_view
+        es_return       = es_return
+        es_view         = es_view
+        et_fields       = et_fields_view
+        et_fields_text  = et_fields_text_view
+        et_fields_ddic  = et_fields_ddic.
 
   ENDMETHOD.
 
 
   METHOD read_view_alv.
-    DATA lt_fields_view TYPE zal30_i_fields_view.
+
 
     CLEAR es_return.
 
 * Leo los datos de la vista
     CALL METHOD read_view
       EXPORTING
-        iv_name_view = iv_name_view
+        iv_name_view        = iv_name_view
+        iv_read_ddic        = iv_read_ddic
+        iv_all_language     = iv_all_language
       IMPORTING
-        ev_text_view = ev_text_view
-        es_return    = es_return
-        es_view      = es_view
-        et_fields    = lt_fields_view.
+        ev_text_view        = ev_text_view
+        es_return           = es_return
+        es_view             = es_view
+        et_fields_view      = DATA(lt_fields_view)
+        et_fields_text_view = DATA(lt_fields_text_view)
+        et_fields_ddic      = et_fields_ddic.
 
 * Convierto los datos al formato ALV
-    et_fields = conv_view_to_alv( lt_fields_view ).
+    conv_view_to_alv( EXPORTING it_fields_view = lt_fields_view
+                                it_fields_text_view = lt_fields_text_view
+                      IMPORTING et_fields_view_alv = et_fields_view_alv
+                                et_fields_text_view_alv = et_fields_text_view_alv ).
 
 
   ENDMETHOD.
 
 
   METHOD save_data.
-
-    DATA lo_view TYPE REF TO zcl_al30_view.
-
-    CLEAR es_return.
-
-    CREATE OBJECT lo_view.
-
-    CALL METHOD lo_view->save_data
+    CALL METHOD mo_view->save_data
       EXPORTING
-        is_view      = iv_view
+        iv_allow_request = iv_allow_request
       IMPORTING
-        es_return    = es_return
+        es_return        = es_return
       CHANGING
-        ct_datos     = ct_datos
-        ct_datos_del = ct_datos_del.
+        cv_order         = cv_order
+        ct_datos         = ct_datos
+        ct_datos_del     = ct_datos_del.
 
-    FREE lo_view.
 
   ENDMETHOD.
 
 
   METHOD save_view.
-    DATA lo_conf TYPE REF TO zcl_al30_conf.
 
     CLEAR rs_return.
 
-    CREATE OBJECT lo_conf.
 
-    rs_return = lo_conf->save_view( is_view = is_view
-                                   it_fields_view  = it_fields ).
+    rs_return = mo_conf->save_view( is_view = is_view
+                                   it_fields  = it_fields_view
+                                   it_fields_text = it_fields_text_view ).
 
-    FREE lo_conf.
   ENDMETHOD.
 
 
   METHOD save_view_alv.
 
-    DATA lt_fields_view TYPE zal30_i_fields_view.
-
-    CLEAR rs_return.
-
-* Convierto los datos del alv a un formato compatible con la vista
-    lt_fields_view = conv_view_from_alv( it_fields ).
+* convierto los datos del alv a un formato compatible con la vista
+    conv_view_from_alv( EXPORTING it_fields_view_alv = it_fields_view_alv
+                                  it_fields_text_view_alv = it_fields_text_view_alv
+                        IMPORTING et_fields_view = DATA(lt_fields_view)
+                                  et_fields_text_view = DATA(lt_fields_text_view) ).
 
     rs_return = save_view( is_view = is_view
-                                       it_fields  = lt_fields_view ).
+                           it_fields_view  = lt_fields_view
+                           it_fields_text_view = lt_fields_text_view ).
 
 
   ENDMETHOD.
 
 
-  METHOD transport_entries.
+  METHOD transport_data_entries.
 
-    DATA lo_view TYPE REF TO zcl_al30_view.
+    rs_return = mo_view->transport_entries( EXPORTING it_data = it_data
+                                            CHANGING cv_order = cv_order ).
 
-    CREATE OBJECT lo_view.
 
-    rs_return = lo_view->transport_entries( iv_name_view = iv_name_view
-                                           it_keys      = it_keys ).
+  ENDMETHOD.
 
-    FREE lo_view.
+
+  METHOD transport_view_alv.
+
+* Convierto los datos del alv a un formato compatible con la vista
+    conv_view_from_alv( EXPORTING it_fields_view_alv = it_fields_view_alv
+                                  it_fields_text_view_alv = it_fields_text_view_alv
+                        IMPORTING et_fields_view = DATA(lt_fields_view)
+                                  et_fields_text_view = DATA(lt_fields_text_view) ).
+
+    mo_conf->transport_view(
+                 EXPORTING is_view = is_view
+                           it_fields_view = lt_fields_view
+                           it_fields_text_view = lt_fields_text_view
+                 IMPORTING es_return = es_return
+                 CHANGING cv_order = cv_order           ).
 
   ENDMETHOD.
 
 
   METHOD verify_change_row_data.
 
-    DATA lo_view TYPE REF TO zcl_al30_view.
-
     CLEAR es_return.
 
-    CREATE OBJECT lo_view.
-
-    CALL METHOD lo_view->verify_change_row_data
-      EXPORTING
-        iv_exit_class = iv_exit_class
+    mo_view->verify_change_row_data(
       IMPORTING
         es_return     = es_return
       CHANGING
-        cs_row_data   = cs_row_data.
+        cs_row_data   = cs_row_data ).
 
-    FREE lo_view.
+
 
   ENDMETHOD.
 
 
   METHOD verify_field_data.
 
-    DATA lo_view TYPE REF TO zcl_al30_view.
 
     CLEAR rs_return.
 
-    CREATE OBJECT lo_view.
+    rs_return = mo_view->verify_field_data( iv_fieldname = iv_fieldname
+                                            iv_value = iv_value ).
 
-    rs_return = lo_view->verify_field_data( iv_exit_class = iv_exit_class
-                                           iv_fieldname = iv_fieldname
-                                           it_fields = it_fields
-                                           iv_value = iv_value ).
-
-    FREE lo_view.
 
   ENDMETHOD.
+
+
+  METHOD view_have_auto_adjust.
+    rv_have = mo_view->view_have_auto_adjust( iv_view ).
+  ENDMETHOD.
+
+
+  METHOD view_have_sap_auth.
+    rv_have = mo_view->view_have_sap_auth( iv_view ).
+  ENDMETHOD.
+
+
+  METHOD view_have_user_auth.
+    rv_have = mo_view->view_have_user_auth( iv_view ).
+  ENDMETHOD.
+  METHOD lock_view.
+
+    mo_view->lock_view( ).
+
+  ENDMETHOD.
+
+  METHOD instance_exit_class.
+    rs_return = mo_view->instance_exit_class( iv_exit_class ).
+  ENDMETHOD.
+
+  METHOD set_data_conf_view.
+
+    conv_view_from_alv( EXPORTING it_fields_view_alv = it_fields_view_alv
+                                it_fields_text_view_alv = it_fields_text_view_alv
+                      IMPORTING et_fields_view = DATA(lt_fields_view)
+                                et_fields_text_view = DATA(lt_fields_text_view) ).
+
+
+    mo_view->set_data_conf_view( is_view = is_view
+                                 it_fields_view = lt_fields_view
+                                 it_fields_text_view = lt_fields_text_view
+                                 it_fields_ddic = it_fields_ddic ).
+  ENDMETHOD.
+
 ENDCLASS.

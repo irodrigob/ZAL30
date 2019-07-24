@@ -1,34 +1,40 @@
-class ZCX_AL30 definition
-  public
-  inheriting from CX_STATIC_CHECK
-  final
-  create public .
+CLASS zcx_al30 DEFINITION
+  PUBLIC
+  INHERITING FROM cx_static_check
+  FINAL
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
 
-  constants NO_VALUES_F4_VIEW type SOTR_CONC value '62379100861F1ED99EFA079B976B012C' ##NO_TEXT.
-  constants VIEW_DONT_EXIST type SOTR_CONC value '62379100861F1ED99EFA079C0AE4412C' ##NO_TEXT.
-  constants ERROR_SAVE_VIEW type SOTR_CONC value '62379100861F1ED99EFA0798A5D80129' ##NO_TEXT.
-  constants NO_AUTHORIZATION type SOTR_CONC value '62379100861F1ED99EFA079B1E9E012C' ##NO_TEXT.
+    CONSTANTS no_values_f4_view TYPE sotr_conc VALUE '62379100861F1ED99EFA079B976B012C' ##NO_TEXT.
+    CONSTANTS view_dont_exist TYPE sotr_conc VALUE '62379100861F1ED99EFA079C0AE4412C' ##NO_TEXT.
+    CONSTANTS error_save_view TYPE sotr_conc VALUE '62379100861F1ED99EFA0798A5D80129' ##NO_TEXT.
+    CONSTANTS no_authorization TYPE sotr_conc VALUE '62379100861F1ED99EFA079B1E9E012C' ##NO_TEXT.
+    CONSTANTS invalid_params TYPE sotr_conc VALUE '62379100861F1ED9A28C4D0084271E2B' ##NO_TEXT.
+    CONSTANTS view_locked TYPE sotr_conc VALUE '62379100861F1ED9A89B0FC57B795F2C' ##NO_TEXT.
+    DATA mv_message TYPE string .
 
-  methods CONSTRUCTOR
-    importing
-      !TEXTID like TEXTID optional
-      !PREVIOUS like PREVIOUS optional .
-protected section.
-private section.
+    METHODS constructor
+      IMPORTING
+        !textid     LIKE textid OPTIONAL
+        !previous   LIKE previous OPTIONAL
+        !mv_message TYPE string OPTIONAL .
+  PROTECTED SECTION.
+  PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS ZCX_AL30 IMPLEMENTATION.
+CLASS zcx_al30 IMPLEMENTATION.
 
 
-  method CONSTRUCTOR.
-CALL METHOD SUPER->CONSTRUCTOR
-EXPORTING
-TEXTID = TEXTID
-PREVIOUS = PREVIOUS
-.
-  endmethod.
+  METHOD constructor ##ADT_SUPPRESS_GENERATION.
+    CALL METHOD super->constructor
+      EXPORTING
+        textid   = textid
+        previous = previous.
+    IF mv_message IS SUPPLIED.
+      me->mv_message = mv_message .
+    ENDIF.
+  ENDMETHOD.
 ENDCLASS.

@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_FUGR" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <AREAT>AL30 - Conversión exit</AREAT>
+   <INCLUDES>
+    <SOBJ_NAME>LZAL30_CONVTOP</SOBJ_NAME>
+    <SOBJ_NAME>SAPLZAL30_CONV</SOBJ_NAME>
+   </INCLUDES>
+   <FUNCTIONS>
+    <item>
+     <FUNCNAME>CONVERSION_EXIT_ZSRCT_INPUT</FUNCNAME>
+     <SHORT_TEXT>AL30 - Conversion exit for source text</SHORT_TEXT>
+     <IMPORT>
+      <RSIMP>
+       <PARAMETER>INPUT</PARAMETER>
+      </RSIMP>
+     </IMPORT>
+     <EXPORT>
+      <RSEXP>
+       <PARAMETER>OUTPUT</PARAMETER>
+      </RSEXP>
+     </EXPORT>
+     <DOCUMENTATION>
+      <RSFDO>
+       <PARAMETER>INPUT</PARAMETER>
+       <KIND>P</KIND>
+       <INDEX> 001</INDEX>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>OUTPUT</PARAMETER>
+       <KIND>P</KIND>
+       <INDEX> 002</INDEX>
+      </RSFDO>
+     </DOCUMENTATION>
+    </item>
+    <item>
+     <FUNCNAME>CONVERSION_EXIT_ZSRCT_OUTPUT</FUNCNAME>
+     <SHORT_TEXT>AL30 - Conversion exit for source text</SHORT_TEXT>
+     <IMPORT>
+      <RSIMP>
+       <PARAMETER>INPUT</PARAMETER>
+      </RSIMP>
+     </IMPORT>
+     <EXPORT>
+      <RSEXP>
+       <PARAMETER>OUTPUT</PARAMETER>
+      </RSEXP>
+     </EXPORT>
+     <DOCUMENTATION>
+      <RSFDO>
+       <PARAMETER>INPUT</PARAMETER>
+       <KIND>P</KIND>
+       <INDEX> 001</INDEX>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>OUTPUT</PARAMETER>
+       <KIND>P</KIND>
+       <INDEX> 002</INDEX>
+      </RSFDO>
+     </DOCUMENTATION>
+    </item>
+   </FUNCTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>
