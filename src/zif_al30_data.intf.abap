@@ -69,7 +69,7 @@ INTERFACE zif_al30_data
   CONSTANTS cv_mode_view TYPE cdchngind VALUE 'V' ##NO_TEXT.
   CONSTANTS cv_operation_insert TYPE char01 VALUE 'I' ##NO_TEXT.
   CONSTANTS cv_operation_read TYPE char01 VALUE 'R' ##NO_TEXT.
-  CONSTANTS cv_msg_id TYPE arbgb VALUE 'ZAL30' ##NO_TEXT.
+  CONSTANTS cv_msg_id TYPE arbgb VALUE 'ZCA_AL30' ##NO_TEXT.
   CONSTANTS: BEGIN OF cs_msg_type,
                error   TYPE bapi_mtype VALUE 'E',
                dump    TYPE bapi_mtype VALUE 'X',
