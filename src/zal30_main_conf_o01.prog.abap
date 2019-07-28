@@ -205,6 +205,10 @@ MODULE alv_gen OUTPUT.
       SET HANDLER mo_event_receiver_gen->handle_data_changed FOR mo_alv_gen.
 
     ELSE.
+
+      " Se vuelve a indicar que tenga en cuenta las columnas optimizadas. Hay que ponerlo antes del refresh para que funcione
+      mo_alv_gen->set_frontend_layout( EXPORTING is_layout = VALUE #( cwidth_opt = abap_true ) ).
+
       CALL METHOD mo_alv_gen->refresh_table_display( EXPORTING is_stable = ms_stable ).
     ENDIF.
 
@@ -278,6 +282,10 @@ MODULE alv_text OUTPUT.
 
 
     ELSE.
+
+      " Se vuelve a indicar que tenga en cuenta las columnas optimizadas. Hay que ponerlo antes del refresh para que funcione
+      mo_alv_text->set_frontend_layout( EXPORTING is_layout = VALUE #( cwidth_opt = abap_true ) ).
+
       CALL METHOD mo_alv_text->refresh_table_display( EXPORTING is_stable = ms_stable ).
     ENDIF.
 

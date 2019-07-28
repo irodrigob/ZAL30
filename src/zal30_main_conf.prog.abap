@@ -31,7 +31,7 @@
 *|                                                                   |*
 *\===================================================================/*
 
-REPORT  zal30_main_conf MESSAGE-ID zal30.
+REPORT  zal30_main_conf MESSAGE-ID zca_al30.
 
 INCLUDE zal30_main_conf_top.
 

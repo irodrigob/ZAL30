@@ -788,7 +788,7 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
       ENDLOOP.
 
     ELSE.
-      es_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error iv_number = '021' iv_message_v1 = ms_view-tabname ).
+      es_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error iv_number = '012' iv_message_v1 = ms_view-tabname ).
     ENDIF.
 
   ENDMETHOD.

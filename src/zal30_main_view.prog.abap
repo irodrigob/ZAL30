@@ -31,7 +31,7 @@
 *|                                                                   |*
 *\===================================================================/*
 
-REPORT  zal30_main_view MESSAGE-ID zal30.
+REPORT  zal30_main_view MESSAGE-ID zca_al30.
 
 INCLUDE zal30_main_view_top.
 

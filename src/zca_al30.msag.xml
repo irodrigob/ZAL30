@@ -71,12 +71,6 @@
     <T100>
      <SPRSL>E</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
-     <MSGNR>010</MSGNR>
-     <TEXT>Error to get fieldcatalog of ALV</TEXT>
-    </T100>
-    <T100>
-     <SPRSL>E</SPRSL>
-     <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>011</MSGNR>
      <TEXT>Error adding the text of the table/view &amp;</TEXT>
     </T100>
@@ -90,7 +84,7 @@
      <SPRSL>E</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>013</MSGNR>
-     <TEXT>Failed to get fields from table/view &amp;</TEXT>
+     <TEXT>Failed to get fields of ddic from table/view &amp;</TEXT>
     </T100>
     <T100>
      <SPRSL>E</SPRSL>
@@ -133,12 +127,6 @@
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>020</MSGNR>
      <TEXT>SQL Error: &amp;</TEXT>
-    </T100>
-    <T100>
-     <SPRSL>E</SPRSL>
-     <ARBGB>ZCA_AL30</ARBGB>
-     <MSGNR>021</MSGNR>
-     <TEXT>Failed to get the field catalog table &amp;</TEXT>
     </T100>
     <T100>
      <SPRSL>E</SPRSL>
@@ -366,11 +354,6 @@
     </item>
     <item>
      <SPRSL>4</SPRSL>
-     <MSGNR>010</MSGNR>
-     <TEXT>The view &amp; has been deleted.</TEXT>
-    </item>
-    <item>
-     <SPRSL>4</SPRSL>
      <MSGNR>011</MSGNR>
      <TEXT>The view &amp; already exists.</TEXT>
     </item>
@@ -408,11 +391,6 @@
      <SPRSL>4</SPRSL>
      <MSGNR>020</MSGNR>
      <TEXT>Failed to get the table/view &amp; fields.</TEXT>
-    </item>
-    <item>
-     <SPRSL>4</SPRSL>
-     <MSGNR>021</MSGNR>
-     <TEXT>No entries.</TEXT>
     </item>
     <item>
      <SPRSL>4</SPRSL>
@@ -551,11 +529,6 @@
     </item>
     <item>
      <SPRSL>6</SPRSL>
-     <MSGNR>010</MSGNR>
-     <TEXT>The view &amp; has been deleted.</TEXT>
-    </item>
-    <item>
-     <SPRSL>6</SPRSL>
      <MSGNR>011</MSGNR>
      <TEXT>The view &amp; already exists.</TEXT>
     </item>
@@ -593,11 +566,6 @@
      <SPRSL>6</SPRSL>
      <MSGNR>020</MSGNR>
      <TEXT>Failed to get the table/view &amp; fields.</TEXT>
-    </item>
-    <item>
-     <SPRSL>6</SPRSL>
-     <MSGNR>021</MSGNR>
-     <TEXT>No entries.</TEXT>
     </item>
     <item>
      <SPRSL>6</SPRSL>
@@ -736,11 +704,6 @@
     </item>
     <item>
      <SPRSL>I</SPRSL>
-     <MSGNR>010</MSGNR>
-     <TEXT>The view &amp; has been deleted.</TEXT>
-    </item>
-    <item>
-     <SPRSL>I</SPRSL>
      <MSGNR>011</MSGNR>
      <TEXT>The view &amp; already exists.</TEXT>
     </item>
@@ -778,11 +741,6 @@
      <SPRSL>I</SPRSL>
      <MSGNR>020</MSGNR>
      <TEXT>Failed to get the table/view &amp; fields.</TEXT>
-    </item>
-    <item>
-     <SPRSL>I</SPRSL>
-     <MSGNR>021</MSGNR>
-     <TEXT>No entries.</TEXT>
     </item>
     <item>
      <SPRSL>I</SPRSL>
@@ -921,11 +879,6 @@
     </item>
     <item>
      <SPRSL>L</SPRSL>
-     <MSGNR>010</MSGNR>
-     <TEXT>The view &amp; has been deleted.</TEXT>
-    </item>
-    <item>
-     <SPRSL>L</SPRSL>
      <MSGNR>011</MSGNR>
      <TEXT>The view &amp; already exists.</TEXT>
     </item>
@@ -963,11 +916,6 @@
      <SPRSL>L</SPRSL>
      <MSGNR>020</MSGNR>
      <TEXT>Failed to get the table/view &amp; fields.</TEXT>
-    </item>
-    <item>
-     <SPRSL>L</SPRSL>
-     <MSGNR>021</MSGNR>
-     <TEXT>No entries.</TEXT>
     </item>
     <item>
      <SPRSL>L</SPRSL>
@@ -1106,11 +1054,6 @@
     </item>
     <item>
      <SPRSL>W</SPRSL>
-     <MSGNR>010</MSGNR>
-     <TEXT>The view &amp; has been deleted.</TEXT>
-    </item>
-    <item>
-     <SPRSL>W</SPRSL>
      <MSGNR>011</MSGNR>
      <TEXT>The view &amp; already exists.</TEXT>
     </item>
@@ -1148,11 +1091,6 @@
      <SPRSL>W</SPRSL>
      <MSGNR>020</MSGNR>
      <TEXT>Failed to get the table/view &amp; fields.</TEXT>
-    </item>
-    <item>
-     <SPRSL>W</SPRSL>
-     <MSGNR>021</MSGNR>
-     <TEXT>No entries.</TEXT>
     </item>
     <item>
      <SPRSL>W</SPRSL>
