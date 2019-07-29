@@ -15,7 +15,7 @@
      <HEADER>
       <PROGRAM>ZAL30_MAIN_CONF</PROGRAM>
       <SCREEN>9000</SCREEN>
-      <LANGUAGE>S</LANGUAGE>
+      <LANGUAGE>E</LANGUAGE>
       <DESCRIPT>Main screen</DESCRIPT>
       <TYPE>N</TYPE>
       <NEXTSCREEN>9000</NEXTSCREEN>
@@ -101,7 +101,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>TEXT</TYPE>
        <NAME>ZAL30_T_VIEW-TABNAME</NAME>
-       <TEXT>Tabellenname___</TEXT>
+       <TEXT>Table_Name_____</TEXT>
        <LINE>001</LINE>
        <COLUMN>003</COLUMN>
        <LENGTH>015</LENGTH>
@@ -249,7 +249,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>FRAME</TYPE>
        <NAME>FRAME_HEADER</NAME>
-       <TEXT>Opciones_de_la_vista_________________________________________________________________________________________________________</TEXT>
+       <TEXT>View_options_________________________________________________________________________________________________________________</TEXT>
        <LINE>004</LINE>
        <COLUMN>001</COLUMN>
        <LENGTH>126</LENGTH>
@@ -265,7 +265,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>CHECK</TYPE>
        <NAME>ZAL30_T_VIEW-TRANSPORT</NAME>
-       <TEXT>Trans._contenido____</TEXT>
+       <TEXT>Content_Transport___</TEXT>
        <LINE>005</LINE>
        <COLUMN>003</COLUMN>
        <LENGTH>022</LENGTH>
@@ -286,7 +286,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>CHECK</TYPE>
        <NAME>ZAL30_T_VIEW-CHANGE_LOG</NAME>
-       <TEXT>Log_Modificaciones__</TEXT>
+       <TEXT>Change_log__________</TEXT>
        <LINE>005</LINE>
        <COLUMN>035</COLUMN>
        <LENGTH>022</LENGTH>
@@ -307,7 +307,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>CHECK</TYPE>
        <NAME>ZAL30_T_VIEW-CHECK_AUTH_SAP</NAME>
-       <TEXT>Cheq._Auto._SAP_____</TEXT>
+       <TEXT>SAP_Auth._Check_____</TEXT>
        <LINE>005</LINE>
        <COLUMN>061</COLUMN>
        <LENGTH>022</LENGTH>
@@ -328,7 +328,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>CHECK</TYPE>
        <NAME>ZAL30_T_VIEW-AUTH_USER</NAME>
-       <TEXT>Autorización_Usuario</TEXT>
+       <TEXT>User_Auth.__________</TEXT>
        <LINE>005</LINE>
        <COLUMN>089</COLUMN>
        <LENGTH>022</LENGTH>
@@ -349,7 +349,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>CHECK</TYPE>
        <NAME>ZAL30_T_VIEW-AUTO_ADJUST</NAME>
-       <TEXT>Auto_Ajuste_________</TEXT>
+       <TEXT>Auto_adjust_________</TEXT>
        <LINE>006</LINE>
        <COLUMN>003</COLUMN>
        <LENGTH>022</LENGTH>
@@ -370,7 +370,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>TEXT</TYPE>
        <NAME>ZAL30_T_VIEW-TEXTTABLE</NAME>
-       <TEXT>Tabla_Texto_________</TEXT>
+       <TEXT>Text_Table__________</TEXT>
        <LINE>007</LINE>
        <COLUMN>003</COLUMN>
        <LENGTH>020</LENGTH>
@@ -447,7 +447,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>FRAME</TYPE>
        <NAME>FRAME_FIELDS</NAME>
-       <TEXT>Información_de_los_campos___________________________________________________________________________________________________</TEXT>
+       <TEXT>Field_information___________________________________________________________________________________________________________</TEXT>
        <LINE>010</LINE>
        <COLUMN>001</COLUMN>
        <LENGTH>125</LENGTH>

@@ -1,94 +1,97 @@
-class ZCL_AL30_VIEW definition
-  public
-  create public .
+CLASS zcl_al30_view DEFINITION
+  PUBLIC
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
+*"* public components of class ZCL_AL30_VIEW
+*"* do not include other source files here!!!
+    TYPE-POOLS adbc .
 
-  methods READ_DATA
-    exporting
-      !ES_RETURN type BAPIRET2
-    changing
-      !CO_DATA type ref to DATA .
-  methods GET_FIELDCAT_VIEW
-    importing
-      !IV_MODE type CHAR1
-    exporting
-      !ES_RETURN type BAPIRET2
-      !ET_FIELDCAT type LVC_T_FCAT .
-  methods CREATE_IT_DATA_VIEW
-    importing
-      !IV_MODE type CHAR1
-    exporting
-      !ET_DATA type ref to DATA
-      !ES_RETURN type BAPIRET2 .
-  methods SAVE_DATA
-    importing
-      !IV_ALLOW_REQUEST type SAP_BOOL default ABAP_FALSE
-    exporting
-      !ES_RETURN type BAPIRET2
-    changing
-      !CT_DATOS_DEL type STANDARD TABLE
-      !CT_DATOS type STANDARD TABLE
-      !CV_ORDER type E070-TRKORR .
-  methods VERIFY_FIELD_DATA
-    importing
-      !IV_FIELDNAME type ANY
-      !IV_VALUE type ANY
-    returning
-      value(RS_RETURN) type BAPIRET2 .
-  methods VERIFY_CHANGE_ROW_DATA
-    exporting
-      value(ES_RETURN) type BAPIRET2
-    changing
-      !CS_ROW_DATA type ANY .
-  methods CHECK_AUTHORIZATION
-    importing
-      !IV_VIEW_NAME type TABNAME
-      !IV_VIEW_ACTION type ANY default 'U'
-    raising
-      ZCX_AL30 .
-  methods TRANSPORT_ENTRIES
-    importing
-      !IT_DATA type STANDARD TABLE
-    changing
-      !CV_ORDER type E070-TRKORR
-    returning
-      value(RS_RETURN) type BAPIRET2 .
-  methods VIEW_HAVE_USER_AUTH
-    importing
-      !IV_VIEW type TABNAME
-    returning
-      value(RV_HAVE) type SAP_BOOL .
-  methods VIEW_HAVE_SAP_AUTH
-    importing
-      !IV_VIEW type TABNAME
-    returning
-      value(RV_HAVE) type SAP_BOOL .
-  methods GET_LEVEL_AUTH_VIEW
-    importing
-      !IV_VIEW type TABNAME
-      !IV_USER type SYUNAME default SY-UNAME
-    returning
-      value(RV_LEVEL_AUTH) type ZAL30_E_LEVEL_AUTH .
-  methods VIEW_HAVE_AUTO_ADJUST
-    importing
-      !IV_VIEW type TABNAME
-    returning
-      value(RV_HAVE) type SAP_BOOL .
-  methods LOCK_VIEW
-    raising
-      ZCX_AL30 .
-  methods INSTANCE_EXIT_CLASS
-    importing
-      !IV_EXIT_CLASS type ZAL30_E_EXIT_CLASS
-    returning
-      value(RS_RETURN) type BAPIRET2 .
-  methods SET_DATA_CONF_VIEW
-    importing
-      !IT_FIELDS_VIEW type ZIF_AL30_DATA=>TT_FIELDS_VIEW
-      !IT_FIELDS_TEXT_VIEW type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW
-      !IS_VIEW type ZAL30_T_VIEW
-      !IT_FIELDS_DDIC type DD03PTAB .
+    METHODS read_data
+      EXPORTING
+        !es_return TYPE bapiret2
+      CHANGING
+        !co_data   TYPE REF TO data .
+    METHODS get_fieldcat_view
+      IMPORTING
+        !iv_mode     TYPE char1
+      EXPORTING
+        !es_return   TYPE bapiret2
+        !et_fieldcat TYPE lvc_t_fcat .
+    METHODS create_it_data_view
+      IMPORTING
+        !iv_mode   TYPE char1
+      EXPORTING
+        !et_data   TYPE REF TO data
+        !es_return TYPE bapiret2 .
+    METHODS save_data
+      IMPORTING
+        !iv_allow_request TYPE sap_bool DEFAULT abap_false
+      EXPORTING
+        !es_return        TYPE bapiret2
+      CHANGING
+        !ct_datos_del     TYPE STANDARD TABLE
+        !ct_datos         TYPE STANDARD TABLE
+        !cv_order         TYPE e070-trkorr .
+    METHODS verify_field_data
+      IMPORTING
+        !iv_fieldname TYPE any
+        !iv_value     TYPE any
+      EXPORTING
+        es_return     TYPE bapiret2 .
+    METHODS verify_change_row_data
+      EXPORTING
+        VALUE(es_return) TYPE bapiret2
+      CHANGING
+        !cs_row_data     TYPE any .
+    METHODS check_authorization
+      IMPORTING
+        !iv_view_name   TYPE tabname
+        !iv_view_action TYPE any DEFAULT 'U'
+      RAISING
+        zcx_al30 .
+    METHODS transport_entries
+      IMPORTING
+        !it_data         TYPE STANDARD TABLE
+      CHANGING
+        !cv_order        TYPE e070-trkorr
+      RETURNING
+        VALUE(rs_return) TYPE bapiret2 .
+    METHODS view_have_user_auth
+      IMPORTING
+        !iv_view       TYPE tabname
+      RETURNING
+        VALUE(rv_have) TYPE sap_bool .
+    METHODS view_have_sap_auth
+      IMPORTING
+        !iv_view       TYPE tabname
+      RETURNING
+        VALUE(rv_have) TYPE sap_bool .
+    METHODS get_level_auth_view
+      IMPORTING
+        !iv_view             TYPE tabname
+        !iv_user             TYPE syuname DEFAULT sy-uname
+      RETURNING
+        VALUE(rv_level_auth) TYPE zal30_e_level_auth .
+    METHODS view_have_auto_adjust
+      IMPORTING
+        !iv_view       TYPE tabname
+      RETURNING
+        VALUE(rv_have) TYPE sap_bool .
+    METHODS lock_view
+      RAISING
+        zcx_al30 .
+    METHODS instance_exit_class
+      IMPORTING
+        !iv_exit_class   TYPE zal30_e_exit_class
+      RETURNING
+        VALUE(rs_return) TYPE bapiret2 .
+    METHODS set_data_conf_view
+      IMPORTING
+        !it_fields_view      TYPE zif_al30_data=>tt_fields_view
+        !it_fields_text_view TYPE zif_al30_data=>tt_fields_text_view
+        !is_view             TYPE zal30_t_view
+        !it_fields_ddic      TYPE dd03ptab .
   PROTECTED SECTION.
 *"* protected components of class ZCL_AL30_VIEW
 *"* do not include other source files here!!!
@@ -123,23 +126,23 @@ public section.
       CHANGING
         !ct_datos     TYPE STANDARD TABLE
         !ct_datos_del TYPE STANDARD TABLE .
-    METHODS exit_check_auth_data_record
+    METHODS exit_check_auth_data_read
       IMPORTING
         !is_row_data   TYPE any
       RETURNING
         VALUE(rv_auth) TYPE sap_bool .
-    METHODS exit_in_process_data_record
+    METHODS exit_in_process_data_read
       CHANGING
         !cs_row_data TYPE any .
-    METHODS exit_before_process_data
+    METHODS exit_before_read_data
       CHANGING
         !ct_data TYPE STANDARD TABLE .
     METHODS exit_verify_field_data
       IMPORTING
-        !iv_fieldname    TYPE any
-        !iv_value        TYPE any
-      RETURNING
-        VALUE(rs_return) TYPE bapiret2 .
+        !iv_fieldname TYPE any
+        !iv_value     TYPE any
+      EXPORTING
+        es_return     TYPE bapiret2 .
 
     METHODS exit_verify_change_row_data
       EXPORTING
@@ -231,7 +234,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_AL30_VIEW IMPLEMENTATION.
+CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD add_edit_fields.
@@ -484,13 +487,13 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD exit_before_process_data.
+  METHOD exit_before_read_data.
     DATA ld_metodo TYPE seocpdname.
 
     IF mo_exit_class IS BOUND.
 
 * Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_BEFORE_PROCESS_DATA' INTO ld_metodo.
+      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_BEFORE_READ_DATA' INTO ld_metodo.
 
       TRY.
           CALL METHOD mo_exit_class->(ld_metodo)
@@ -528,7 +531,7 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD exit_check_auth_data_record.
+  METHOD exit_check_auth_data_read.
     DATA ld_metodo TYPE seocpdname.
 
 * Por defecto tiene autorizacion
@@ -537,7 +540,7 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
     IF mo_exit_class IS BOUND.
 
 * Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_CHECK_AUTH_DATA_RECORD' INTO ld_metodo.
+      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_CHECK_AUTH_DATA_READ' INTO ld_metodo.
 
 
       TRY.
@@ -559,13 +562,13 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD exit_in_process_data_record.
+  METHOD exit_in_process_data_read.
     DATA ld_metodo TYPE seocpdname.
 
     IF mo_exit_class IS BOUND.
 
 * Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_IN_PROCESS_DATA_RECORD' INTO ld_metodo.
+      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_IN_PROCESS_DATA_READ' INTO ld_metodo.
 
       TRY.
           CALL METHOD mo_exit_class->(ld_metodo)
@@ -624,7 +627,7 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
   METHOD exit_verify_field_data.
     DATA ld_metodo TYPE seocpdname.
 
-    CLEAR: rs_return.
+    CLEAR: es_return.
 
     IF mo_exit_class IS BOUND.
 
@@ -636,8 +639,8 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
             EXPORTING
               iv_fieldname = iv_fieldname
               iv_value     = iv_value
-            RECEIVING
-              rs_return    = rs_return.
+            IMPORTING
+              es_return    = es_return.
         CATCH cx_root.
       ENDTRY.
 
@@ -977,14 +980,14 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
 
 
           " Exit antes de procesar los registros
-          exit_before_process_data( CHANGING ct_data = <lt_datos> ).
+          exit_before_read_data( CHANGING ct_data = <lt_datos> ).
 
           " Se recorren los datos para procesarlo
           LOOP AT <lt_datos> ASSIGNING FIELD-SYMBOL(<ls_datos>).
             DATA(lv_tabix) = sy-tabix.
 
             " Exit para comprobar que se tenga autorizacion
-            IF exit_check_auth_data_record( EXPORTING is_row_data = <ls_datos> ) = abap_true.
+            IF exit_check_auth_data_read( EXPORTING is_row_data = <ls_datos> ) = abap_true.
 
               " Para saber que el registro viene del diccionario se le informa la posición original que contiene.
               ASSIGN COMPONENT zif_al30_data=>cv_field_tabix_ddic OF STRUCTURE <ls_datos> TO FIELD-SYMBOL(<field>).
@@ -993,7 +996,7 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
               ENDIF.
 
               " Exit mientras se procesan los registros.
-              exit_in_process_data_record( CHANGING cs_row_data = <ls_datos> ).
+              exit_in_process_data_read( CHANGING cs_row_data = <ls_datos> ).
 
             ELSE. " Si no tiene se borra el registro
               DELETE <lt_datos> INDEX lv_tabix.
@@ -1477,7 +1480,7 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
   METHOD verify_field_data.
 
 
-    CLEAR rs_return.
+    CLEAR es_return.
 
 * Me posiciono en la configuración del campo pasado. Si no existe, en principio no deberia pasar, configuracion no se hace nada
     READ TABLE mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WITH KEY fieldname = iv_fieldname.
@@ -1485,13 +1488,14 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
 
 * Validación: Campo obligatorio
       IF <ls_fields>-mandatory = abap_true AND iv_value IS INITIAL.
-        rs_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error iv_number = '034' ).
+        es_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error iv_number = '034' ).
       ENDIF.
 
 * Si no hay errores entra la verificacion de cliente
-      IF rs_return IS INITIAL.
-        rs_return = exit_verify_field_data(  iv_fieldname = iv_fieldname
-                                             iv_value = iv_value ).
+      IF es_return IS INITIAL.
+        exit_verify_field_data(  EXPORTING iv_fieldname = iv_fieldname
+                                           iv_value = iv_value
+                                 IMPORTING es_return = es_return ).
       ENDIF.
 
     ENDIF.

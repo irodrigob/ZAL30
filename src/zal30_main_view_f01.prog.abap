@@ -675,8 +675,9 @@ FORM verify_content_fields  USING  pe_modif TYPE lvc_s_modi
                                    ps_datos_validos TYPE sap_bool.
   DATA ls_return TYPE bapiret2.
 
-  ls_return = mo_controller->verify_field_data( iv_fieldname  = pe_modif-fieldname
-                                                iv_value      = pe_modif-value ).
+  mo_controller->verify_field_data( EXPORTING iv_fieldname  = pe_modif-fieldname
+                                              iv_value      = pe_modif-value
+                                    IMPORTING es_return = ls_return ).
 
   IF ls_return IS NOT INITIAL.
 

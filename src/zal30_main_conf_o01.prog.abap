@@ -32,12 +32,15 @@ MODULE field_dynpro_9000 OUTPUT.
 * elementos del grupo1 que sea igual a 'EDI' (campo de edicion).
 * En el caso de los campos de texto de la aplicación lo dejo ináctivo
 * para evitar que salga con "*" típico de campos de password.
+* Los campos principal (group3 = 'APL') activo la entrada de datos.
     IF mv_mode IS INITIAL.
       IF screen-group1 = 'EDI' AND
          ( screen-name = 'ZAL30_T_VIEW-EXIT_CLASS' OR screen-name = 'ZAL30_T_VIEW-TEXTTABLE' ).
         screen-active = 0.
       ELSEIF screen-group1 = 'EDI'.
         screen-invisible = 1.
+      ELSEIF screen-group3 = 'APL'.
+        screen-input = 1.
       ENDIF.
 
 * Si es el de creacion:
@@ -50,7 +53,8 @@ MODULE field_dynpro_9000 OUTPUT.
     ELSEIF mv_mode = zif_al30_data=>cv_mode_insert.
 
       IF screen-group3 = 'APL'.
-        screen-active = 1.
+*        screen-active = 1.
+        screen-input = 0.
       ELSEIF screen-group2 = 'CRE'.
         screen-invisible = 0.
       ELSEIF screen-group2 = 'BOE'.
@@ -66,6 +70,7 @@ MODULE field_dynpro_9000 OUTPUT.
 
 
 * Si se esta modificando
+* Los del grupo3 'APL'(campo principal de aplicacion) se desactiva su entrada de datos
 * Los del grupo2 'ENT' (campo de entrada) se habilitan.
 * Los del grupo2 'BOE' (botones si existe aplicacion) se habilitan
 * Los del grupo2 'CRE' (botones de creacion) se ocultan.
@@ -75,12 +80,11 @@ MODULE field_dynpro_9000 OUTPUT.
 * valor de la variable d_expand_header.
 * El campo del nombre de aplicacion se deshabilita.
     ELSEIF mv_mode = zif_al30_data=>cv_mode_change.
-
       IF screen-group2 = 'BOE'.
         screen-invisible = 0.
       ELSEIF screen-group2 = 'CRE'.
         screen-invisible = 1.
-      ELSEIF screen-name = 'ZDOAP_T_APPL-APPL'.
+      ELSEIF screen-group3 = 'APL'.
         screen-input = 0.
       ELSEIF screen-group2 = 'ENT'.
         screen-input = 1.
