@@ -4,7 +4,3 @@ Programa que permite el mantenimiento de cualquier tabla mediante ALV, sustituye
 
 
 Más información en la Wiki / More info in the Wiki
-
-# Prerequisitos / Prerequisites
-
-Versión ABAP 7.4 o superior / ABAP 7.4 or higher
