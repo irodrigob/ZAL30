@@ -1545,45 +1545,112 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD create_where_sql.
+    DATA lv_where TYPE string.
 
     CLEAR rv_where.
 
-    LOOP AT is_filters-where_clauses ASSIGNING FIELD-SYMBOL(<ls_tables>).
-
-      " Primero se construye el alias segun la tabla
+    " Primer nivel son las tablas
+    LOOP AT is_filters-fields_ranges ASSIGNING FIELD-SYMBOL(<ls_tables>).
+      " Según la tabla se monta el alias
       IF <ls_tables>-tablename = ms_view-tabname.
         DATA(lv_alias) = |{ zif_al30_data=>cs_alias_sql-view }.|.
       ELSE.
         lv_alias = |{ zif_al30_data=>cs_alias_sql-texttable }.|.
       ENDIF.
-      " Se recorre las líneas del where de la tabla y se concatena en una
-      DATA(lv_where) = ||.
-      LOOP AT <ls_tables>-where_tab ASSIGNING FIELD-SYMBOL(<ls_where>).
 
-        lv_where = COND #( WHEN lv_where IS INITIAL THEN <ls_where>-line ELSE |{ lv_where } { <ls_where>-line }| ).
+      " Segundo nivel los campos de la tabla
+      LOOP AT <ls_tables>-frange_t ASSIGNING FIELD-SYMBOL(<ls_fields>).
+
+        " Tercer nivel son los valores de los campos
+        " Se mira el número de registros por si hay que añadir un OR
+        DATA(lv_lines) = lines( <ls_fields>-selopt_t ).
+        LOOP AT <ls_fields>-selopt_t ASSIGNING FIELD-SYMBOL(<ls_values>).
+
+          " Primero se monta el campo
+          DATA(lv_field) = |{ lv_alias }{ <ls_fields>-fieldname }|.
+
+          " Ahora el operador y valor
+          IF <ls_values>-option = 'BT'.
+            IF <ls_values>-sign = 'E'.
+              DATA(lv_operator) = |NOT BETWEEN '{ <ls_values>-low }' AND '{ <ls_values>-high }'|.
+            ELSE.
+              lv_operator = |BETWEEN '{ <ls_values>-low }' AND '{ <ls_values>-high }'|.
+            ENDIF.
+          ELSEIF <ls_values>-sign = 'E' OR <ls_values>-option = 'NE'. " Exclusión y NE se comportan igual
+            lv_operator = |<> '{ <ls_values>-low }'|.
+          ELSEIF <ls_values>-option = 'LE'.
+            lv_operator = |<= '{ <ls_values>-low }'|.
+          ELSEIF <ls_values>-option = 'LT'.
+            lv_operator = |< '{ <ls_values>-low }'|.
+          ELSEIF <ls_values>-option = 'GE'.
+            lv_operator = |>= '{ <ls_values>-low }'|.
+          ELSEIF <ls_values>-option = 'GT'.
+            lv_operator = |> '{ <ls_values>-low }'|.
+          ELSEIF <ls_values>-option = 'EQ'.
+            lv_operator = |= '{ <ls_values>-low }'|.
+          ENDIF.
+          " Se monta la condición
+          DATA(lv_cond) = |{ lv_field } { lv_operator }|.
+
+          " Y se pone en el where
+          lv_where = COND #( WHEN lv_where IS INITIAL THEN |( { lv_cond }| ELSE |{ lv_where } { lv_cond }| ).
+
+          " Si el numero del registro es inferior al numero de líneas hay que añadir un OR
+          IF sy-tabix < lv_lines.
+            lv_where = |{ lv_where } OR|.
+          ENDIF.
+          CLEAR: lv_operator, lv_cond.
+
+        ENDLOOP.
+        IF sy-subrc = 0. " Si hay registros se cierra parentesis y se añade al where principal
+          rv_where = COND #( WHEN rv_where IS INITIAL THEN |{ lv_where } )| ELSE |{ rv_where } AND { lv_where } ) | ).
+          CLEAR: lv_where.
+        ENDIF.
 
       ENDLOOP.
-
-      " En la tabla del where los operadores lógicos vienen con código SAP, esto se tiene que cambiar ara
-      " hacer compatible con la sentencia SQL.
-      " Es decir, los EQ pasan a ser =. Lo mismo para los NE, LT, GT, LE o GE.
-      REPLACE ALL OCCURRENCES OF ' NE ' IN lv_where WITH ' <> '.
-      REPLACE ALL OCCURRENCES OF ' EQ ' IN lv_where WITH ' = '.
-      REPLACE ALL OCCURRENCES OF ' LE ' IN lv_where WITH ' <= '.
-      REPLACE ALL OCCURRENCES OF ' LT ' IN lv_where WITH ' < '.
-      REPLACE ALL OCCURRENCES OF ' GE ' IN lv_where WITH ' >= '.
-      REPLACE ALL OCCURRENCES OF ' GT ' IN lv_where WITH ' > '.
-
-      " Ahora recorro los campos que son filtros para reemplazar su valor por un campo que es el alias+campo
-      LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WHERE sel_screen = abap_true.
-        DATA(lv_field) = |{ lv_alias }{ <ls_fields>-fieldname }|.
-        REPLACE ALL OCCURRENCES OF <ls_fields>-fieldname IN lv_where WITH lv_field.
-      ENDLOOP.
-
-      " Si el where es global esta en blanco se informa poniendo un parántesis inicial
-      rv_where = COND #( WHEN rv_where IS INITIAL THEN | { lv_where }| ELSE |{ rv_where } { lv_where }| ).
-
     ENDLOOP.
+
+
+* Nota Iván: Este código funciona, aunque internamente hay muchos espacios en blanco y parentesis, pero solo en S/4 HANA
+* En otras versiones de ABAP/SAP en el campo que tenga el elemento de datos LAND1 esta añadiendo un espacio en blanco en países
+* de dos dígitos. Es decir, si se pone ES queda como 'ES ', esto hace que no encuentre datos. Este caso en S/4 HANA no ocurre
+* Y como puede ser que este problema este en más campos y como esto tiene que ser multiversión se monta en SQL a manija.
+**    LOOP AT is_filters-where_clauses ASSIGNING FIELD-SYMBOL(<ls_tables>).
+**
+**      " Primero se construye el alias segun la tabla
+**      IF <ls_tables>-tablename = ms_view-tabname.
+**        DATA(lv_alias) = |{ zif_al30_data=>cs_alias_sql-view }.|.
+**      ELSE.
+**        lv_alias = |{ zif_al30_data=>cs_alias_sql-texttable }.|.
+**      ENDIF.
+**      " Se recorre las líneas del where de la tabla y se concatena en una
+**      DATA(lv_where) = ||.
+**      LOOP AT <ls_tables>-where_tab ASSIGNING FIELD-SYMBOL(<ls_where>).
+**
+**        lv_where = COND #( WHEN lv_where IS INITIAL THEN <ls_where>-line ELSE |{ lv_where } { <ls_where>-line }| ).
+**
+**      ENDLOOP.
+**
+**      " En la tabla del where los operadores lógicos vienen con código SAP, esto se tiene que cambiar ara
+**      " hacer compatible con la sentencia SQL.
+**      " Es decir, los EQ pasan a ser =. Lo mismo para los NE, LT, GT, LE o GE.
+**      REPLACE ALL OCCURRENCES OF ' NE ' IN lv_where WITH ' <> '.
+**      REPLACE ALL OCCURRENCES OF ' EQ ' IN lv_where WITH ' = '.
+**      REPLACE ALL OCCURRENCES OF ' LE ' IN lv_where WITH ' <= '.
+**      REPLACE ALL OCCURRENCES OF ' LT ' IN lv_where WITH ' < '.
+**      REPLACE ALL OCCURRENCES OF ' GE ' IN lv_where WITH ' >= '.
+**      REPLACE ALL OCCURRENCES OF ' GT ' IN lv_where WITH ' > '.
+**
+**      " Ahora recorro los campos que son filtros para reemplazar su valor por un campo que es el alias+campo
+**      LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WHERE sel_screen = abap_true.
+**        DATA(lv_field) = |{ lv_alias }{ <ls_fields>-fieldname }|.
+**        REPLACE ALL OCCURRENCES OF <ls_fields>-fieldname IN lv_where WITH lv_field.
+**      ENDLOOP.
+**
+**      " Si el where es global esta en blanco se informa poniendo un parántesis inicial
+**      rv_where = COND #( WHEN rv_where IS INITIAL THEN | { lv_where }| ELSE |{ rv_where } { lv_where }| ).
+**
+**    ENDLOOP.
 
   ENDMETHOD.
 

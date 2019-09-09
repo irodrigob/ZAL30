@@ -23,6 +23,7 @@ TYPES: BEGIN OF ts_sel_screen,
          selid         TYPE rsdynsel-selid,
          fields_ranges TYPE rsds_trange,
          where_clauses TYPE rsds_twhere,
+         expressions   TYPE rsds_texpr,
          fields        TYPE rsdsfields_t,
          fields_text   TYPE wcb_rsdstexts_tab,
        END OF ts_sel_screen.

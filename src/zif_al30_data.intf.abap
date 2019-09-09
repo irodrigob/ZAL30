@@ -52,9 +52,10 @@ INTERFACE zif_al30_data
          TYPES:
                 END OF ts_default_values_create.
   TYPES: BEGIN OF ts_filter_read_data,
-           fields_ranges       TYPE rsds_trange,
-           where_clauses       TYPE rsds_twhere,
-          END OF ts_filter_read_data.
+           fields_ranges TYPE rsds_trange,
+           where_clauses TYPE rsds_twhere,
+           expressions   TYPE rsds_texpr,
+         END OF ts_filter_read_data.
 
   CONSTANTS: BEGIN OF cs_internal_tables,
                auth_user TYPE tabname VALUE 'ZAL30_T_USR_AUTH',

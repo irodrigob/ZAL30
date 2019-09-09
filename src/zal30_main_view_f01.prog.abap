@@ -191,6 +191,7 @@ FORM read_data_view .
   IF sy-subrc = 0.
     ls_filter-fields_ranges = <ls_sel_screen>-fields_ranges.
     ls_filter-where_clauses = <ls_sel_screen>-where_clauses.
+    ls_filter-expressions = <ls_sel_screen>-expressions.
   ENDIF.
 
   CALL METHOD mo_controller->read_data
@@ -1072,62 +1073,60 @@ FORM selection_screen .
 
     ENDIF.
 
-    IF <ls_sel_screen>-fields IS NOT INITIAL.
+    IF <ls_sel_screen>-selid IS INITIAL.
 
-      IF <ls_sel_screen>-selid IS INITIAL.
+      CALL FUNCTION 'FREE_SELECTIONS_INIT'
+        EXPORTING
+          kind                     = 'F' " Los campos se pasan en el fichero en el parámetro FIELDS_TAB
+        IMPORTING
+          selection_id             = <ls_sel_screen>-selid
+        TABLES
+          fields_tab               = <ls_sel_screen>-fields[]
+          field_texts              = <ls_sel_screen>-fields_text[]
+        EXCEPTIONS
+          fields_incomplete        = 01
+          fields_no_join           = 02
+          field_not_found          = 03
+          no_tables                = 04
+          table_not_found          = 05
+          expression_not_supported = 06
+          incorrect_expression     = 07
+          illegal_kind             = 08
+          area_not_found           = 09
+          inconsistent_area        = 10
+          kind_f_no_fields_left    = 11
+          kind_f_no_fields         = 12
+          too_many_fields          = 13
+          dup_field                = 14
+          field_no_type            = 15
+          field_ill_type           = 16
+          dup_event_field          = 17
+          node_not_in_ldb          = 18
+          area_no_field            = 19
+          OTHERS                   = 20.
 
-        CALL FUNCTION 'FREE_SELECTIONS_INIT'
-          EXPORTING
-            kind                     = 'F' " Los campos se pasan en el fichero en el parámetro FIELDS_TAB
-          IMPORTING
-            selection_id             = <ls_sel_screen>-selid
-          TABLES
-            fields_tab               = <ls_sel_screen>-fields[]
-            field_texts              = <ls_sel_screen>-fields_text[]
-          EXCEPTIONS
-            fields_incomplete        = 01
-            fields_no_join           = 02
-            field_not_found          = 03
-            no_tables                = 04
-            table_not_found          = 05
-            expression_not_supported = 06
-            incorrect_expression     = 07
-            illegal_kind             = 08
-            area_not_found           = 09
-            inconsistent_area        = 10
-            kind_f_no_fields_left    = 11
-            kind_f_no_fields         = 12
-            too_many_fields          = 13
-            dup_field                = 14
-            field_no_type            = 15
-            field_ill_type           = 16
-            dup_event_field          = 17
-            node_not_in_ldb          = 18
-            area_no_field            = 19
-            OTHERS                   = 20.
+    ENDIF.
 
-      ENDIF.
+    IF <ls_sel_screen>-selid IS NOT INITIAL.
+      CALL FUNCTION 'FREE_SELECTIONS_DIALOG'
+        EXPORTING
+          selection_id    = <ls_sel_screen>-selid
+          tree_visible    = space
+          as_subscreen    = abap_true
+          no_frame        = abap_false
+        IMPORTING
+          where_clauses   = <ls_sel_screen>-where_clauses[]
+          field_ranges    = <ls_sel_screen>-fields_ranges[]
+          expressions     = <ls_sel_screen>-expressions[]
+        TABLES
+          fields_tab      = <ls_sel_screen>-fields[]
+        EXCEPTIONS
+          internal_error  = 1
+          no_action       = 2
+          selid_not_found = 3
+          illegal_status  = 4
+          OTHERS          = 5.
 
-      IF <ls_sel_screen>-selid IS NOT INITIAL.
-        CALL FUNCTION 'FREE_SELECTIONS_DIALOG'
-          EXPORTING
-            selection_id    = <ls_sel_screen>-selid
-            tree_visible    = space
-            as_subscreen    = abap_true
-            no_frame        = abap_false
-          IMPORTING
-            where_clauses   = <ls_sel_screen>-where_clauses[]
-            field_ranges    = <ls_sel_screen>-fields_ranges[]
-          TABLES
-            fields_tab      = <ls_sel_screen>-fields[]
-          EXCEPTIONS
-            internal_error  = 1
-            no_action       = 2
-            selid_not_found = 3
-            illegal_status  = 4
-            OTHERS          = 5.
-
-      ENDIF.
     ENDIF.
   ENDIF.
 
