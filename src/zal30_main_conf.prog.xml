@@ -21,7 +21,6 @@
       <NEXTSCREEN>9000</NEXTSCREEN>
       <LINES>037</LINES>
       <COLUMNS>128</COLUMNS>
-      <FIORIENLARGEOFF>X</FIORIENLARGEOFF>
      </HEADER>
      <CONTAINERS>
       <RPY_DYCATT>
@@ -949,91 +948,91 @@
     <item>
      <ID>I</ID>
      <KEY>B01</KEY>
-     <ENTRY>Ajustar vista con los datos del diccionario</ENTRY>
+     <ENTRY>Adjusts the view with the dictionary</ENTRY>
      <LENGTH>68</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>B02</KEY>
-     <ENTRY>Comprobar cambios en el diccionario</ENTRY>
+     <ENTRY>Check changes in dictionary</ENTRY>
      <LENGTH>70</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>B03</KEY>
-     <ENTRY>Cambiar idioma</ENTRY>
+     <ENTRY>Change language</ENTRY>
      <LENGTH>25</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>C01</KEY>
-     <ENTRY>Cpo. Tabla Texto</ENTRY>
+     <ENTRY>Text Table Fld.</ENTRY>
      <LENGTH>19</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>C02</KEY>
-     <ENTRY>Cpo.Idioma en Tabla Texto</ENTRY>
+     <ENTRY>Lang. Field in Texttable</ENTRY>
      <LENGTH>30</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>C03</KEY>
-     <ENTRY>Cpo. Checkbox</ENTRY>
+     <ENTRY>Checkbox field</ENTRY>
      <LENGTH>21</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>C04</KEY>
-     <ENTRY>Pantalla Sel.</ENTRY>
-     <LENGTH>23</LENGTH>
+     <ENTRY>Sel. Screen</ENTRY>
+     <LENGTH>21</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>T03</KEY>
-     <ENTRY>Borrar Vista</ENTRY>
+     <ENTRY>Delete View</ENTRY>
      <LENGTH>22</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>T04</KEY>
-     <ENTRY>¿Estas seguro que la quieres borrar?</ENTRY>
+     <ENTRY>Are you sure you want to delete?</ENTRY>
      <LENGTH>70</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>T05</KEY>
-     <ENTRY>¡Si, borra!</ENTRY>
+     <ENTRY>Yes, deleted!!</ENTRY>
      <LENGTH>23</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>T06</KEY>
-     <ENTRY>¡Lo siento!</ENTRY>
+     <ENTRY>Sorry!!</ENTRY>
      <LENGTH>21</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>T07</KEY>
-     <ENTRY>Mantener textos</ENTRY>
+     <ENTRY>Keep the text</ENTRY>
      <LENGTH>27</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>T08</KEY>
-     <ENTRY>¿Quieres mantener los textos de la vista?</ENTRY>
+     <ENTRY>Want to keep the texts of view?</ENTRY>
      <LENGTH>78</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>T09</KEY>
-     <ENTRY>Si</ENTRY>
+     <ENTRY>Sure!</ENTRY>
      <LENGTH>14</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>T10</KEY>
-     <ENTRY>No</ENTRY>
+     <ENTRY>No, refresh!</ENTRY>
      <LENGTH>25</LENGTH>
     </item>
     <item>
@@ -1044,95 +1043,101 @@
    </TPOOL>
    <I18N_TPOOL>
     <item>
-     <LANGUAGE>E</LANGUAGE>
+     <LANGUAGE>S</LANGUAGE>
      <TEXTPOOL>
       <item>
        <ID>I</ID>
        <KEY>B01</KEY>
-       <ENTRY>Adjusts the view with the dictionary</ENTRY>
+       <ENTRY>Ajustar vista con los datos del diccionario</ENTRY>
        <LENGTH>68</LENGTH>
       </item>
       <item>
        <ID>I</ID>
        <KEY>B02</KEY>
-       <ENTRY>Check changes in dictionary</ENTRY>
+       <ENTRY>Comprobar cambios en el diccionario</ENTRY>
        <LENGTH>70</LENGTH>
       </item>
       <item>
        <ID>I</ID>
        <KEY>B03</KEY>
-       <ENTRY>Change language</ENTRY>
+       <ENTRY>Cambiar idioma</ENTRY>
        <LENGTH>25</LENGTH>
       </item>
       <item>
        <ID>I</ID>
        <KEY>C01</KEY>
-       <ENTRY>Text Table Fld.</ENTRY>
+       <ENTRY>Cpo. Tabla Texto</ENTRY>
        <LENGTH>19</LENGTH>
       </item>
       <item>
        <ID>I</ID>
        <KEY>C02</KEY>
-       <ENTRY>Lang. Field in Texttable</ENTRY>
+       <ENTRY>Cpo.Idioma en Tabla Texto</ENTRY>
        <LENGTH>30</LENGTH>
       </item>
       <item>
        <ID>I</ID>
        <KEY>C03</KEY>
-       <ENTRY>Checkbox field</ENTRY>
+       <ENTRY>Cpo. Checkbox</ENTRY>
+       <LENGTH>21</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>C04</KEY>
+       <ENTRY>Pant.Sel.</ENTRY>
        <LENGTH>21</LENGTH>
       </item>
       <item>
        <ID>I</ID>
        <KEY>T03</KEY>
-       <ENTRY>Delete View</ENTRY>
+       <ENTRY>Borrar Vista</ENTRY>
        <LENGTH>22</LENGTH>
       </item>
       <item>
        <ID>I</ID>
        <KEY>T04</KEY>
-       <ENTRY>Are you sure you want to delete?</ENTRY>
+       <ENTRY>¿Estas seguro que la quieres borrar?</ENTRY>
        <LENGTH>70</LENGTH>
       </item>
       <item>
        <ID>I</ID>
        <KEY>T05</KEY>
-       <ENTRY>Yes, deleted!!</ENTRY>
+       <ENTRY>¡Si, borra!</ENTRY>
        <LENGTH>23</LENGTH>
       </item>
       <item>
        <ID>I</ID>
        <KEY>T06</KEY>
-       <ENTRY>Sorry!!</ENTRY>
+       <ENTRY>¡Lo siento!</ENTRY>
        <LENGTH>21</LENGTH>
       </item>
       <item>
        <ID>I</ID>
        <KEY>T07</KEY>
-       <ENTRY>Keep the text</ENTRY>
+       <ENTRY>Mantener textos</ENTRY>
        <LENGTH>27</LENGTH>
       </item>
       <item>
        <ID>I</ID>
        <KEY>T08</KEY>
-       <ENTRY>Want to keep the texts of view?</ENTRY>
+       <ENTRY>¿Quieres mantener los textos de la vista?</ENTRY>
        <LENGTH>78</LENGTH>
       </item>
       <item>
        <ID>I</ID>
        <KEY>T09</KEY>
-       <ENTRY>Sure!</ENTRY>
+       <ENTRY>Si</ENTRY>
        <LENGTH>14</LENGTH>
       </item>
       <item>
        <ID>I</ID>
        <KEY>T10</KEY>
-       <ENTRY>No, refresh!</ENTRY>
+       <ENTRY>No</ENTRY>
        <LENGTH>25</LENGTH>
       </item>
       <item>
        <ID>R</ID>
-       <ENTRY>Configuration view of AL30</ENTRY>
+       <ENTRY>AL30 - Configuración de vistas</ENTRY>
        <LENGTH>70</LENGTH>
       </item>
      </TEXTPOOL>

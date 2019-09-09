@@ -4,7 +4,7 @@
   <asx:values>
    <PROGDIR>
     <NAME>ZAL30_MAIN_VIEW</NAME>
-    <SUBC>M</SUBC>
+    <SUBC>1</SUBC>
     <RSTAT>K</RSTAT>
     <RLOAD>S</RLOAD>
     <FIXPT>X</FIXPT>
@@ -768,7 +768,7 @@
     <item>
      <ID>I</ID>
      <KEY>001</KEY>
-     <ENTRY>Transportation content table</ENTRY>
+     <ENTRY>Transport table entries</ENTRY>
      <LENGTH>52</LENGTH>
     </item>
     <item>
@@ -778,25 +778,25 @@
      <LENGTH>104</LENGTH>
     </item>
     <item>
-     <ID>S</ID>
-     <KEY>P_VIEW</KEY>
-     <ENTRY>View name</ENTRY>
-     <LENGTH>17</LENGTH>
-    </item>
-    <item>
      <ID>R</ID>
      <ENTRY>AL30 - Mantenimiento tablas</ENTRY>
-     <LENGTH>27</LENGTH>
+     <LENGTH>70</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_VIEW</KEY>
+     <ENTRY>View</ENTRY>
+     <LENGTH>38</LENGTH>
     </item>
    </TPOOL>
    <I18N_TPOOL>
     <item>
-     <LANGUAGE>E</LANGUAGE>
+     <LANGUAGE>S</LANGUAGE>
      <TEXTPOOL>
       <item>
        <ID>I</ID>
        <KEY>001</KEY>
-       <ENTRY>Transport table entries</ENTRY>
+       <ENTRY>Transportation content table</ENTRY>
        <LENGTH>52</LENGTH>
       </item>
       <item>
@@ -806,15 +806,15 @@
        <LENGTH>104</LENGTH>
       </item>
       <item>
-       <ID>R</ID>
-       <ENTRY>Maintance view of AL30</ENTRY>
-       <LENGTH>70</LENGTH>
-      </item>
-      <item>
        <ID>S</ID>
        <KEY>P_VIEW</KEY>
-       <ENTRY>View</ENTRY>
-       <LENGTH>38</LENGTH>
+       <ENTRY>View name</ENTRY>
+       <LENGTH>17</LENGTH>
+      </item>
+      <item>
+       <ID>R</ID>
+       <ENTRY>AL30 - Mantenimiento tablas</ENTRY>
+       <LENGTH>27</LENGTH>
       </item>
      </TEXTPOOL>
     </item>

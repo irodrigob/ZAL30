@@ -142,14 +142,26 @@ CLASS lcl_event_gen IMPLEMENTATION.
           IF sy-subrc = 0.
 * Paso los datos
             <ls_fields> = <wa>.
+
+            " Si el campo se ha marcado como técnico hay campos que se tienen que informar como falso
+            " En caso contrario se informará lo que ya tenga.
+            IF <ls_fields>-tech = abap_true.
+              <ls_fields>-sel_screen = abap_false.
+              <ls_fields>-mandatory = abap_false.
+            ENDIF.
           ENDIF.
         ENDIF.
       ENDAT.
 
       " Se comprueba el campo de origen de texto. Esto activa una variable que realiza al final del proceso
       " se resincronizan la editabilidad de los campos de texto y sus valores.
-      IF <ls_mod_cells>-fieldname = 'SOURCE_TEXT'.
+      IF <ls_mod_cells>-fieldname = zif_al30_data=>cs_fix_field_conf-source_text.
         lv_source_text_change = abap_true.
+      ENDIF.
+
+      " Si se modifica el campo técnico se tiene sincronizar los campos asociados
+      IF <ls_mod_cells>-fieldname = zif_al30_data=>cs_fix_field_conf-tech.
+        DATA(lv_tech_change) = abap_true.
       ENDIF.
 
       ADD 1 TO ld_tabix.
@@ -161,6 +173,12 @@ CLASS lcl_event_gen IMPLEMENTATION.
     IF lv_source_text_change = abap_true.
       PERFORM enabled_field_texts_source IN PROGRAM (sy-cprog).
       PERFORM syncro_field_texts_source  IN PROGRAM (sy-cprog).
+    ENDIF.
+
+
+* Activación/desacticacion del campo de checkbox cuando el campo técnico varia
+    IF lv_tech_change = abap_true.
+      PERFORM enabled_field_tech.
     ENDIF.
 
 * Actualizo los dos listados

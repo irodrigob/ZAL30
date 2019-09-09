@@ -713,11 +713,14 @@ ENDFORM.
 *       text
 *----------------------------------------------------------------------*
 FORM adjust_field_and_text .
-* Desactivación de campos de entrada de textos segun la opción de origen del texto
+* Activación/Desactivación de campos de entrada de textos segun la opción de origen del texto
   PERFORM enabled_field_texts_source.
 
 * Se pone el idioma de cabecera al ALV de campos.
   PERFORM text_heading_fields.
+
+* Activación/desacticacion del campo de checkbox si el campo es técnico
+  PERFORM enabled_field_tech.
 
 ENDFORM.
 *&---------------------------------------------------------------------*
@@ -956,6 +959,78 @@ FORM syncro_field_texts_source .
         <ls_fields_text>-scrtext_s = <ls_fields_text_orig>-scrtext_s.
         <ls_fields_text>-scrtext_m = <ls_fields_text_orig>-scrtext_m.
       ENDIF.
+    ENDIF.
+  ENDLOOP.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  ENABLED_FIELD_TECH
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM enabled_field_tech .
+
+
+  LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>).
+
+    IF <ls_fields>-tech = abap_true.
+      DATA(lv_style) = cl_gui_alv_grid=>mc_style_disabled.
+    ELSE.
+      lv_style = cl_gui_alv_grid=>mc_style_enabled.
+    ENDIF.
+
+    " Campo pantalla de seleccion
+    READ TABLE <ls_fields>-celltab  ASSIGNING FIELD-SYMBOL(<ls_celltab>)
+                                    WITH KEY fieldname = zif_al30_data=>cs_fix_field_conf-sel_screen.
+    IF sy-subrc NE 0.
+      INSERT VALUE #( fieldname = zif_al30_data=>cs_fix_field_conf-sel_screen
+                      style = lv_style )
+                      INTO TABLE <ls_fields>-celltab.
+    ELSE.
+      <ls_celltab>-style = lv_style.
+    ENDIF.
+
+    " Campo obligatorio
+    READ TABLE <ls_fields>-celltab  ASSIGNING <ls_celltab>
+                                    WITH KEY fieldname = zif_al30_data=>cs_fix_field_conf-mandatory.
+    IF sy-subrc NE 0.
+      INSERT VALUE #( fieldname = zif_al30_data=>cs_fix_field_conf-mandatory
+                      style = lv_style )
+                      INTO TABLE <ls_fields>-celltab.
+    ELSE.
+      <ls_celltab>-style = lv_style.
+    ENDIF.
+    " Campo salida
+    READ TABLE <ls_fields>-celltab  ASSIGNING <ls_celltab>
+                                    WITH KEY fieldname = zif_al30_data=>cs_fix_field_conf-no_output.
+    IF sy-subrc NE 0.
+      INSERT VALUE #( fieldname = zif_al30_data=>cs_fix_field_conf-no_output
+                      style = lv_style )
+                      INTO TABLE <ls_fields>-celltab.
+    ELSE.
+      <ls_celltab>-style = lv_style.
+    ENDIF.
+
+    " Origen del texto
+    READ TABLE <ls_fields>-celltab  ASSIGNING <ls_celltab>
+                                    WITH KEY fieldname = zif_al30_data=>cs_fix_field_conf-source_text.
+    IF sy-subrc NE 0.
+      INSERT VALUE #( fieldname = zif_al30_data=>cs_fix_field_conf-source_text
+                      style = lv_style )
+                      INTO TABLE <ls_fields>-celltab.
+    ELSE.
+      <ls_celltab>-style = lv_style.
+    ENDIF.
+
+    " Checkbox
+    READ TABLE <ls_fields>-celltab  ASSIGNING <ls_celltab>
+                                    WITH KEY fieldname = zif_al30_data=>cs_fix_field_conf-checkbox.
+    IF sy-subrc NE 0.
+      INSERT VALUE #( fieldname = zif_al30_data=>cs_fix_field_conf-checkbox
+                      style = lv_style )
+                      INTO TABLE <ls_fields>-celltab.
+    ELSE.
+      <ls_celltab>-style = lv_style.
     ENDIF.
   ENDLOOP.
 

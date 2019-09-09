@@ -18,12 +18,12 @@
    </TPOOL>
    <I18N_TPOOL>
     <item>
-     <LANGUAGE>E</LANGUAGE>
+     <LANGUAGE>S</LANGUAGE>
      <TEXTPOOL>
       <item>
        <ID>R</ID>
-       <ENTRY>Include ZAL30_MAIN_CONF_O01</ENTRY>
-       <LENGTH>27</LENGTH>
+       <ENTRY>Configuration view of AL30</ENTRY>
+       <LENGTH>26</LENGTH>
       </item>
      </TEXTPOOL>
     </item>
