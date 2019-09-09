@@ -5,8 +5,7 @@
    <TSTC>
     <TCODE>ZAL30_MAIN_VIEW</TCODE>
     <PGMNA>ZAL30_MAIN_VIEW</PGMNA>
-    <DYPNO>1000</DYPNO>
-    <CINFO>gA==</CINFO>
+    <DYPNO>9000</DYPNO>
    </TSTC>
    <TSTCC>
     <TCODE>ZAL30_MAIN_VIEW</TCODE>
@@ -15,7 +14,7 @@
     <S_PLATIN>X</S_PLATIN>
    </TSTCC>
    <TSTCT>
-    <SPRSL>E</SPRSL>
+    <SPRSL>S</SPRSL>
     <TCODE>ZAL30_MAIN_VIEW</TCODE>
     <TTEXT>AL30 - Maintenance tables</TTEXT>
    </TSTCT>

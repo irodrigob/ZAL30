@@ -43,7 +43,7 @@ public section.
     importing
       !IV_STRUC type ANY
     returning
-      value(RT_FIELDS) type ETSTRING_TAB .
+      value(RT_FIELDS) type STRING_T .
   class-methods ALLOWED_TRANSPORT
     returning
       value(RV_ALLOWED) type SAP_BOOL .

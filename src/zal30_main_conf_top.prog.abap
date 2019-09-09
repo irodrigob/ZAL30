@@ -18,6 +18,7 @@ TABLES: zal30_t_view.
 * Campos de la vista
 DATA mt_fields TYPE zif_al30_data=>tt_fields_view_alv.
 DATA mt_fields_text TYPE zif_al30_data=>tt_fields_text_view_alv.
+DATA mt_fields_text_orig TYPE zif_al30_data=>tt_fields_text_view_alv.
 
 *----------------------------------------------------------------------*
 * Constantes

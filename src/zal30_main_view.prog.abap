@@ -40,55 +40,81 @@ INCLUDE zal30_main_view_c01. " Verif. datos
 *----------------------------------------------------------------------*
 * Pantalla de selección
 *----------------------------------------------------------------------*
-PARAMETERS p_view LIKE zal30_t_view-tabname OBLIGATORY.
+*PARAMETERS p_view LIKE zal30_t_view-tabname OBLIGATORY.
 
 *----------------------------------------------------------------------*
 * Inicializacion programa
 *----------------------------------------------------------------------*
-INITIALIZATION.
-  PERFORM inicializacion_prog.
+*INITIALIZATION.
+*  PERFORM inicializacion_prog.
 
 *----------------------------------------------------------------------*
 * Validación de la pantalla de selección
 *----------------------------------------------------------------------*
-AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_view.
-  PERFORM f4_view.
-
-AT SELECTION-SCREEN..
-  PERFORM chequeo_vista.
+*AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_view.
+*  PERFORM f4_view.
+*
+*AT SELECTION-SCREEN..
+*  PERFORM chequeo_vista.
 
 *----------------------------------------------------------------------*
 * Select data
 *----------------------------------------------------------------------*
-START-OF-SELECTION.
-
-* Inicialización de datos
-  PERFORM inicializacion_datos.
-
-* Creacion de objetos de la vista
-  PERFORM read_create_data_view.
-
-*----------------------------------------------------------------------*
-* End data
-*----------------------------------------------------------------------*
-END-OF-SELECTION.
-
-* Si el puntero de datos no esta incializado no hago nada porque el mensaje ya sale
-* en la propia lectura de datos. Si esta asignado, entonces lo que hago es mirar si esta lleno.
-* Si no lo esta saco el mensaje correspondiente.
-  IF <it_datos> IS ASSIGNED.
-    IF <it_datos> IS INITIAL.
-      MESSAGE s017 WITH ms_view-tabname.
-    ENDIF.
-* Lectura de datos
-    CALL SCREEN 9000.
-  ENDIF.
+*START-OF-SELECTION.
+*
+** Inicialización de datos
+*  PERFORM inicializacion_datos.
+*
+** Creacion de objetos de la vista
+*  PERFORM read_create_data_view.
+*
+**----------------------------------------------------------------------*
+** End data
+**----------------------------------------------------------------------*
+*END-OF-SELECTION.
+*
+** Si el puntero de datos no esta incializado no hago nada porque el mensaje ya sale
+** en la propia lectura de datos. Si esta asignado, entonces lo que hago es mirar si esta lleno.
+** Si no lo esta saco el mensaje correspondiente.
+*  IF <it_datos> IS ASSIGNED.
+*    IF <it_datos> IS INITIAL.
+*      MESSAGE s017 WITH ms_view-tabname.
+*    ENDIF.
+** Lectura de datos
+*    CALL SCREEN 9001.
+*  ENDIF.
 
 *----------------------------------------------------------------------*
 * Includes
 *----------------------------------------------------------------------*
-  INCLUDE zal30_main_view_f01.
+INCLUDE zal30_main_view_f01.
 
-  INCLUDE zal30_main_view_o01.
+INCLUDE zal30_main_view_o01.
 
-  INCLUDE zal30_main_view_i01.
+INCLUDE zal30_main_view_i01.
+*&---------------------------------------------------------------------*
+*& Module SCREEN_FIELDS_9000 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE screen_fields_9000 OUTPUT.
+
+  " Desactivo el campo de entrada de la tabla porque ya viene preinformado
+  LOOP AT SCREEN.
+
+    " En el caso que la transacción de origen no sea distinta a la del programa y la tabla
+    " esta informando lo que se hace es proteger el campo para que no se pueda cambiar. El motivo
+    " es que viene de una transacción por parámetro y se evita que pueda cambiar de tabla.
+    " Además se marca que se ha deshabilitado el campo de entrada de la tabla.
+    IF screen-name = 'ZAL30_T_VIEW-TABNAME' .
+      IF ms_conf_screen-origin_tcode NE zif_al30_data=>cs_prog_tcode-view
+         AND ms_view-tabname IS NOT INITIAL.
+        screen-input = 0.
+      ELSE.
+        screen-input = 1.
+      ENDIF.
+    ENDIF.
+    MODIFY SCREEN.
+
+  ENDLOOP.
+ENDMODULE.

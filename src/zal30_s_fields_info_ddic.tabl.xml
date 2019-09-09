@@ -4,7 +4,7 @@
   <asx:values>
    <DD02V>
     <TABNAME>ZAL30_S_FIELDS_INFO_DDIC</TABNAME>
-    <DDLANGUAGE>E</DDLANGUAGE>
+    <DDLANGUAGE>S</DDLANGUAGE>
     <TABCLASS>INTTAB</TABCLASS>
     <DDTEXT>AL30 - Data dictionary information</DDTEXT>
    </DD02V>

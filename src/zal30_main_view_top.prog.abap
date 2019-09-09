@@ -1,10 +1,15 @@
 *&---------------------------------------------------------------------*
 *&  Include           ZAL30_MAIN_VIEW_TOP
 *&---------------------------------------------------------------------*
+*----------------------------------------------------------------------*
+* Tablas de diccionario
+*----------------------------------------------------------------------*
+TABLES: zal30_t_view.
 
 *----------------------------------------------------------------------*
 * Tipos de datos
 *----------------------------------------------------------------------*
+
 TYPE-POOLS: cntb, icon, abap.
 
 TYPES: BEGIN OF ts_control_data,
@@ -13,13 +18,30 @@ TYPES: BEGIN OF ts_control_data,
        END OF ts_control_data.
 TYPES: tt_control_data TYPE STANDARD TABLE OF ts_control_data.
 
+TYPES: BEGIN OF ts_sel_screen,
+         tabname       TYPE tabname,
+         selid         TYPE rsdynsel-selid,
+         fields_ranges TYPE rsds_trange,
+         where_clauses TYPE rsds_twhere,
+         fields        TYPE rsdsfields_t,
+         fields_text   TYPE wcb_rsdstexts_tab,
+       END OF ts_sel_screen.
+TYPES tt_sel_screen TYPE STANDARD TABLE OF ts_sel_screen WITH EMPTY KEY.
+
+* Tipo que contiene los campos para controlar la configuración
+* y determinados datos de la dynpro
+TYPES: BEGIN OF ts_conf_screen,
+         sel_screen   TYPE tt_sel_screen,
+         origin_tcode TYPE sytcode,
+       END OF ts_conf_screen.
+
 *----------------------------------------------------------------------*
 * Internal tables
 *----------------------------------------------------------------------*
 * Campos de la parametrización de la vista
 DATA mt_fields TYPE zif_al30_data=>tt_fields_view_alv.
 DATA mt_fields_text TYPE zif_al30_data=>tt_fields_text_view_alv.
-data mt_fields_ddic type DD03PTAB.
+DATA mt_fields_ddic TYPE dd03ptab.
 
 DATA mt_control_data TYPE tt_control_data.
 
@@ -39,7 +61,10 @@ FIELD-SYMBOLS <it_datos_del> TYPE STANDARD TABLE.
 * Variables
 *----------------------------------------------------------------------*
 * boton pulsado en dynpro 9000, la principal.
-DATA d_okcode_9000 TYPE sy-ucomm.
+DATA mv_okcode_9000 TYPE sy-ucomm.
+
+* boton pulsado en dynpro 9001, la del listado.
+DATA mv_okcode_9001 TYPE sy-ucomm.
 
 * Modo de visualización del programa.
 DATA mv_mode TYPE char1.
@@ -61,6 +86,12 @@ DATA mv_orden_transporte TYPE e070-trkorr.
 
 * Texto de idioma de la tabla de texto
 DATA mv_field_lang_textable TYPE fieldname.
+
+" Configuración y determinados datos de las pantallas
+DATA ms_conf_screen TYPE ts_conf_screen.
+
+" Lenguaje de visualización
+DATA mv_lang_vis TYPE sylangu.
 
 *----------------------------------------------------------------------*
 * Class

@@ -4,272 +4,273 @@
   <asx:values>
    <T100A>
     <ARBGB>ZCA_AL30</ARBGB>
-    <MASTERLANG>E</MASTERLANG>
+    <MASTERLANG>S</MASTERLANG>
     <STEXT>Message of AL30</STEXT>
    </T100A>
    <T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>000</MSGNR>
      <TEXT>&amp; &amp; &amp; &amp;</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>001</MSGNR>
-     <TEXT>The view &amp; don&apos;t exist</TEXT>
+     <TEXT>La vista &amp; no existe</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>002</MSGNR>
-     <TEXT>String fields is not permitted in the view &amp;</TEXT>
+     <TEXT>Los campos string no están permitidos en la vista &amp;</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>003</MSGNR>
-     <TEXT>The table/view does not allow data maintenance</TEXT>
+     <TEXT>La tabla/vista no permite el mantenimiento de datos</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>004</MSGNR>
-     <TEXT>Failed to insert the view &amp;</TEXT>
+     <TEXT>Error al insertar la vista &amp;</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>005</MSGNR>
-     <TEXT>The view &amp; is saved</TEXT>
+     <TEXT>La vista &amp; ha sido grabada</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>006</MSGNR>
-     <TEXT>Failed to deleted the view &amp;</TEXT>
+     <TEXT>Error al borrar la vista &amp;</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>007</MSGNR>
-     <TEXT>Failed to deleted the fields of view &amp;</TEXT>
+     <TEXT>Error al borrar los campos de la vista &amp;</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>008</MSGNR>
-     <TEXT>The view &amp; has been deleted</TEXT>
+     <TEXT>La vista &amp; ha sido borrada</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>009</MSGNR>
-     <TEXT>The view &amp; already exists</TEXT>
+     <TEXT>La vista &amp; ya existe</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>011</MSGNR>
-     <TEXT>Error adding the text of the table/view &amp;</TEXT>
+     <TEXT>Error al añadir los textos de la tabla/vista &amp;</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>012</MSGNR>
-     <TEXT>Error in obtaining the field catalog for the ALV</TEXT>
+     <TEXT>Error al obtener el catálogo de campos del ALV</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>013</MSGNR>
-     <TEXT>Failed to get fields of ddic from table/view &amp;</TEXT>
+     <TEXT>Error al obtener los campos del ddic de la tabla/vista &amp;</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>014</MSGNR>
-     <TEXT>Error adding the table/view text &amp;</TEXT>
+     <TEXT>Error al añadir los textos de la tabla/vista &amp;</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>015</MSGNR>
-     <TEXT>Errors in the general attributes tab</TEXT>
+     <TEXT>Error en la pestaña de atributos generales</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>016</MSGNR>
-     <TEXT>Error in the texts tab</TEXT>
+     <TEXT>Error en la pestaña de texto</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>017</MSGNR>
-     <TEXT>No entries</TEXT>
+     <TEXT>Sin entrada</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>018</MSGNR>
-     <TEXT>Failed to create dynamic internal table for the table &amp;</TEXT>
+     <TEXT>Error al crear la tabla dinámica de la tabla &amp;</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>019</MSGNR>
-     <TEXT>Error reading from our own fields</TEXT>
+     <TEXT>Error en la lectura de los campos propios</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>020</MSGNR>
-     <TEXT>SQL Error: &amp;</TEXT>
+     <TEXT>Error SQL: &amp;</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>022</MSGNR>
-     <TEXT>There was an error saving the data</TEXT>
+     <TEXT>Se ha producido un error grabando los datos</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>023</MSGNR>
-     <TEXT>Data saved</TEXT>
+     <TEXT>Datos grabados</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>024</MSGNR>
-     <TEXT>Exists differences between the fields of the configuration and dictionary</TEXT>
+     <TEXT>Hay diferencias entre los campos de la vista y del diccionario</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>025</MSGNR>
-     <TEXT>No configuration differences in the view &amp;</TEXT>
+     <TEXT>No hay diferencias de configuración en la vista &amp;</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>026</MSGNR>
-     <TEXT>Failed to instantiate the exit class &amp;</TEXT>
+     <TEXT>Error al instanciar la clase &amp;</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>027</MSGNR>
-     <TEXT>Texts of view &amp; updated</TEXT>
+     <TEXT>Los textos de la vista &amp; actualizados</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>028</MSGNR>
-     <TEXT>Records added in the order &amp;</TEXT>
+     <TEXT>Registros añadidos en la orden &amp;</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>029</MSGNR>
-     <TEXT>Failed to add the records in the order &amp;</TEXT>
+     <TEXT>Error al añadir los registros a la orden &amp;</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>030</MSGNR>
-     <TEXT>The exits class &amp; don&apos;t exist</TEXT>
+     <TEXT>La clase de exist &amp; no existe</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>031</MSGNR>
-     <TEXT>The interface &amp; is not implemented in the class</TEXT>
+     <TEXT>La interface &amp; no esta implementada en la clase</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>032</MSGNR>
-     <TEXT>You are not authorized to view certain records</TEXT>
+     <TEXT>No estáis autorizados para ver determinados registros</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>033</MSGNR>
-     <TEXT>Action canceled</TEXT>
+     <TEXT>Acción cancelada</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>034</MSGNR>
-     <TEXT>Field mandatory</TEXT>
+     <TEXT>Campo obligatorio</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>035</MSGNR>
-     <TEXT>The view configuration has auto-adjusted</TEXT>
+     <TEXT>La configuración de la vista se ha autoajustado</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>036</MSGNR>
-     <TEXT>There are differences in the fields of view &amp; and the table/view</TEXT>
+     <TEXT>Hay diferencias entre los campos de la vista &amp; y la tabla/vista</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>037</MSGNR>
-     <TEXT>Failed to save the view &amp;</TEXT>
+     <TEXT>Error al grabar la vista &amp;</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>038</MSGNR>
-     <TEXT>There was an error deleting the data</TEXT>
+     <TEXT>Se ha producido un error borrando los datos</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>039</MSGNR>
-     <TEXT>No data changed</TEXT>
+     <TEXT>No hay modificaciones</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>040</MSGNR>
-     <TEXT>The operation &amp; is not valid</TEXT>
+     <TEXT>La operación &amp; no es válida</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>041</MSGNR>
-     <TEXT>You do not have authorization</TEXT>
+     <TEXT>No tienes autorización</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>042</MSGNR>
-     <TEXT>You only have query permissions</TEXT>
+     <TEXT>Solo tienes permisos de lectura</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>043</MSGNR>
-     <TEXT>There is already an entry with the same key</TEXT>
+     <TEXT>Existe un registro con la misma clave</TEXT>
     </T100>
     <T100>
-     <SPRSL>E</SPRSL>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>044</MSGNR>
-     <TEXT>No data selected</TEXT>
+     <TEXT>No se han seleccionado datos</TEXT>
     </T100>
    </T100>
    <I18N_LANGS>
     <LANGU>4</LANGU>
     <LANGU>6</LANGU>
+    <LANGU>E</LANGU>
     <LANGU>I</LANGU>
     <LANGU>L</LANGU>
     <LANGU>W</LANGU>
@@ -282,6 +283,11 @@
     </T100T>
     <T100T>
      <SPRSL>6</SPRSL>
+     <ARBGB>ZCA_AL30</ARBGB>
+     <STEXT>Message of AL30</STEXT>
+    </T100T>
+    <T100T>
+     <SPRSL>E</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <STEXT>Message of AL30</STEXT>
     </T100T>
@@ -651,6 +657,221 @@
      <SPRSL>6</SPRSL>
      <MSGNR>040</MSGNR>
      <TEXT>You are not authorized to view certain records.</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>000</MSGNR>
+     <TEXT>&amp; &amp; &amp; &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>001</MSGNR>
+     <TEXT>The view &amp; don&apos;t exist</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>002</MSGNR>
+     <TEXT>String fields is not permitted in the view &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>003</MSGNR>
+     <TEXT>The table/view does not allow data maintenance</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>004</MSGNR>
+     <TEXT>Failed to insert the view &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>005</MSGNR>
+     <TEXT>The view &amp; is saved</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>006</MSGNR>
+     <TEXT>Failed to deleted the view &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>007</MSGNR>
+     <TEXT>Failed to deleted the fields of view &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>008</MSGNR>
+     <TEXT>The view &amp; has been deleted</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>009</MSGNR>
+     <TEXT>The view &amp; already exists</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>011</MSGNR>
+     <TEXT>Error adding the text of the table/view &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>012</MSGNR>
+     <TEXT>Error in obtaining the field catalog for the ALV</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>013</MSGNR>
+     <TEXT>Failed to get fields of ddic from table/view &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>014</MSGNR>
+     <TEXT>Error adding the table/view text &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>015</MSGNR>
+     <TEXT>Errors in the general attributes tab</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>016</MSGNR>
+     <TEXT>Error in the texts tab</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>017</MSGNR>
+     <TEXT>No entries</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>018</MSGNR>
+     <TEXT>Failed to create dynamic internal table for the table &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>019</MSGNR>
+     <TEXT>Error reading from our own fields</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>020</MSGNR>
+     <TEXT>SQL Error: &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>022</MSGNR>
+     <TEXT>There was an error saving the data</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>023</MSGNR>
+     <TEXT>Data saved</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>024</MSGNR>
+     <TEXT>Exists differences between the fields of the configuration and dictionary</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>025</MSGNR>
+     <TEXT>No configuration differences in the view &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>026</MSGNR>
+     <TEXT>Failed to instantiate the exit class &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>027</MSGNR>
+     <TEXT>Texts of view &amp; updated</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>028</MSGNR>
+     <TEXT>Records added in the order &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>029</MSGNR>
+     <TEXT>Failed to add the records in the order &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>030</MSGNR>
+     <TEXT>The exits class &amp; don&apos;t exist</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>031</MSGNR>
+     <TEXT>The interface &amp; is not implemented in the class</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>032</MSGNR>
+     <TEXT>You are not authorized to view certain records</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>033</MSGNR>
+     <TEXT>Action canceled</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>034</MSGNR>
+     <TEXT>Field mandatory</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>035</MSGNR>
+     <TEXT>The view configuration has auto-adjusted</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>036</MSGNR>
+     <TEXT>There are differences in the fields of view &amp; and the table/view</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>037</MSGNR>
+     <TEXT>Failed to save the view &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>038</MSGNR>
+     <TEXT>There was an error deleting the data</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>039</MSGNR>
+     <TEXT>No data changed</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>040</MSGNR>
+     <TEXT>The operation &amp; is not valid</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>041</MSGNR>
+     <TEXT>You do not have authorization</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>042</MSGNR>
+     <TEXT>You only have query permissions</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>043</MSGNR>
+     <TEXT>There is already an entry with the same key</TEXT>
+    </item>
+    <item>
+     <SPRSL>E</SPRSL>
+     <MSGNR>044</MSGNR>
+     <TEXT>No data selected</TEXT>
     </item>
     <item>
      <SPRSL>I</SPRSL>

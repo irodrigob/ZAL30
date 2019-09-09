@@ -7,30 +7,8 @@
 *       text
 *----------------------------------------------------------------------*
 MODULE status_9000 OUTPUT.
-  DATA lt_fcode TYPE TABLE OF sy-ucomm.
-  SET TITLEBAR 'T-1' WITH mv_text_view.
-
-* Determinados botones solo estan activos en modo edicion
-  IF mv_mode = zif_al30_data=>cv_mode_change.
-
-* Quito el boton de transporte si la configuracion de la vista no lo permite.
-    IF mv_pedir_orden = abap_false.
-      APPEND 'TRANSP' TO lt_fcode.
-    ENDIF.
-    IF lt_fcode IS NOT INITIAL.
-      SET PF-STATUS 'PANT-1' EXCLUDING lt_fcode.
-    ELSE.
-      SET PF-STATUS 'PANT-1'.
-    ENDIF.
-
-  ELSE.
-    APPEND 'SAVE' TO lt_fcode.
-    APPEND 'TRANSP' TO lt_fcode.
-    SET PF-STATUS 'PANT-1' EXCLUDING lt_fcode.
-  ENDIF.
-
-
-  CLEAR d_okcode_9000.
+  SET TITLEBAR 'T-2'.
+  SET PF-STATUS '9000'.
 ENDMODULE.                 " STATUS_9000  OUTPUT
 *&---------------------------------------------------------------------*
 *&      Module  ALV_VIEW  OUTPUT
@@ -96,3 +74,40 @@ MODULE alv_view OUTPUT.
 
   ENDIF.
 ENDMODULE.                 " CREATE_ALV  OUTPUT
+*&---------------------------------------------------------------------*
+*& Module STATUS_9001 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_9001 OUTPUT.
+  DATA lt_fcode TYPE TABLE OF sy-ucomm.
+
+  " Si no hay nombre de la tabla en el idioma de logon se muestra el nombre técnico
+  IF mv_text_view IS NOT INITIAL.
+    SET TITLEBAR 'T-1' WITH mv_text_view.
+  ELSE.
+    SET TITLEBAR 'T-1' WITH ms_view-tabname.
+  ENDIF.
+
+* Determinados botones solo estan activos en modo edicion
+  IF mv_mode = zif_al30_data=>cv_mode_change.
+
+* Quito el boton de transporte si la configuracion de la vista no lo permite.
+    IF mv_pedir_orden = abap_false.
+      APPEND 'TRANSP' TO lt_fcode.
+    ENDIF.
+    IF lt_fcode IS NOT INITIAL.
+      SET PF-STATUS 'PANT-1' EXCLUDING lt_fcode.
+    ELSE.
+      SET PF-STATUS 'PANT-1'.
+    ENDIF.
+
+  ELSE.
+    APPEND 'SAVE' TO lt_fcode.
+    APPEND 'TRANSP' TO lt_fcode.
+    SET PF-STATUS 'PANT-1' EXCLUDING lt_fcode.
+  ENDIF.
+
+
+  CLEAR mv_okcode_9001.
+ENDMODULE.

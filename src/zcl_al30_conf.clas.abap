@@ -1,191 +1,191 @@
-class ZCL_AL30_CONF definition
-  public
-  create public .
+CLASS zcl_al30_conf DEFINITION
+  PUBLIC
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
 *"* public components of class ZCL_AL30_CONF
 *"* do not include other source files here!!!
-  type-pools ABAP .
+    TYPE-POOLS abap .
 
-  methods READ_VIEW
-    importing
-      !IV_NAME_VIEW type TABNAME
-      !IV_ALL_LANGUAGE type SAP_BOOL default ABAP_FALSE
-      !IV_LANGU type SYLANGU default SY-LANGU
-      !IV_READ_DDIC type SAP_BOOL default ABAP_TRUE
-    exporting
-      !EV_TEXT_VIEW type AS4TEXT
-      !ES_RETURN type BAPIRET2
-      !ES_VIEW type ZAL30_T_VIEW
-      !ET_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW
-      !ET_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW
-      !ET_FIELDS_DDIC type DD03PTAB .
-  methods CHECK_VIEW_DDIC
-    importing
-      !IV_NAME_VIEW type TABNAME
-    exporting
-      !E_RETURN type BAPIRET2
-      !E_TEXT_VIEW type AS4TEXT .
-  methods INSERT_VIEW
-    importing
-      !IV_NAME_VIEW type TABNAME
-      !IV_USE_DEFAULT_VALUES type SAP_BOOL default ABAP_FALSE
-      !IS_DEFAULT_VALUES type ZIF_AL30_DATA=>TS_DEFAULT_VALUES_CREATE optional
-    exporting
-      !ES_RETURN type BAPIRET2
-      !ET_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW
-      !ET_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW
-      !ES_VIEW type ZAL30_T_VIEW
-      !ET_FIELDS_DDIC type DD03PTAB .
-  methods DELETE_VIEW
-    importing
-      !IV_NAME_VIEW type TABNAME
-    returning
-      value(RS_RETURN) type BAPIRET2 .
-  methods SAVE_VIEW
-    importing
-      !IS_VIEW type ZAL30_T_VIEW
-      !IT_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW
-      !IT_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW optional
-    returning
-      value(RS_RETURN) type BAPIRET2 .
-  methods CHECK_VIEW_INSERT
-    importing
-      !IV_NAME_VIEW type TABNAME
-    exporting
-      !ES_RETURN type BAPIRET2
-      !EV_TEXT_VIEW type AS4TEXT .
-  methods CHECK_VIEW_READ
-    importing
-      !IV_NAME_VIEW type TABNAME
-    exporting
-      !ES_RETURN type BAPIRET2
-      !EV_TEXT_VIEW type AS4TEXT .
-  methods CHECK_CHANGES_DICT
-    importing
-      !IT_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW optional
-      !IT_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW optional
-      !IS_VIEW type ZAL30_T_VIEW
-      !IV_LANGU type SYLANGU default SY-LANGU
-    exporting
-      !EV_DIFF_FIELDS type SAP_BOOL
-      !EV_DIFF_TEXT type SAP_BOOL .
-  methods ADJUST_VIEW_DICTIONARY
-    importing
-      !IV_KEEP_TEXT type SAP_BOOL default ABAP_TRUE
-    exporting
-      value(ES_RETURN) type BAPIRET2
-      !EV_TEXT_VIEW type AS4TEXT
-    changing
-      !CT_FIELDS_VIEW type ZIF_AL30_DATA=>TT_FIELDS_VIEW
-      !CT_FIELDS_TEXT_VIEW type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW
-      !CS_VIEW type ZAL30_T_VIEW .
-  methods CHECK_EXIT_CLASS
-    importing
-      !IV_EXIT_CLASS type ZAL30_E_EXIT_CLASS
-    returning
-      value(RS_RETURN) type BAPIRET2 .
-  methods GET_LOGON_LANGUAGES
-    importing
-      !IV_LANGU type SYLANGU default SY-LANGU
-    exporting
-      !ET_LANG type ZIF_AL30_DATA=>TT_LOGON_LANG
-      !ET_R_LANG type ZIF_AL30_DATA=>TT_R_LANG .
-  methods GET_FIELDS_VIEW_DDIC
-    importing
-      !IV_NAME_VIEW type ANY
-      !IV_LANGU type SYLANGU default SY-LANGU
-      !IV_ADD_TEXTTABLE type SAP_BOOL default ABAP_FALSE
-      !IV_ALL_LANGUAGE type SAP_BOOL default ABAP_FALSE
-    exporting
-      !ES_DD02V type DD02V
-      !ET_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW
-      !ET_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW
-      !EV_TEXTTABLE type TABNAME
-      !ET_FIELDS_DDIC type DD03PTAB
-    raising
-      ZCX_AL30 .
-  methods TRANSPORT_VIEW
-    importing
-      !IS_VIEW type ZAL30_T_VIEW
-      !IT_FIELDS_VIEW type ZIF_AL30_DATA=>TT_FIELDS_VIEW
-      !IT_FIELDS_TEXT_VIEW type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW optional
-    exporting
-      !ES_RETURN type BAPIRET2
-    changing
-      !CV_ORDER type E070-TRKORR .
-  methods READ_SINGLE_VIEW_DDIC
-    importing
-      !IV_NAME_VIEW type ANY
-      !IV_LANGU type SYLANGU default SY-LANGU
-    exporting
-      !ES_DD02V type DD02V
-      !ET_DD03P type DD03PTAB
-      !ET_DD05M type DD05MTTYP
-    raising
-      ZCX_AL30 .
-protected section.
+    METHODS read_view
+      IMPORTING
+        !iv_name_view    TYPE tabname
+        !iv_all_language TYPE sap_bool DEFAULT abap_false
+        !iv_langu        TYPE sylangu DEFAULT sy-langu
+        !iv_read_ddic    TYPE sap_bool DEFAULT abap_true
+      EXPORTING
+        !ev_text_view    TYPE as4text
+        !es_return       TYPE bapiret2
+        !es_view         TYPE zal30_t_view
+        !et_fields       TYPE zif_al30_data=>tt_fields_view
+        !et_fields_text  TYPE zif_al30_data=>tt_fields_text_view
+        !et_fields_ddic  TYPE dd03ptab .
+    METHODS check_view_ddic
+      IMPORTING
+        !iv_name_view TYPE tabname
+      EXPORTING
+        !e_return     TYPE bapiret2
+        !e_text_view  TYPE as4text .
+    METHODS insert_view
+      IMPORTING
+        !iv_name_view          TYPE tabname
+        !iv_use_default_values TYPE sap_bool DEFAULT abap_false
+        !is_default_values     TYPE zif_al30_data=>ts_default_values_create OPTIONAL
+      EXPORTING
+        !es_return             TYPE bapiret2
+        !et_fields             TYPE zif_al30_data=>tt_fields_view
+        !et_fields_text        TYPE zif_al30_data=>tt_fields_text_view
+        !es_view               TYPE zal30_t_view
+        !et_fields_ddic        TYPE dd03ptab .
+    METHODS delete_view
+      IMPORTING
+        !iv_name_view    TYPE tabname
+      RETURNING
+        VALUE(rs_return) TYPE bapiret2 .
+    METHODS save_view
+      IMPORTING
+        !is_view         TYPE zal30_t_view
+        !it_fields       TYPE zif_al30_data=>tt_fields_view
+        !it_fields_text  TYPE zif_al30_data=>tt_fields_text_view OPTIONAL
+      RETURNING
+        VALUE(rs_return) TYPE bapiret2 .
+    METHODS check_view_insert
+      IMPORTING
+        !iv_name_view TYPE tabname
+      EXPORTING
+        !es_return    TYPE bapiret2
+        !ev_text_view TYPE as4text .
+    METHODS check_view_read
+      IMPORTING
+        !iv_name_view TYPE tabname
+      EXPORTING
+        !es_return    TYPE bapiret2
+        !ev_text_view TYPE as4text .
+    METHODS check_changes_dict
+      IMPORTING
+        !it_fields      TYPE zif_al30_data=>tt_fields_view OPTIONAL
+        !it_fields_text TYPE zif_al30_data=>tt_fields_text_view OPTIONAL
+        !is_view        TYPE zal30_t_view
+        !iv_langu       TYPE sylangu DEFAULT sy-langu
+      EXPORTING
+        !ev_diff_fields TYPE sap_bool
+        !ev_diff_text   TYPE sap_bool .
+    METHODS adjust_view_dictionary
+      IMPORTING
+        !iv_keep_text        TYPE sap_bool DEFAULT abap_true
+      EXPORTING
+        VALUE(es_return)     TYPE bapiret2
+        !ev_text_view        TYPE as4text
+      CHANGING
+        !ct_fields_view      TYPE zif_al30_data=>tt_fields_view
+        !ct_fields_text_view TYPE zif_al30_data=>tt_fields_text_view
+        !cs_view             TYPE zal30_t_view .
+    METHODS check_exit_class
+      IMPORTING
+        !iv_exit_class   TYPE zal30_e_exit_class
+      RETURNING
+        VALUE(rs_return) TYPE bapiret2 .
+    METHODS get_logon_languages
+      IMPORTING
+        !iv_langu  TYPE sylangu DEFAULT sy-langu
+      EXPORTING
+        !et_lang   TYPE zif_al30_data=>tt_logon_lang
+        !et_r_lang TYPE zif_al30_data=>tt_r_lang .
+    METHODS get_fields_view_ddic
+      IMPORTING
+        !iv_name_view     TYPE any
+        !iv_langu         TYPE sylangu DEFAULT sy-langu
+        !iv_add_texttable TYPE sap_bool DEFAULT abap_false
+        !iv_all_language  TYPE sap_bool DEFAULT abap_false
+      EXPORTING
+        !es_dd02v         TYPE dd02v
+        !et_fields        TYPE zif_al30_data=>tt_fields_view
+        !et_fields_text   TYPE zif_al30_data=>tt_fields_text_view
+        !ev_texttable     TYPE tabname
+        !et_fields_ddic   TYPE dd03ptab
+      RAISING
+        zcx_al30 .
+    METHODS transport_view
+      IMPORTING
+        !is_view             TYPE zal30_t_view
+        !it_fields_view      TYPE zif_al30_data=>tt_fields_view
+        !it_fields_text_view TYPE zif_al30_data=>tt_fields_text_view OPTIONAL
+      EXPORTING
+        !es_return           TYPE bapiret2
+      CHANGING
+        !cv_order            TYPE e070-trkorr .
+    METHODS read_single_view_ddic
+      IMPORTING
+        !iv_name_view TYPE any
+        !iv_langu     TYPE sylangu DEFAULT sy-langu
+      EXPORTING
+        !es_dd02v     TYPE dd02v
+        !et_dd03p     TYPE dd03ptab
+        !et_dd05m     TYPE dd05mttyp
+      RAISING
+        zcx_al30 .
+  PROTECTED SECTION.
 
 *"* protected components of class ZCL_AL30_CONF
 *"* do not include other source files here!!!
-  data MT_LOGON_LANG type ZIF_AL30_DATA=>TT_LOGON_LANG .
-  data MT_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW .
-  data MT_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW .
-  data MT_FIELDS_DDIC type DD03PTAB .
-  data MS_VIEW type ZAL30_T_VIEW .
+    DATA mt_logon_lang TYPE zif_al30_data=>tt_logon_lang .
+    DATA mt_fields TYPE zif_al30_data=>tt_fields_view .
+    DATA mt_fields_text TYPE zif_al30_data=>tt_fields_text_view .
+    DATA mt_fields_ddic TYPE dd03ptab .
+    DATA ms_view TYPE zal30_t_view .
 
-  methods SAVE_VIEW_DDIC
-    importing
-      !IS_VIEW type ZAL30_T_VIEW
-      !IT_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW
-      !IT_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW optional
-    raising
-      ZCX_AL30 .
-  methods READ_VIEW_DDIC_ALL_LANG
-    importing
-      !IV_NAME_VIEW type ANY
-      !IV_LANGU type SYLANGU default SY-LANGU
-    exporting
-      !ES_DD02V type DD02V
-      !ET_DD03P type DD03PTAB
-      !ET_DD05M type DD05MTTYP .
-  methods READ_TEXT_VIEW
-    importing
-      !IV_NAME_VIEW type TABNAME
-      !IV_ALL_LANGUAGE type SAP_BOOL default ABAP_FALSE
-      !IV_LANGU type SYLANGU default SY-LANGU
-    exporting
-      !ET_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW .
-  methods GET_TEXTTABLE_VIEW
-    importing
-      !IV_NAME_VIEW type ANY
-      !IV_LANGU type SYLANGU default SY-LANGU
-      !IV_ALL_LANGUAGE type SAP_BOOL default ABAP_FALSE
-    exporting
-      !EV_TEXTTABLE type TABNAME
-      !ET_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW
-      !ET_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW
-      !ET_FIELDS_DDIC type DD03PTAB .
-  methods ADJUST_FIELDS_TEXT
-    importing
-      !IT_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW
-      !IT_FIELDS_DDIC type DD03PTAB
-    changing
-      !CT_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW .
-  methods FILL_DEFAULT_VALUES_FIELDS
-    changing
-      !CS_FIELDS type ZIF_AL30_DATA=>TS_FIELDS_VIEW .
-  methods FILL_DEFAULT_VALUES_VIEW
-    importing
-      !IS_DEFAULT_VALUES type ZIF_AL30_DATA=>TS_DEFAULT_VALUES_CREATE optional
-      !IV_USE_DEFAULT_VALUES type SAP_BOOL default ABAP_FALSE
-    changing
-      !CS_VIEW type ZAL30_T_VIEW .
-  methods IS_FIELD_CHECKBOX
-    importing
-      !IV_ROLLNAME type DOMNAME
-    returning
-      value(RV_RESULT) type ZAL30_S_FIELDS_ATTR_GENERAL-CHECKBOX .
+    METHODS save_view_ddic
+      IMPORTING
+        !is_view        TYPE zal30_t_view
+        !it_fields      TYPE zif_al30_data=>tt_fields_view
+        !it_fields_text TYPE zif_al30_data=>tt_fields_text_view OPTIONAL
+      RAISING
+        zcx_al30 .
+    METHODS read_view_ddic_all_lang
+      IMPORTING
+        !iv_name_view TYPE any
+        !iv_langu     TYPE sylangu DEFAULT sy-langu
+      EXPORTING
+        !es_dd02v     TYPE dd02v
+        !et_dd03p     TYPE dd03ptab
+        !et_dd05m     TYPE dd05mttyp .
+    METHODS read_text_view
+      IMPORTING
+        !iv_name_view    TYPE tabname
+        !iv_all_language TYPE sap_bool DEFAULT abap_false
+        !iv_langu        TYPE sylangu DEFAULT sy-langu
+      EXPORTING
+        !et_fields_text  TYPE zif_al30_data=>tt_fields_text_view .
+    METHODS get_texttable_view
+      IMPORTING
+        !iv_name_view    TYPE any
+        !iv_langu        TYPE sylangu DEFAULT sy-langu
+        !iv_all_language TYPE sap_bool DEFAULT abap_false
+      EXPORTING
+        !ev_texttable    TYPE tabname
+        !et_fields       TYPE zif_al30_data=>tt_fields_view
+        !et_fields_text  TYPE zif_al30_data=>tt_fields_text_view
+        !et_fields_ddic  TYPE dd03ptab .
+    METHODS adjust_fields_text
+      IMPORTING
+        !it_fields      TYPE zif_al30_data=>tt_fields_view
+        !it_fields_ddic TYPE dd03ptab
+      CHANGING
+        !ct_fields_text TYPE zif_al30_data=>tt_fields_text_view .
+    METHODS fill_default_values_fields
+      CHANGING
+        !cs_fields TYPE zif_al30_data=>ts_fields_view .
+    METHODS fill_default_values_view
+      IMPORTING
+        !is_default_values     TYPE zif_al30_data=>ts_default_values_create OPTIONAL
+        !iv_use_default_values TYPE sap_bool DEFAULT abap_false
+      CHANGING
+        !cs_view               TYPE zal30_t_view .
+    METHODS is_field_checkbox
+      IMPORTING
+        !iv_rollname     TYPE domname
+      RETURNING
+        VALUE(rv_result) TYPE zal30_s_fields_attr_general-checkbox .
   PRIVATE SECTION.
 
 *"* private components of class ZCL_AL30_CONF
@@ -194,7 +194,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_AL30_CONF IMPLEMENTATION.
+CLASS zcl_al30_conf IMPLEMENTATION.
 
 
   METHOD adjust_fields_text.
@@ -587,6 +587,7 @@ CLASS ZCL_AL30_CONF IMPLEMENTATION.
 
   METHOD fill_default_values_fields.
     cs_fields-source_text = zif_al30_data=>cs_source_text-dictionary.
+    cs_fields-sel_screen = abap_true.
   ENDMETHOD.
 
 
@@ -821,6 +822,7 @@ CLASS ZCL_AL30_CONF IMPLEMENTATION.
           EXPORTING
             iv_name_view     = iv_name_view
             iv_add_texttable = abap_true
+            iv_all_language  = abap_true
           IMPORTING
             et_fields        = et_fields
             et_fields_text   = et_fields_text

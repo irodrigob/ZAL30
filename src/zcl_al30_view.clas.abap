@@ -8,6 +8,8 @@ CLASS zcl_al30_view DEFINITION
     TYPE-POOLS adbc .
 
     METHODS read_data
+      IMPORTING
+        is_filters TYPE zif_al30_data=>ts_filter_read_data
       EXPORTING
         !es_return TYPE bapiret2
       CHANGING
@@ -92,6 +94,7 @@ CLASS zcl_al30_view DEFINITION
         !it_fields_text_view TYPE zif_al30_data=>tt_fields_text_view
         !is_view             TYPE zal30_t_view
         !it_fields_ddic      TYPE dd03ptab .
+
   PROTECTED SECTION.
 *"* protected components of class ZCL_AL30_VIEW
 *"* do not include other source files here!!!
@@ -167,9 +170,10 @@ CLASS zcl_al30_view DEFINITION
       CHANGING
         VALUE(cs_fieldcat) TYPE lvc_s_fcat.
     METHODS create_sql_read
+      IMPORTING is_filters TYPE zif_al30_data=>ts_filter_read_data
       EXPORTING
-        et_cols TYPE adbc_column_tab
-        ev_sql  TYPE string.
+                et_cols    TYPE adbc_column_tab
+                ev_sql     TYPE string.
     METHODS create_join_sql_texttable
       RETURNING
         VALUE(rv_result) TYPE string.
@@ -226,6 +230,11 @@ CLASS zcl_al30_view DEFINITION
         iv_tabname     TYPE zal30_t_view-tabname
       EXPORTING
         VALUE(es_data) TYPE any.
+    METHODS create_where_sql
+      IMPORTING
+        is_filters      TYPE zif_al30_data=>ts_filter_read_data
+      RETURNING
+        VALUE(rv_where) TYPE string.
   PRIVATE SECTION.
 
 *"* private components of class ZCL_AL30_VIEW
@@ -431,8 +440,6 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
     CLEAR: et_cols.
 
-
-
     " Primero se rellena el nombre de las campos de la vist
     et_cols = VALUE #( FOR <ls_fields> IN mt_fields ( <ls_fields>-fieldname ) ).
 
@@ -457,8 +464,19 @@ CLASS zcl_al30_view IMPLEMENTATION.
       DATA(lv_union_texttable) = create_join_sql_texttable( ).
     ENDIF.
 
+    " Si los filtros están informados se genera la parte del where
+    IF is_filters-where_clauses IS NOT INITIAL.
+      DATA(lv_where) = create_where_sql( is_filters = is_filters ).
+    ENDIF.
+
     " Se monta la SQL
-    ev_sql = |{ ev_sql } { lv_sql_fields } FROM { ms_view-tabname } { zif_al30_data=>cs_alias_sql-view } { lv_union_texttable } ORDER BY { lv_order_fields }|.
+    ev_sql = |{ ev_sql } { lv_sql_fields } FROM { ms_view-tabname } { zif_al30_data=>cs_alias_sql-view } { lv_union_texttable } |.
+
+    " Se añade el where, si esta informado
+    ev_sql = COND #( WHEN lv_where IS NOT INITIAL THEN |{ ev_sql } WHERE { lv_where }| ELSE ev_sql ).
+
+    " Se añade el ORDER BY
+    ev_sql = |{ ev_sql } ORDER BY { lv_order_fields }|.
 
   ENDMETHOD.
 
@@ -962,10 +980,10 @@ CLASS zcl_al30_view IMPLEMENTATION.
     ASSIGN co_data->* TO <lt_datos>.
 
 * Se crea la sentencia SQL a ejecutar
-    create_sql_read( IMPORTING et_cols = DATA(lt_cols)
+    create_sql_read( EXPORTING is_filters = is_filters
+                     IMPORTING et_cols = DATA(lt_cols)
                                ev_sql = DATA(lv_sql) ).
 * NOTA IRB: Código de ejemplo extraido del report: DEMO_ADBC_QUERY
-
 
     TRY.
 
@@ -1524,4 +1542,49 @@ CLASS zcl_al30_view IMPLEMENTATION.
     SELECT SINGLE auth_user INTO rv_have FROM zal30_t_view WHERE tabname = iv_view.
 
   ENDMETHOD.
+
+
+  METHOD create_where_sql.
+
+    CLEAR rv_where.
+
+    LOOP AT is_filters-where_clauses ASSIGNING FIELD-SYMBOL(<ls_tables>).
+
+      " Primero se construye el alias segun la tabla
+      IF <ls_tables>-tablename = ms_view-tabname.
+        DATA(lv_alias) = |{ zif_al30_data=>cs_alias_sql-view }.|.
+      ELSE.
+        lv_alias = |{ zif_al30_data=>cs_alias_sql-texttable }.|.
+      ENDIF.
+      " Se recorre las líneas del where de la tabla y se concatena en una
+      DATA(lv_where) = ||.
+      LOOP AT <ls_tables>-where_tab ASSIGNING FIELD-SYMBOL(<ls_where>).
+
+        lv_where = COND #( WHEN lv_where IS INITIAL THEN <ls_where>-line ELSE |{ lv_where } { <ls_where>-line }| ).
+
+      ENDLOOP.
+
+      " En la tabla del where los operadores lógicos vienen con código SAP, esto se tiene que cambiar ara
+      " hacer compatible con la sentencia SQL.
+      " Es decir, los EQ pasan a ser =. Lo mismo para los NE, LT, GT, LE o GE.
+      REPLACE ALL OCCURRENCES OF ' NE ' IN lv_where WITH ' <> '.
+      REPLACE ALL OCCURRENCES OF ' EQ ' IN lv_where WITH ' = '.
+      REPLACE ALL OCCURRENCES OF ' LE ' IN lv_where WITH ' <= '.
+      REPLACE ALL OCCURRENCES OF ' LT ' IN lv_where WITH ' < '.
+      REPLACE ALL OCCURRENCES OF ' GE ' IN lv_where WITH ' >= '.
+      REPLACE ALL OCCURRENCES OF ' GT ' IN lv_where WITH ' > '.
+
+      " Ahora recorro los campos que son filtros para reemplazar su valor por un campo que es el alias+campo
+      LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WHERE sel_screen = abap_true.
+        DATA(lv_field) = |{ lv_alias }{ <ls_fields>-fieldname }|.
+        REPLACE ALL OCCURRENCES OF <ls_fields>-fieldname IN lv_where WITH lv_field.
+      ENDLOOP.
+
+      " Si el where es global esta en blanco se informa poniendo un parántesis inicial
+      rv_where = COND #( WHEN rv_where IS INITIAL THEN | { lv_where }| ELSE |{ rv_where } { lv_where }| ).
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
 ENDCLASS.

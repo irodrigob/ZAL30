@@ -394,16 +394,12 @@ FORM read_view  USING    pe_name_view
       et_fields_text_view_alv = mt_fields_text
       ev_text_view            = d_text_view.
 
+  " Guardo los textos originales de la vista para poder recuperar
+  " el texto en caso necesario
+  mt_fields_text_orig = mt_fields_text.
+
 * Ajuste de campos y textos de los listados
   PERFORM adjust_field_and_text.
-
-* Para cuando haya que desactivar campos segun el caso
-
-*DATA ls_celltab TYPE lvc_s_styl.
-*    CLEAR ls_celltab.
-*    ls_celltab-fieldname = 'TECH'.
-*    ls_celltab-style = cl_gui_alv_grid=>mc_style_disabled.
-*    APPEND ls_celltab TO ls_fields_alv-celltab.
 
 ENDFORM.                    " READ_VIEW
 *&---------------------------------------------------------------------*
@@ -737,6 +733,8 @@ FORM alv_fieldcat_gen .
   FIELD-SYMBOLS <ls_fieldcat> TYPE LINE OF lvc_t_fcat.
   DATA ls_fieldcat_gen TYPE LINE OF lvc_t_fcat.
 
+  CLEAR: mt_fieldcat_gen.
+
 * Recorro los campos y los voy colocando
   LOOP AT mt_fieldcat ASSIGNING <ls_fieldcat>.
 
@@ -785,19 +783,26 @@ FORM alv_fieldcat_gen .
         ls_fieldcat_gen-fieldname = <ls_fieldcat>-fieldname.
         ls_fieldcat_gen-checkbox = abap_true.
         ls_fieldcat_gen-coltext = TEXT-c01.
-        ls_fieldcat_gen-col_pos = 10.
+        ls_fieldcat_gen-col_pos = 12.
 
 * Indicador que es el campo idioma de la tabla de textos
       WHEN 'LANG_TEXTTABLE'.
         ls_fieldcat_gen-fieldname = <ls_fieldcat>-fieldname.
         ls_fieldcat_gen-checkbox = abap_true.
         ls_fieldcat_gen-coltext = TEXT-c02.
-        ls_fieldcat_gen-col_pos = 11.
+        ls_fieldcat_gen-col_pos = 13.
       WHEN 'CHECKBOX'. " Indicador si es un campo de checkbox
         ls_fieldcat_gen-fieldname = <ls_fieldcat>-fieldname.
         ls_fieldcat_gen-checkbox = abap_true.
         ls_fieldcat_gen-coltext = TEXT-c03.
-        ls_fieldcat_gen-col_pos = 12.
+        ls_fieldcat_gen-col_pos = 10.
+        ls_fieldcat_gen-edit = abap_true.
+
+      WHEN 'SEL_SCREEN'. " Indicador si se mostrará en la pantalla de selección
+        ls_fieldcat_gen-fieldname = <ls_fieldcat>-fieldname.
+        ls_fieldcat_gen-checkbox = abap_true.
+        ls_fieldcat_gen-coltext = TEXT-c04.
+        ls_fieldcat_gen-col_pos = 11.
         ls_fieldcat_gen-edit = abap_true.
 
     ENDCASE.
@@ -927,4 +932,31 @@ FORM transport_entries  USING pe_objfunc TYPE objfunc.
                   WITH ls_return-message_v1 ls_return-message_v2 ls_return-message_v3 ls_return-message_v4.
     ENDIF.
   ENDIF.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  syncro_field_texts_source
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM syncro_field_texts_source .
+
+* El objetivo es que todos los campos que tengan la opción de textos
+* del diccionario, ponerle el texto del diccionario
+  LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>)
+                    WHERE source_text = zif_al30_data=>cs_source_text-dictionary.
+    READ TABLE mt_fields_text ASSIGNING FIELD-SYMBOL(<ls_fields_text>) WITH KEY fieldname = <ls_fields>-fieldname
+                                                                                spras = mv_lang_vis.
+    IF sy-subrc = 0.
+      READ TABLE mt_fields_text_orig ASSIGNING FIELD-SYMBOL(<ls_fields_text_orig>)
+                                     WITH KEY fieldname = <ls_fields>-fieldname
+                                              spras = <ls_fields_text>-spras.
+      IF sy-subrc = 0.
+        <ls_fields>-reptext = <ls_fields_text>-reptext = <ls_fields_text_orig>-reptext.
+        <ls_fields_text>-scrtext_l = <ls_fields_text_orig>-scrtext_l.
+        <ls_fields_text>-scrtext_s = <ls_fields_text_orig>-scrtext_s.
+        <ls_fields_text>-scrtext_m = <ls_fields_text_orig>-scrtext_m.
+      ENDIF.
+    ENDIF.
+  ENDLOOP.
+
 ENDFORM.

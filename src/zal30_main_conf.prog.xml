@@ -6,7 +6,7 @@
     <NAME>ZAL30_MAIN_CONF</NAME>
     <SUBC>1</SUBC>
     <RSTAT>K</RSTAT>
-    <RLOAD>E</RLOAD>
+    <RLOAD>S</RLOAD>
     <FIXPT>X</FIXPT>
     <UCCHECK>X</UCCHECK>
    </PROGDIR>
@@ -15,12 +15,13 @@
      <HEADER>
       <PROGRAM>ZAL30_MAIN_CONF</PROGRAM>
       <SCREEN>9000</SCREEN>
-      <LANGUAGE>E</LANGUAGE>
+      <LANGUAGE>S</LANGUAGE>
       <DESCRIPT>Main screen</DESCRIPT>
       <TYPE>N</TYPE>
       <NEXTSCREEN>9000</NEXTSCREEN>
       <LINES>037</LINES>
-      <COLUMNS>127</COLUMNS>
+      <COLUMNS>128</COLUMNS>
+      <FIORIENLARGEOFF>X</FIORIENLARGEOFF>
      </HEADER>
      <CONTAINERS>
       <RPY_DYCATT>
@@ -31,7 +32,7 @@
        <TYPE>CUST_CTRL</TYPE>
        <NAME>TOOLBAR_FIELDS</NAME>
        <ELEMENT_OF>SCREEN</ELEMENT_OF>
-       <LINE>011</LINE>
+       <LINE>010</LINE>
        <COLUMN>003</COLUMN>
        <LENGTH>098</LENGTH>
        <HEIGHT>001</HEIGHT>
@@ -40,10 +41,10 @@
        <TYPE>STRIP_CTRL</TYPE>
        <NAME>TAB_FIELDS</NAME>
        <ELEMENT_OF>SCREEN</ELEMENT_OF>
-       <LINE>012</LINE>
+       <LINE>011</LINE>
        <COLUMN>002</COLUMN>
        <LENGTH>122</LENGTH>
-       <HEIGHT>025</HEIGHT>
+       <HEIGHT>026</HEIGHT>
        <C_RESIZE_V>X</C_RESIZE_V>
        <C_RESIZE_H>X</C_RESIZE_H>
        <C_LINE_MIN>006</C_LINE_MIN>
@@ -53,10 +54,10 @@
        <TYPE>SUBSCREEN</TYPE>
        <NAME>9001_SCA</NAME>
        <ELEMENT_OF>TAB_FIELDS</ELEMENT_OF>
-       <LINE>014</LINE>
+       <LINE>013</LINE>
        <COLUMN>003</COLUMN>
        <LENGTH>118</LENGTH>
-       <HEIGHT>022</HEIGHT>
+       <HEIGHT>023</HEIGHT>
        <C_RESIZE_V>X</C_RESIZE_V>
        <C_RESIZE_H>X</C_RESIZE_H>
        <C_LINE_MIN>003</C_LINE_MIN>
@@ -68,10 +69,10 @@
        <TYPE>SUBSCREEN</TYPE>
        <NAME>9002_SCA</NAME>
        <ELEMENT_OF>TAB_FIELDS</ELEMENT_OF>
-       <LINE>014</LINE>
+       <LINE>013</LINE>
        <COLUMN>003</COLUMN>
        <LENGTH>120</LENGTH>
-       <HEIGHT>022</HEIGHT>
+       <HEIGHT>023</HEIGHT>
        <C_RESIZE_V>X</C_RESIZE_V>
        <C_RESIZE_H>X</C_RESIZE_H>
        <C_LINE_MIN>003</C_LINE_MIN>
@@ -83,10 +84,10 @@
        <TYPE>SUBSCREEN</TYPE>
        <NAME>9003_SCA</NAME>
        <ELEMENT_OF>TAB_FIELDS</ELEMENT_OF>
-       <LINE>014</LINE>
+       <LINE>013</LINE>
        <COLUMN>003</COLUMN>
        <LENGTH>120</LENGTH>
-       <HEIGHT>022</HEIGHT>
+       <HEIGHT>023</HEIGHT>
        <C_RESIZE_V>X</C_RESIZE_V>
        <C_RESIZE_H>X</C_RESIZE_H>
        <C_LINE_MIN>003</C_LINE_MIN>
@@ -101,7 +102,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>TEXT</TYPE>
        <NAME>ZAL30_T_VIEW-TABNAME</NAME>
-       <TEXT>Table_Name_____</TEXT>
+       <TEXT>Tabla__________</TEXT>
        <LINE>001</LINE>
        <COLUMN>003</COLUMN>
        <LENGTH>015</LENGTH>
@@ -128,7 +129,6 @@
        <FORMAT>CHAR</FORMAT>
        <FROM_DICT>X</FROM_DICT>
        <PARAM_ID>DTB</PARAM_ID>
-       <FOREIGNKEY>X</FOREIGNKEY>
        <INPUT_FLD>X</INPUT_FLD>
        <OUTPUT_FLD>X</OUTPUT_FLD>
       </RPY_DYFATC>
@@ -230,7 +230,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>FRAME</TYPE>
        <NAME>FRAME_HEADER</NAME>
-       <TEXT>View_options_________________________________________________________________________________________________________________</TEXT>
+       <TEXT>Opciones_de_la_vista_________________________________________________________________________________________________________</TEXT>
        <LINE>004</LINE>
        <COLUMN>001</COLUMN>
        <LENGTH>126</LENGTH>
@@ -246,7 +246,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>CHECK</TYPE>
        <NAME>ZAL30_T_VIEW-TRANSPORT</NAME>
-       <TEXT>Content_Transport___</TEXT>
+       <TEXT>Trans._contenido____</TEXT>
        <LINE>005</LINE>
        <COLUMN>003</COLUMN>
        <LENGTH>022</LENGTH>
@@ -257,7 +257,6 @@
        <FORMAT>CHAR</FORMAT>
        <FROM_DICT>X</FROM_DICT>
        <MODIFIC>2</MODIFIC>
-       <FOREIGNKEY>X</FOREIGNKEY>
        <INPUT_FLD>X</INPUT_FLD>
        <OUTPUT_FLD>X</OUTPUT_FLD>
        <DICT_I_VAL>X</DICT_I_VAL>
@@ -267,7 +266,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>CHECK</TYPE>
        <NAME>ZAL30_T_VIEW-CHANGE_LOG</NAME>
-       <TEXT>Change_log__________</TEXT>
+       <TEXT>Log_Modificaciones__</TEXT>
        <LINE>005</LINE>
        <COLUMN>035</COLUMN>
        <LENGTH>022</LENGTH>
@@ -278,7 +277,6 @@
        <FORMAT>CHAR</FORMAT>
        <FROM_DICT>X</FROM_DICT>
        <MODIFIC>2</MODIFIC>
-       <FOREIGNKEY>X</FOREIGNKEY>
        <INPUT_FLD>X</INPUT_FLD>
        <OUTPUT_FLD>X</OUTPUT_FLD>
        <DICT_I_VAL>X</DICT_I_VAL>
@@ -288,7 +286,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>CHECK</TYPE>
        <NAME>ZAL30_T_VIEW-CHECK_AUTH_SAP</NAME>
-       <TEXT>SAP_Auth._Check_____</TEXT>
+       <TEXT>Cheq._Auto._SAP_____</TEXT>
        <LINE>005</LINE>
        <COLUMN>061</COLUMN>
        <LENGTH>022</LENGTH>
@@ -299,7 +297,6 @@
        <FORMAT>CHAR</FORMAT>
        <FROM_DICT>X</FROM_DICT>
        <MODIFIC>2</MODIFIC>
-       <FOREIGNKEY>X</FOREIGNKEY>
        <INPUT_FLD>X</INPUT_FLD>
        <OUTPUT_FLD>X</OUTPUT_FLD>
        <DICT_I_VAL>X</DICT_I_VAL>
@@ -309,7 +306,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>CHECK</TYPE>
        <NAME>ZAL30_T_VIEW-AUTH_USER</NAME>
-       <TEXT>User_Auth.__________</TEXT>
+       <TEXT>Autorización_Usuario</TEXT>
        <LINE>005</LINE>
        <COLUMN>089</COLUMN>
        <LENGTH>022</LENGTH>
@@ -320,7 +317,6 @@
        <FORMAT>CHAR</FORMAT>
        <FROM_DICT>X</FROM_DICT>
        <MODIFIC>2</MODIFIC>
-       <FOREIGNKEY>X</FOREIGNKEY>
        <INPUT_FLD>X</INPUT_FLD>
        <OUTPUT_FLD>X</OUTPUT_FLD>
        <DICT_I_VAL>X</DICT_I_VAL>
@@ -330,7 +326,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>CHECK</TYPE>
        <NAME>ZAL30_T_VIEW-AUTO_ADJUST</NAME>
-       <TEXT>Auto_adjust_________</TEXT>
+       <TEXT>Auto_Ajuste_________</TEXT>
        <LINE>006</LINE>
        <COLUMN>003</COLUMN>
        <LENGTH>022</LENGTH>
@@ -341,7 +337,6 @@
        <FORMAT>CHAR</FORMAT>
        <FROM_DICT>X</FROM_DICT>
        <MODIFIC>2</MODIFIC>
-       <FOREIGNKEY>X</FOREIGNKEY>
        <INPUT_FLD>X</INPUT_FLD>
        <OUTPUT_FLD>X</OUTPUT_FLD>
        <DICT_I_VAL>X</DICT_I_VAL>
@@ -351,7 +346,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>TEXT</TYPE>
        <NAME>ZAL30_T_VIEW-TEXTTABLE</NAME>
-       <TEXT>Text_Table__________</TEXT>
+       <TEXT>Tabla_Texto_________</TEXT>
        <LINE>007</LINE>
        <COLUMN>003</COLUMN>
        <LENGTH>020</LENGTH>
@@ -363,7 +358,6 @@
        <FROM_DICT>X</FROM_DICT>
        <MODIFIC>2</MODIFIC>
        <REQU_ENTRY>N</REQU_ENTRY>
-       <LABELLEFT>X</LABELLEFT>
       </RPY_DYFATC>
       <RPY_DYFATC>
        <CONT_TYPE>SCREEN</CONT_TYPE>
@@ -380,7 +374,6 @@
        <GROUP2>FFH</GROUP2>
        <FORMAT>CHAR</FORMAT>
        <FROM_DICT>X</FROM_DICT>
-       <FOREIGNKEY>X</FOREIGNKEY>
        <OUTPUT_FLD>X</OUTPUT_FLD>
        <OUTPUTONLY>X</OUTPUTONLY>
        <REQU_ENTRY>N</REQU_ENTRY>
@@ -419,7 +412,6 @@
        <GROUP2>FFH</GROUP2>
        <FORMAT>CHAR</FORMAT>
        <FROM_DICT>X</FROM_DICT>
-       <FOREIGNKEY>X</FOREIGNKEY>
        <INPUT_FLD>X</INPUT_FLD>
        <OUTPUT_FLD>X</OUTPUT_FLD>
       </RPY_DYFATC>
@@ -428,12 +420,12 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>FRAME</TYPE>
        <NAME>FRAME_FIELDS</NAME>
-       <TEXT>Field_information___________________________________________________________________________________________________________</TEXT>
-       <LINE>010</LINE>
+       <TEXT>Información_de_los_campos___________________________________________________________________________________________________</TEXT>
+       <LINE>009</LINE>
        <COLUMN>001</COLUMN>
        <LENGTH>125</LENGTH>
        <VISLENGTH>125</VISLENGTH>
-       <HEIGHT>028</HEIGHT>
+       <HEIGHT>029</HEIGHT>
        <GROUP1>EDI</GROUP1>
        <GROUP2>FFI</GROUP2>
        <FORMAT>CHAR</FORMAT>
@@ -957,93 +949,195 @@
     <item>
      <ID>I</ID>
      <KEY>B01</KEY>
-     <ENTRY>Adjusts the view with the dictionary</ENTRY>
-     <LENGTH>36</LENGTH>
+     <ENTRY>Ajustar vista con los datos del diccionario</ENTRY>
+     <LENGTH>68</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>B02</KEY>
-     <ENTRY>Check changes in dictionary</ENTRY>
-     <LENGTH>27</LENGTH>
+     <ENTRY>Comprobar cambios en el diccionario</ENTRY>
+     <LENGTH>70</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>B03</KEY>
-     <ENTRY>Change language</ENTRY>
+     <ENTRY>Cambiar idioma</ENTRY>
      <LENGTH>25</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>C01</KEY>
-     <ENTRY>Field Texttable</ENTRY>
-     <LENGTH>20</LENGTH>
+     <ENTRY>Cpo. Tabla Texto</ENTRY>
+     <LENGTH>19</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>C02</KEY>
-     <ENTRY>Field Lang. on Texttable</ENTRY>
-     <LENGTH>29</LENGTH>
+     <ENTRY>Cpo.Idioma en Tabla Texto</ENTRY>
+     <LENGTH>30</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>C03</KEY>
-     <ENTRY>Checkbox field</ENTRY>
-     <LENGTH>24</LENGTH>
+     <ENTRY>Cpo. Checkbox</ENTRY>
+     <LENGTH>21</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>C04</KEY>
+     <ENTRY>Pantalla Sel.</ENTRY>
+     <LENGTH>23</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>T03</KEY>
-     <ENTRY>Delete View</ENTRY>
-     <LENGTH>18</LENGTH>
+     <ENTRY>Borrar Vista</ENTRY>
+     <LENGTH>22</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>T04</KEY>
-     <ENTRY>Are you sure you want to delete?</ENTRY>
-     <LENGTH>32</LENGTH>
+     <ENTRY>¿Estas seguro que la quieres borrar?</ENTRY>
+     <LENGTH>70</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>T05</KEY>
-     <ENTRY>Yes, deleted!!</ENTRY>
-     <LENGTH>14</LENGTH>
+     <ENTRY>¡Si, borra!</ENTRY>
+     <LENGTH>23</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>T06</KEY>
-     <ENTRY>Sorry!!</ENTRY>
-     <LENGTH>7</LENGTH>
+     <ENTRY>¡Lo siento!</ENTRY>
+     <LENGTH>21</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>T07</KEY>
-     <ENTRY>Keep the text</ENTRY>
-     <LENGTH>13</LENGTH>
+     <ENTRY>Mantener textos</ENTRY>
+     <LENGTH>27</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>T08</KEY>
-     <ENTRY>Want to keep the texts of view?</ENTRY>
-     <LENGTH>31</LENGTH>
+     <ENTRY>¿Quieres mantener los textos de la vista?</ENTRY>
+     <LENGTH>78</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>T09</KEY>
-     <ENTRY>Yes</ENTRY>
-     <LENGTH>12</LENGTH>
+     <ENTRY>Si</ENTRY>
+     <LENGTH>14</LENGTH>
     </item>
     <item>
      <ID>I</ID>
      <KEY>T10</KEY>
      <ENTRY>No</ENTRY>
-     <LENGTH>26</LENGTH>
+     <LENGTH>25</LENGTH>
     </item>
     <item>
      <ID>R</ID>
-     <ENTRY>AL30 - Configuration of view</ENTRY>
-     <LENGTH>28</LENGTH>
+     <ENTRY>AL30 - Configuración de vistas</ENTRY>
+     <LENGTH>30</LENGTH>
     </item>
    </TPOOL>
+   <I18N_TPOOL>
+    <item>
+     <LANGUAGE>E</LANGUAGE>
+     <TEXTPOOL>
+      <item>
+       <ID>I</ID>
+       <KEY>B01</KEY>
+       <ENTRY>Adjusts the view with the dictionary</ENTRY>
+       <LENGTH>68</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>B02</KEY>
+       <ENTRY>Check changes in dictionary</ENTRY>
+       <LENGTH>70</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>B03</KEY>
+       <ENTRY>Change language</ENTRY>
+       <LENGTH>25</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>C01</KEY>
+       <ENTRY>Text Table Fld.</ENTRY>
+       <LENGTH>19</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>C02</KEY>
+       <ENTRY>Lang. Field in Texttable</ENTRY>
+       <LENGTH>30</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>C03</KEY>
+       <ENTRY>Checkbox field</ENTRY>
+       <LENGTH>21</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>T03</KEY>
+       <ENTRY>Delete View</ENTRY>
+       <LENGTH>22</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>T04</KEY>
+       <ENTRY>Are you sure you want to delete?</ENTRY>
+       <LENGTH>70</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>T05</KEY>
+       <ENTRY>Yes, deleted!!</ENTRY>
+       <LENGTH>23</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>T06</KEY>
+       <ENTRY>Sorry!!</ENTRY>
+       <LENGTH>21</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>T07</KEY>
+       <ENTRY>Keep the text</ENTRY>
+       <LENGTH>27</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>T08</KEY>
+       <ENTRY>Want to keep the texts of view?</ENTRY>
+       <LENGTH>78</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>T09</KEY>
+       <ENTRY>Sure!</ENTRY>
+       <LENGTH>14</LENGTH>
+      </item>
+      <item>
+       <ID>I</ID>
+       <KEY>T10</KEY>
+       <ENTRY>No, refresh!</ENTRY>
+       <LENGTH>25</LENGTH>
+      </item>
+      <item>
+       <ID>R</ID>
+       <ENTRY>Configuration view of AL30</ENTRY>
+       <LENGTH>70</LENGTH>
+      </item>
+     </TEXTPOOL>
+    </item>
+   </I18N_TPOOL>
   </asx:values>
  </asx:abap>
 </abapGit>

@@ -19,39 +19,42 @@ INTERFACE zif_al30_data
   TYPES: BEGIN OF ts_fields_view,
            tabname   TYPE tabname,
            fieldname TYPE fieldname.
-      INCLUDE TYPE zal30_s_fields_attr_general.
-      INCLUDE TYPE zal30_s_fields_info_ddic.
-  TYPES:
-  END OF ts_fields_view.
+           INCLUDE TYPE zal30_s_fields_attr_general.
+           INCLUDE TYPE zal30_s_fields_info_ddic.
+         TYPES:
+                END OF ts_fields_view.
   TYPES: tt_fields_view TYPE STANDARD TABLE OF ts_fields_view.
   TYPES: BEGIN OF ts_fields_text_view,
            tabname   TYPE tabname,
            fieldname TYPE fieldname,
            pos_ddic  TYPE tabfdpos,
            spras     TYPE spras.
-      INCLUDE TYPE zal30_s_fields_attr_text.
-  TYPES:
-  END OF ts_fields_text_view.
+           INCLUDE TYPE zal30_s_fields_attr_text.
+         TYPES:
+                END OF ts_fields_text_view.
   TYPES: tt_fields_text_view TYPE STANDARD TABLE OF ts_fields_text_view.
   TYPES: BEGIN OF ts_fields_view_alv.
-      INCLUDE TYPE ts_fields_view.
-  TYPES:
-    reptext TYPE reptext,
-    celltab TYPE lvc_t_styl,
-    END OF ts_fields_view_alv.
+           INCLUDE TYPE ts_fields_view.
+         TYPES:
+                  reptext TYPE reptext,
+                  celltab TYPE lvc_t_styl,
+                END OF ts_fields_view_alv.
   TYPES: tt_fields_view_alv TYPE STANDARD TABLE OF ts_fields_view_alv.
 
   TYPES: BEGIN OF ts_fields_text_view_alv.
-      INCLUDE TYPE ts_fields_text_view.
-  TYPES:
-    celltab TYPE lvc_t_styl,
-    END OF ts_fields_text_view_alv.
+           INCLUDE TYPE ts_fields_text_view.
+         TYPES:
+                  celltab TYPE lvc_t_styl,
+                END OF ts_fields_text_view_alv.
   TYPES: tt_fields_text_view_alv TYPE STANDARD TABLE OF ts_fields_text_view_alv.
   TYPES: BEGIN OF ts_default_values_create.
-      INCLUDE TYPE zal30_t_view.
-  TYPES:
-  END OF ts_default_values_create.
-
+           INCLUDE TYPE zal30_t_view.
+         TYPES:
+                END OF ts_default_values_create.
+  TYPES: BEGIN OF ts_filter_read_data,
+           fields_ranges       TYPE rsds_trange,
+           where_clauses       TYPE rsds_twhere,
+          END OF ts_filter_read_data.
 
   CONSTANTS: BEGIN OF cs_internal_tables,
                auth_user TYPE tabname VALUE 'ZAL30_T_USR_AUTH',
@@ -107,5 +110,8 @@ INTERFACE zif_al30_data
   CONSTANTS: BEGIN OF cs_datatype,
                mandt TYPE datatype_d  VALUE 'CLNT',
              END OF cs_datatype.
-
+  CONSTANTS: BEGIN OF cs_prog_tcode,
+               configuration TYPE sytcode VALUE 'ZAL30_MAIN_CONF',
+               view          TYPE sytcode VALUE 'ZAL30_MAIN_VIEW',
+             END OF cs_prog_tcode.
 ENDINTERFACE.

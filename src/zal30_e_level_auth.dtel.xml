@@ -4,31 +4,31 @@
   <asx:values>
    <DD04V>
     <ROLLNAME>ZAL30_E_LEVEL_AUTH</ROLLNAME>
-    <DDLANGUAGE>E</DDLANGUAGE>
+    <DDLANGUAGE>S</DDLANGUAGE>
     <DOMNAME>ZAL30_D_LEVEL_AUTH</DOMNAME>
     <HEADLEN>55</HEADLEN>
     <SCRLEN1>10</SCRLEN1>
     <SCRLEN2>20</SCRLEN2>
     <SCRLEN3>40</SCRLEN3>
-    <DDTEXT>AL30 - Level Authorization</DDTEXT>
-    <REPTEXT>Level Auth.</REPTEXT>
-    <SCRTEXT_S>LvlAuth</SCRTEXT_S>
-    <SCRTEXT_M>Level Auth.</SCRTEXT_M>
-    <SCRTEXT_L>Level Authorization</SCRTEXT_L>
-    <DTELMASTER>E</DTELMASTER>
+    <DDTEXT>AL30 - Nivel de autorización</DDTEXT>
+    <REPTEXT>Nivel Autorización</REPTEXT>
+    <SCRTEXT_S>Nv.Autor.</SCRTEXT_S>
+    <SCRTEXT_M>Nivel Autorización</SCRTEXT_M>
+    <SCRTEXT_L>Nivel Autorización</SCRTEXT_L>
+    <DTELMASTER>S</DTELMASTER>
     <REFKIND>D</REFKIND>
    </DD04V>
    <I18N_LANGS>
-    <LANGU>S</LANGU>
+    <LANGU>E</LANGU>
    </I18N_LANGS>
    <DD04_TEXTS>
     <item>
-     <DDLANGUAGE>S</DDLANGUAGE>
-     <DDTEXT>AL30 - Nivel de autorización</DDTEXT>
-     <REPTEXT>Nivel Autorización</REPTEXT>
-     <SCRTEXT_S>Nv.Autor.</SCRTEXT_S>
-     <SCRTEXT_M>Nivel Autorización</SCRTEXT_M>
-     <SCRTEXT_L>Nivel Autorización</SCRTEXT_L>
+     <DDLANGUAGE>E</DDLANGUAGE>
+     <DDTEXT>AL30 - Level Authorization</DDTEXT>
+     <REPTEXT>Level Authorization</REPTEXT>
+     <SCRTEXT_S>Lvl.Auth.</SCRTEXT_S>
+     <SCRTEXT_M>Level Authorization</SCRTEXT_M>
+     <SCRTEXT_L>Level Authorization</SCRTEXT_L>
     </item>
    </DD04_TEXTS>
   </asx:values>

@@ -36,7 +36,7 @@ FORM chequeo_vista.
 * Verifico que la vista/tabla sea correcta
   CALL METHOD mo_controller->check_view
     EXPORTING
-      iv_name_view = p_view
+      iv_name_view = zal30_t_view-tabname
       iv_operation = zif_al30_data=>cv_operation_read
     IMPORTING
       es_return    = ls_return.
@@ -44,7 +44,7 @@ FORM chequeo_vista.
   IF ls_return-type = zif_al30_data=>cs_msg_type-error.
     " Antes de dar el mensaje de error se mira si la tabla que se pide es la que gestiona la autorización
     " de los usuarios. Si es así, lo que haré es crearla de manera automática.
-    IF p_view = zif_al30_data=>cs_internal_tables-auth_user.
+    IF zal30_t_view-tabname = zif_al30_data=>cs_internal_tables-auth_user.
       PERFORM create_view_user_auth CHANGING ls_return.
     ENDIF.
     IF ls_return IS NOT INITIAL.
@@ -75,10 +75,10 @@ FORM chequeo_vista.
                                           IMPORTING ev_diff_fields = DATA(lv_diff_fields)
                                                     ev_diff_text = DATA(lv_diff_text) ).
   IF lv_diff_fields = abap_true OR lv_diff_text = abap_true.
-    IF mo_controller->view_have_auto_adjust( p_view ) = abap_true.
+    IF mo_controller->view_have_auto_adjust( ms_view-tabname ) = abap_true.
       mo_controller->auto_adjust_view_ddic(
         EXPORTING
-          iv_name_view = p_view
+          iv_name_view = ms_view-tabname
         IMPORTING
           es_return    = ls_return
           et_fields_view_alv = mt_fields
@@ -132,7 +132,19 @@ ENDFORM.                    " INICIALIZACION_DATOS
 *----------------------------------------------------------------------*
 FORM inicializacion_prog .
 * Creo el objeto que orquestará todas las operaciones
-  CREATE OBJECT mo_controller.
+  IF mo_controller IS NOT BOUND.
+    CREATE OBJECT mo_controller.
+  ENDIF.
+
+* Se informa el lenguaje de visualización
+  IF mv_lang_vis IS INITIAL.
+    mv_lang_vis = sy-langu.
+  ENDIF.
+
+* Transacción original que se llama
+  IF ms_conf_screen-origin_tcode IS INITIAL.
+    ms_conf_screen-origin_tcode = cl_dynpro=>get_current_transaction( ).
+  ENDIF.
 
 ENDFORM.                    " INICIALIZACION_PROG
 *&---------------------------------------------------------------------*
@@ -167,14 +179,27 @@ ENDFORM.                    " CATALOGO_CAMPOS_ALV
 *       text
 *----------------------------------------------------------------------*
 FORM read_data_view .
+  DATA ls_filter TYPE zif_al30_data=>ts_filter_read_data.
 
   CLEAR <it_datos>.
 
+
+  " Se lee los filtros de la tabla. No todas las tablas tendrán filtros porque depende
+  " de su configuración.
+  READ TABLE ms_conf_screen-sel_screen ASSIGNING FIELD-SYMBOL(<ls_sel_screen>)
+                                       WITH KEY tabname = ms_view-tabname.
+  IF sy-subrc = 0.
+    ls_filter-fields_ranges = <ls_sel_screen>-fields_ranges.
+    ls_filter-where_clauses = <ls_sel_screen>-where_clauses.
+  ENDIF.
+
   CALL METHOD mo_controller->read_data
+    EXPORTING
+      is_filters = ls_filter
     IMPORTING
-      es_return = DATA(ls_return)
+      es_return  = DATA(ls_return)
     CHANGING
-      co_data   = mo_datos.
+      co_data    = mo_datos.
 
 * Si hay un mensaje de error lo devuelvo como warning para que no salga del programa,
 * pero que se vea bien.
@@ -257,11 +282,11 @@ FORM create_it_data_view .
 
 ENDFORM.                    " CREATE_IT_DATA_VIEW
 *&---------------------------------------------------------------------*
-*&      Form  READ_CREATE_DATA_VIEW
+*&      Form  CREATE_DATA_VIEW
 *&---------------------------------------------------------------------*
 *       text
 *----------------------------------------------------------------------*
-FORM read_create_data_view .
+FORM create_data_view .
 
 * Si la tabla tiene la opcion de grabar de entradas y el sistema permite transportar
 * entonces se solicitará orden de tranporte.
@@ -288,10 +313,7 @@ FORM read_create_data_view .
 * Leo el catalogo de campos
   PERFORM catalogo_campos_alv.
 
-* Lectura de datos de la vista
-  PERFORM read_data_view.
-
-ENDFORM.                    " READ_CREATE_DATA_VIEW
+ENDFORM.                    " CREATE_DATA_VIEW
 *&---------------------------------------------------------------------*
 *&      Form  DATA_CHANGED
 *&---------------------------------------------------------------------*
@@ -710,8 +732,8 @@ FORM check_autorization CHANGING ps_auth TYPE sap_bool
   ps_mode = zif_al30_data=>cv_mode_change. " Puede modificar
 
 * Se mira si tiene control de autorización por usuario
-  IF mo_controller->view_have_user_auth( p_view ) = abap_true.
-    DATA(lv_level_auth) = mo_controller->get_level_auth_view( iv_user = sy-uname iv_view = p_view ).
+  IF mo_controller->view_have_user_auth( zal30_t_view-tabname ) = abap_true.
+    DATA(lv_level_auth) = mo_controller->get_level_auth_view( iv_user = sy-uname iv_view = ms_view-tabname ).
 
     " Segun el nivel de autorización cambiará que es lo que puede hacer.
     CASE lv_level_auth.
@@ -725,12 +747,12 @@ FORM check_autorization CHANGING ps_auth TYPE sap_bool
   ENDIF.
 
   IF ps_auth = abap_true.
-    IF mo_controller->view_have_sap_auth( p_view ).
+    IF mo_controller->view_have_sap_auth( zal30_t_view-tabname ).
 
       TRY.
           CALL METHOD mo_controller->check_authorization
             EXPORTING
-              iv_view_name   = p_view
+              iv_view_name   = zal30_t_view-tabname
               iv_view_action = COND #( WHEN ps_mode = zif_al30_data=>cv_mode_change THEN zif_al30_data=>cs_action_auth-update ELSE zif_al30_data=>cs_action_auth-show ).
 
         CATCH zcx_al30 .
@@ -934,7 +956,7 @@ FORM create_view_user_auth CHANGING ps_return TYPE bapiret2.
 
   mo_controller->create_view(
     EXPORTING
-      iv_name_view            =  p_view
+      iv_name_view            = ms_view-tabname
       iv_use_default_values   = abap_true
       is_default_values       = ls_default_values
   IMPORTING
@@ -958,7 +980,7 @@ FORM read_view .
 * Leo los datos de la vista
   CALL METHOD mo_controller->read_view_alv
     EXPORTING
-      iv_name_view            = p_view
+      iv_name_view            = zal30_t_view-tabname
       iv_all_language         = abap_false
     IMPORTING
       ev_text_view            = mv_text_view
@@ -966,6 +988,9 @@ FORM read_view .
       et_fields_view_alv      = mt_fields
       et_fields_text_view_alv = mt_fields_text
       et_fields_ddic          = mt_fields_ddic.
+
+  " Se ajuste el texto de cabecera de la tabla de campos por el valor de la tabla de textos
+  PERFORM text_heading_fields.
 
 ENDFORM.
 *&---------------------------------------------------------------------*
@@ -1010,4 +1035,141 @@ FORM adjust_data_post_read .
 
   ENDLOOP.
 
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form SELECTION_SCREEN
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+FORM selection_screen .
+  DATA lt_fields TYPE rsdsfields_t.
+  DATA lt_fields_text TYPE wcb_rsdstexts_tab.
+  DATA lt_fields_ranges TYPE rsds_trange.
+
+  IF ms_view-tabname IS NOT INITIAL.
+
+    " Se mira si para la tabla ya existe una configuración de pantalla de selección. Esto permite no crear
+    " id de selección cada vez que se cambia la tabla. Si ya se ha creado en su momento se usa el mismo ID.
+    " creo que esto evitará errores ya que esas pantalla se tienen que crear de manera dinámica
+    READ TABLE ms_conf_screen-sel_screen ASSIGNING FIELD-SYMBOL(<ls_sel_screen>) WITH KEY tabname = ms_view-tabname.
+    IF sy-subrc NE 0.
+      APPEND INITIAL LINE TO ms_conf_screen-sel_screen ASSIGNING <ls_sel_screen>.
+      <ls_sel_screen>-tabname = ms_view-tabname.
+
+      " Se construyen los campos que tienen marcado la opción de pantalla de selección
+      " El tipo de campo será 'S' para indicar que es un select options
+      LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WHERE sel_screen = abap_true
+                                                                  AND tech = abap_false. " Los técnicos no se muestran
+
+        " La tabla cambia si el campo viene de la tabla de textos o de la tabla principal
+        DATA(lv_tabname) = COND #( WHEN <ls_fields>-field_texttable = abap_true THEN ms_view-texttable ELSE <ls_fields>-tabname ).
+
+        INSERT VALUE #( tablename = lv_tabname fieldname = <ls_fields>-fieldname
+                        type = 'S' ) INTO TABLE <ls_sel_screen>-fields.
+        INSERT VALUE #( tablename = lv_tabname fieldname = <ls_fields>-fieldname text = <ls_fields>-reptext )
+               INTO TABLE <ls_sel_screen>-fields_text.
+      ENDLOOP.
+
+    ENDIF.
+
+    IF <ls_sel_screen>-fields IS NOT INITIAL.
+
+      IF <ls_sel_screen>-selid IS INITIAL.
+
+        CALL FUNCTION 'FREE_SELECTIONS_INIT'
+          EXPORTING
+            kind                     = 'F' " Los campos se pasan en el fichero en el parámetro FIELDS_TAB
+          IMPORTING
+            selection_id             = <ls_sel_screen>-selid
+          TABLES
+            fields_tab               = <ls_sel_screen>-fields[]
+            field_texts              = <ls_sel_screen>-fields_text[]
+          EXCEPTIONS
+            fields_incomplete        = 01
+            fields_no_join           = 02
+            field_not_found          = 03
+            no_tables                = 04
+            table_not_found          = 05
+            expression_not_supported = 06
+            incorrect_expression     = 07
+            illegal_kind             = 08
+            area_not_found           = 09
+            inconsistent_area        = 10
+            kind_f_no_fields_left    = 11
+            kind_f_no_fields         = 12
+            too_many_fields          = 13
+            dup_field                = 14
+            field_no_type            = 15
+            field_ill_type           = 16
+            dup_event_field          = 17
+            node_not_in_ldb          = 18
+            area_no_field            = 19
+            OTHERS                   = 20.
+
+      ENDIF.
+
+      IF <ls_sel_screen>-selid IS NOT INITIAL.
+        CALL FUNCTION 'FREE_SELECTIONS_DIALOG'
+          EXPORTING
+            selection_id    = <ls_sel_screen>-selid
+            tree_visible    = space
+            as_subscreen    = abap_true
+            no_frame        = abap_false
+          IMPORTING
+            where_clauses   = <ls_sel_screen>-where_clauses[]
+            field_ranges    = <ls_sel_screen>-fields_ranges[]
+          TABLES
+            fields_tab      = <ls_sel_screen>-fields[]
+          EXCEPTIONS
+            internal_error  = 1
+            no_action       = 2
+            selid_not_found = 3
+            illegal_status  = 4
+            OTHERS          = 5.
+
+      ENDIF.
+    ENDIF.
+  ENDIF.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form PROCESS_LOAD_VIEW_DYNPRO
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+FORM process_load_view_dynpro .
+
+* Se comprueba la validez de la vista
+  PERFORM chequeo_vista.
+
+* Inicialización de datos
+  PERFORM inicializacion_datos.
+
+* Creacion de objetos de la vista
+  PERFORM create_data_view.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form TEXT_HEADING_FIELDS
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+FORM text_heading_fields .
+  " Actualizo el texto del campo segun el origen del texto del campo
+  LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>).
+
+    READ TABLE mt_fields_text ASSIGNING FIELD-SYMBOL(<ls_fields_text>)
+                           WITH KEY fieldname = <ls_fields>-fieldname
+                                    spras = mv_lang_vis.
+
+    IF sy-subrc = 0.
+      <ls_fields>-reptext = <ls_fields_text>-reptext.
+    ENDIF.
+
+    " Si no hay texto, se pone el nombre del campo
+    IF <ls_fields>-reptext IS INITIAL.
+      <ls_fields>-reptext = <ls_fields>-fieldname.
+    ENDIF.
+
+  ENDLOOP.
 ENDFORM.

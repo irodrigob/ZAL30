@@ -73,6 +73,8 @@ CLASS zcl_al30_controller DEFINITION
       RETURNING
         VALUE(rs_return)         TYPE bapiret2 .
     METHODS read_data
+      IMPORTING
+        is_filters TYPE zif_al30_data=>ts_filter_read_data
       EXPORTING
         !es_return TYPE bapiret2
       CHANGING
@@ -217,6 +219,7 @@ CLASS zcl_al30_controller DEFINITION
         !it_fields_text_view_alv TYPE zif_al30_data=>tt_fields_text_view_alv
         !it_fields_ddic          TYPE dd03ptab
         !is_view                 TYPE zal30_t_view .
+
   PROTECTED SECTION.
 *"* private components of class ZCL_AL30_CONTROLLER
 *"* do not include other source files here!!!
@@ -548,8 +551,9 @@ CLASS zcl_al30_controller IMPLEMENTATION.
 
     CLEAR es_return.
 
-    mo_view->read_data( IMPORTING es_return = es_return
-                                     CHANGING co_data = co_data ).
+    mo_view->read_data( EXPORTING is_filters = is_filters
+                        IMPORTING es_return = es_return
+                        CHANGING co_data = co_data ).
 
   ENDMETHOD.
 
@@ -731,4 +735,6 @@ CLASS zcl_al30_controller IMPLEMENTATION.
   METHOD view_have_user_auth.
     rv_have = mo_view->view_have_user_auth( iv_view ).
   ENDMETHOD.
+
+
 ENDCLASS.

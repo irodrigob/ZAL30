@@ -45,7 +45,7 @@ MODULE user_command_9000 INPUT.
     WHEN 'DELE'. " Delete view
       PERFORM delete_view.
 
-    WHEN 'DICH'. " Display <-> Change - 29/07/2019 El botón se deja como invisible, no tiene sentido que este.
+    WHEN 'DICH'. " Display <-> Change 29/07/2019 El botón se deja como invisible, no tiene sentido que este.
 
       PERFORM display_change.
 

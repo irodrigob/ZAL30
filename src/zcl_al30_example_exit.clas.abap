@@ -26,22 +26,11 @@ CLASS ZCL_AL30_EXAMPLE_EXIT IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD zif_al30_exit_class~exit_before_process_data.
-
+  METHOD zif_al30_exit_class~exit_before_read_data.
   ENDMETHOD.
 
 
   METHOD zif_al30_exit_class~exit_before_save_data.
-
-  ENDMETHOD.
-
-
-  METHOD zif_al30_exit_class~exit_check_auth_data_record.
-
-  ENDMETHOD.
-
-
-  METHOD zif_al30_exit_class~exit_in_process_data_record.
 
   ENDMETHOD.
 
