@@ -194,7 +194,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_al30_conf IMPLEMENTATION.
+CLASS ZCL_AL30_CONF IMPLEMENTATION.
 
 
   METHOD adjust_fields_text.
@@ -587,7 +587,10 @@ CLASS zcl_al30_conf IMPLEMENTATION.
 
   METHOD fill_default_values_fields.
     cs_fields-source_text = zif_al30_data=>cs_source_text-dictionary.
-    cs_fields-sel_screen = abap_true.
+
+    IF cs_fields-tech = abap_false. " Los campos técnicos no se mostrarán en la pantalla selección
+      cs_fields-sel_screen = abap_true.
+    ENDIF.
   ENDMETHOD.
 
 
