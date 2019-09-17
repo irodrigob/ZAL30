@@ -9,6 +9,7 @@
 MODULE user_command_9000 INPUT.
   CASE mv_okcode_9000.
     WHEN 'EXECUTE'. " Se pasa a la pantalla de resultados
+      mv_read_data_view = abap_true. " Indica que se quiere leer los datos
       SET SCREEN 9001. LEAVE SCREEN.
   ENDCASE.
 ENDMODULE.                 " USER_COMMAND_9000  INPUT
@@ -89,22 +90,24 @@ ENDMODULE.
 *&---------------------------------------------------------------------*
 MODULE read_data_view OUTPUT.
 
+* Solo se leen los datos si la variable global así lo indica.
+  IF mv_read_data_view = abap_true.
+
+    mv_read_data_view = abap_false. " Se marca a false para que no se vuelvan a releer los datos
+
 * Obtención de los datos introducidos en la pantalla de selección
-  PERFORM selection_screen.
+    PERFORM selection_screen.
 
 * Lectura de datos de la vista
-  PERFORM read_data_view.
+    PERFORM read_data_view.
 
-  IF <it_datos> IS ASSIGNED.
-    IF <it_datos> IS INITIAL.
-      MESSAGE s044 WITH ms_view-tabname.
-
-      " Se vuelve a la pantalla principal si no hay datos.
-      SET SCREEN 9000. LEAVE SCREEN.
-
+* Si no hay datos se muestra un mensaje pero se continua para que muestren los datos
+    IF <it_datos> IS ASSIGNED.
+      IF <it_datos> IS INITIAL.
+        MESSAGE s044 WITH ms_view-tabname.
+      ENDIF.
     ENDIF.
   ENDIF.
-
 ENDMODULE.
 *&---------------------------------------------------------------------*
 *& Module SELECTION_SCREEN OUTPUT

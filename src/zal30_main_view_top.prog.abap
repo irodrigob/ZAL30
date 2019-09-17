@@ -94,6 +94,9 @@ DATA ms_conf_screen TYPE ts_conf_screen.
 " Lenguaje de visualización
 DATA mv_lang_vis TYPE sylangu.
 
+* Leer datos de la vista
+DATA mv_read_data_view TYPE sap_bool.
+
 *----------------------------------------------------------------------*
 * Class
 *----------------------------------------------------------------------*
