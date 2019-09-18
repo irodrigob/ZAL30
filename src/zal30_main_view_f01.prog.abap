@@ -144,6 +144,11 @@ FORM inicializacion_prog .
 * Transacción original que se llama
   IF ms_conf_screen-origin_tcode IS INITIAL.
     ms_conf_screen-origin_tcode = cl_dynpro=>get_current_transaction( ).
+    " Se busca la descripción de la transacción original
+    SELECT SINGLE ttext INTO ms_conf_screen-origin_tcode_text
+           FROM tstct
+           WHERE sprsl = sy-langu
+                 AND tcode = ms_conf_screen-origin_tcode.
   ENDIF.
 
 ENDFORM.                    " INICIALIZACION_PROG
@@ -879,11 +884,12 @@ FORM verify_change_row_data USING  pe_modif TYPE lvc_s_modi
                             ps_row_data TYPE any
                      CHANGING ps_data_changed TYPE REF TO cl_alv_changed_data_protocol
                                ps_datos_validos TYPE sap_bool.
-  DATA lo_wa TYPE REF TO data.
-  DATA ls_return TYPE bapiret2.
   FIELD-SYMBOLS <ls_row_data> TYPE any.
   FIELD-SYMBOLS <ls_fieldcat> TYPE lvc_s_fcat.
   FIELD-SYMBOLS <field> TYPE any.
+  FIELD-SYMBOLS: <styles> TYPE lvc_t_styl.
+  DATA lo_wa TYPE REF TO data.
+  DATA ls_return TYPE bapiret2.
 
 
 * Creo una estructura identifica a la vista que se trata. * Creo una estructura identifica a los datos que se están tratando.
@@ -944,6 +950,18 @@ FORM verify_change_row_data USING  pe_modif TYPE lvc_s_modi
       ENDIF.
 
     ENDLOOP.
+
+* Ahora se actualiza los estilos por si se hubiesen modificado en la exit
+    ASSIGN COMPONENT zif_al30_data=>cv_field_style OF STRUCTURE <ls_row_data> TO <styles>.
+    IF sy-subrc = 0.
+      LOOP AT <styles> ASSIGNING FIELD-SYMBOL(<style>).
+        CALL METHOD ps_data_changed->modify_style
+          EXPORTING
+            i_row_id    = pe_modif-row_id
+            i_fieldname = <style>-fieldname
+            i_style     = <style>-style.
+      ENDLOOP.
+    ENDIF.
   ENDIF.
 
 ENDFORM.                    " VERIFY_CHANGE_ROW_DATA
@@ -1059,8 +1077,7 @@ FORM selection_screen .
 
       " Se construyen los campos que tienen marcado la opción de pantalla de selección
       " El tipo de campo será 'S' para indicar que es un select options
-      LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WHERE sel_screen = abap_true
-                                                                  AND tech = abap_false. " Los técnicos no se muestran
+      LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WHERE sel_screen = abap_true.
 
         " La tabla cambia si el campo viene de la tabla de textos o de la tabla principal
         DATA(lv_tabname) = COND #( WHEN <ls_fields>-field_texttable = abap_true THEN ms_view-texttable ELSE <ls_fields>-tabname ).

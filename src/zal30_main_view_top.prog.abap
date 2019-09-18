@@ -32,8 +32,9 @@ TYPES tt_sel_screen TYPE STANDARD TABLE OF ts_sel_screen WITH EMPTY KEY.
 * Tipo que contiene los campos para controlar la configuración
 * y determinados datos de la dynpro
 TYPES: BEGIN OF ts_conf_screen,
-         sel_screen   TYPE tt_sel_screen,
-         origin_tcode TYPE sytcode,
+         sel_screen        TYPE tt_sel_screen,
+         origin_tcode      TYPE sytcode,
+         origin_tcode_text TYPE string,
        END OF ts_conf_screen.
 
 *----------------------------------------------------------------------*
@@ -66,6 +67,9 @@ DATA mv_okcode_9000 TYPE sy-ucomm.
 
 * boton pulsado en dynpro 9001, la del listado.
 DATA mv_okcode_9001 TYPE sy-ucomm.
+
+* boton pulsado en dynpro 9002, la del listado.
+DATA mv_okcode_9002 TYPE sy-ucomm.
 
 * Modo de visualización del programa.
 DATA mv_mode TYPE char1.

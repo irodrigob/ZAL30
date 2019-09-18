@@ -1,89 +1,89 @@
-class ZCL_AL30_UTIL definition
-  public
-  final
-  create public .
+CLASS zcl_al30_util DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
 
-  types:
+    TYPES:
 *"* public components of class ZCL_AL30_DATA
 *"* do not include other source files here!!!
-    tt_keys TYPE STANDARD TABLE OF trobj_name .
+      tt_keys TYPE STANDARD TABLE OF trobj_name .
 
-  class-methods FILL_RETURN
-    importing
-      !IV_TYPE type ANY
-      !IV_NUMBER type ANY
-      !IV_MESSAGE_V1 type ANY optional
-      !IV_MESSAGE_V2 type ANY optional
-      !IV_MESSAGE_V3 type ANY optional
-      !IV_MESSAGE_V4 type ANY optional
-      !IV_ID type SYMSGID optional
-    returning
-      value(RS_RETURN) type BAPIRET2 .
-  class-methods F4_VIEW
-    importing
-      !IV_PROGRAM type SYREPID
-      !IV_DYNPRO type SYDYNNR
-      !IV_DYNPROFIELD type HELP_INFO-DYNPROFLD
-    exporting
-      value(EV_VIEW) type TABNAME
-    raising
-      ZCX_AL30 .
-  class-methods GET_FCAT_CONTROL_EDIT_VIEW
-    returning
-      value(RT_FIELDCAT_CONTROL) type LVC_T_FCAT .
-  class-methods GET_KEY_VALUE_DOMAIN
-    importing
-      !IV_DOMAIN type DOMNAME
-      !IV_LANGU type SYLANGU default SY-LANGU
-    exporting
-      !ET_VALUES type ZIF_AL30_DATA=>TT_KEY_VALUE .
-  class-methods GET_FIELDS_STRUC
-    importing
-      !IV_STRUC type ANY
-    returning
-      value(RT_FIELDS) type STRING_T .
-  class-methods ALLOWED_TRANSPORT
-    returning
-      value(RV_ALLOWED) type SAP_BOOL .
-  class-methods ALLOWED_MODIFY_DATA
-    returning
-      value(RV_ALLOWED) type SAP_BOOL .
-  class-methods CHECK_SELECT_TRANSPORT_ORDER
-    importing
-      !IV_CATEGORY type E070-KORRDEV
-    exporting
-      !ES_RETURN type BAPIRET2
-    changing
-      !CV_ORDER type E070-TRKORR .
-  class-methods CHECK_TRANSPORT_ORDER
-    importing
-      !IV_CATEGORY type E070-KORRDEV
-    exporting
-      !ES_RETURN type BAPIRET2
-    changing
-      !CV_ORDER type E070-TRKORR .
-  class-methods VALUES_ITAB_2_TRANSPORT_ORDER
-    importing
-      !IT_VALUES type ANY TABLE
-      !IV_TABNAME type TABNAME
-      !IV_OBJFUNC type OBJFUNC default ZIF_AL30_DATA=>CS_ORDER_OBJFUNC-KEY_VALUE
-    exporting
-      !ES_RETURN type BAPIRET2
-    changing
-      !CV_ORDER type E070-TRKORR .
-  class-methods TRANSPORT_ENTRIES
-    importing
-      !IV_TABNAME type TABNAME
-      !IT_KEYS type TT_KEYS
-      !IV_OBJFUNC type OBJFUNC
-    exporting
-      !ES_RETURN type BAPIRET2
-    changing
-      !CV_ORDER type E070-TRKORR
-    raising
-      ZCX_AL30 .
+    CLASS-METHODS fill_return
+      IMPORTING
+        !iv_type         TYPE any
+        !iv_number       TYPE any
+        !iv_message_v1   TYPE any OPTIONAL
+        !iv_message_v2   TYPE any OPTIONAL
+        !iv_message_v3   TYPE any OPTIONAL
+        !iv_message_v4   TYPE any OPTIONAL
+        !iv_id           TYPE symsgid OPTIONAL
+      RETURNING
+        VALUE(rs_return) TYPE bapiret2 .
+    CLASS-METHODS f4_view
+      IMPORTING
+        !iv_program     TYPE syrepid
+        !iv_dynpro      TYPE sydynnr
+        !iv_dynprofield TYPE help_info-dynprofld
+      EXPORTING
+        VALUE(ev_view)  TYPE tabname
+      RAISING
+        zcx_al30 .
+    CLASS-METHODS get_fcat_control_edit_view
+      RETURNING
+        VALUE(rt_fieldcat_control) TYPE lvc_t_fcat .
+    CLASS-METHODS get_key_value_domain
+      IMPORTING
+        !iv_domain TYPE domname
+        !iv_langu  TYPE sylangu DEFAULT sy-langu
+      EXPORTING
+        !et_values TYPE zif_al30_data=>tt_key_value .
+    CLASS-METHODS get_fields_struc
+      IMPORTING
+        !iv_struc        TYPE any
+      RETURNING
+        VALUE(rt_fields) TYPE string_t .
+    CLASS-METHODS allowed_transport
+      RETURNING
+        VALUE(rv_allowed) TYPE sap_bool .
+    CLASS-METHODS allowed_modify_data
+      RETURNING
+        VALUE(rv_allowed) TYPE sap_bool .
+    CLASS-METHODS check_select_transport_order
+      IMPORTING
+        !iv_category TYPE e070-korrdev
+      EXPORTING
+        !es_return   TYPE bapiret2
+      CHANGING
+        !cv_order    TYPE e070-trkorr .
+    CLASS-METHODS check_transport_order
+      IMPORTING
+        !iv_category TYPE e070-korrdev
+      EXPORTING
+        !es_return   TYPE bapiret2
+      CHANGING
+        !cv_order    TYPE e070-trkorr .
+    CLASS-METHODS values_itab_2_transport_order
+      IMPORTING
+        !it_values  TYPE ANY TABLE
+        !iv_tabname TYPE tabname
+        !iv_objfunc TYPE objfunc DEFAULT zif_al30_data=>cs_order_objfunc-key_value
+      EXPORTING
+        !es_return  TYPE bapiret2
+      CHANGING
+        !cv_order   TYPE e070-trkorr .
+    CLASS-METHODS transport_entries
+      IMPORTING
+        !iv_tabname TYPE tabname
+        !it_keys    TYPE tt_keys
+        !iv_objfunc TYPE objfunc
+      EXPORTING
+        !es_return  TYPE bapiret2
+      CHANGING
+        !cv_order   TYPE e070-trkorr
+      RAISING
+        zcx_al30 .
   PROTECTED SECTION.
 
     CLASS-METHODS conv_data_2_keys_trkorr
@@ -111,7 +111,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_AL30_UTIL IMPLEMENTATION.
+CLASS zcl_al30_util IMPLEMENTATION.
 
 
   METHOD allowed_modify_data.
@@ -536,21 +536,42 @@ CLASS ZCL_AL30_UTIL IMPLEMENTATION.
           textid = zcx_al30=>invalid_params.
     ENDIF.
 
-
-* Se llenan los datos de la cabecera
-    APPEND VALUE #( pgmid = 'R3TR' object = 'TABU' obj_name = iv_tabname objfunc = iv_objfunc ) TO lt_e071.
-
-* Se Añade las entradas de los campos clave
-    LOOP AT it_keys ASSIGNING FIELD-SYMBOL(<ls_key>).
-      APPEND VALUE #( pgmid = 'R3TR' object = 'TABU' mastertype = 'TABU' mastername = iv_tabname objname = iv_tabname tabkey = <ls_key>  ) TO lt_e071k.
-    ENDLOOP.
-
-*..check category of table
-    SELECT SINGLE contflag FROM dd02l INTO @DATA(lv_contflag)
+    SELECT SINGLE tabclass, contflag FROM dd02l INTO @DATA(ls_dd02l)
              WHERE tabname  = @iv_tabname
                AND as4local = 'A'.
-    IF sy-subrc = 0 AND
-       ( lv_contflag = 'C' OR lv_contflag = 'G').
+    IF sy-subrc NE 0.
+      RAISE EXCEPTION TYPE zcx_al30
+        EXPORTING
+          textid = zcx_al30=>invalid_params.
+    ENDIF.
+
+* Si la tabla que se pasa es una vista la información a rellenar es distinta a la de una tabla normal.
+    IF ls_dd02l-tabclass = 'VIEW'.
+      " Se busca la tabla ráiz de la vista
+      SELECT SINGLE roottab INTO @DATA(lv_roottab)
+             FROM dd25v
+             WHERE viewname = @iv_tabname.
+
+      " Dato de la cabecera
+      APPEND VALUE #( pgmid = 'R3TR' object = 'VDAT' obj_name = iv_tabname objfunc = iv_objfunc ) TO lt_e071.
+
+* Se Añade las entradas de los campos clave
+      LOOP AT it_keys ASSIGNING FIELD-SYMBOL(<ls_key>).
+        APPEND VALUE #( pgmid = 'R3TR' object = 'TABU' mastertype = 'VDAT' mastername = iv_tabname objname = lv_roottab VIEWNAME = iv_tabname tabkey = <ls_key>  ) TO lt_e071k.
+      ENDLOOP.
+
+    ELSE.
+* Se llenan los datos de la cabecera
+      APPEND VALUE #( pgmid = 'R3TR' object = 'TABU' obj_name = iv_tabname objfunc = iv_objfunc ) TO lt_e071.
+
+* Se Añade las entradas de los campos clave
+      LOOP AT it_keys ASSIGNING <ls_key>.
+        APPEND VALUE #( pgmid = 'R3TR' object = 'TABU' mastertype = 'TABU' mastername = iv_tabname objname = iv_tabname tabkey = <ls_key>  ) TO lt_e071k.
+      ENDLOOP.
+    ENDIF.
+
+*   Categoria de la tabla
+    IF ls_dd02l-contflag = 'C' OR ls_dd02l-contflag = 'G'.
       lv_category = 'CUST'.
     ELSE.
       lv_category = 'SYST'.

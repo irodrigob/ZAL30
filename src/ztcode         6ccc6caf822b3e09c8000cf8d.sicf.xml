@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_SICF" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <URL>/sap/bc/gui/sap/its/ztcode/</URL>
+   <ICFSERVICE>
+    <ICF_NAME>ZTCODE</ICF_NAME>
+    <KIND401>Y</KIND401>
+    <SYSLOG401>X</SYSLOG401>
+    <ICFGUILNK>Y</ICFGUILNK>
+    <APPLCUSTFLAG>3</APPLCUSTFLAG>
+    <ORIG_NAME>ztcode</ORIG_NAME>
+   </ICFSERVICE>
+   <ICFDOCU>
+    <ICF_NAME>ZTCODE</ICF_NAME>
+    <ICF_LANGU>E</ICF_LANGU>
+    <ICF_DOCU>Lanzador transacciones</ICF_DOCU>
+   </ICFDOCU>
+   <ICFHANDLER_TABLE>
+    <ICFHANDLER>
+     <ICF_NAME>ZTCODE</ICF_NAME>
+     <ICFORDER>01</ICFORDER>
+     <ICFTYP>A</ICFTYP>
+     <ICFHANDLER>CL_HTTP_EXT_ITS_2</ICFHANDLER>
+    </ICFHANDLER>
+   </ICFHANDLER_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>

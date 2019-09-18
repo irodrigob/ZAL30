@@ -37,52 +37,6 @@ INCLUDE zal30_main_view_top.
 
 INCLUDE zal30_main_view_c01. " Verif. datos
 
-*----------------------------------------------------------------------*
-* Pantalla de selección
-*----------------------------------------------------------------------*
-*PARAMETERS p_view LIKE zal30_t_view-tabname OBLIGATORY.
-
-*----------------------------------------------------------------------*
-* Inicializacion programa
-*----------------------------------------------------------------------*
-*INITIALIZATION.
-*  PERFORM inicializacion_prog.
-
-*----------------------------------------------------------------------*
-* Validación de la pantalla de selección
-*----------------------------------------------------------------------*
-*AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_view.
-*  PERFORM f4_view.
-*
-*AT SELECTION-SCREEN..
-*  PERFORM chequeo_vista.
-
-*----------------------------------------------------------------------*
-* Select data
-*----------------------------------------------------------------------*
-*START-OF-SELECTION.
-*
-** Inicialización de datos
-*  PERFORM inicializacion_datos.
-*
-** Creacion de objetos de la vista
-*  PERFORM read_create_data_view.
-*
-**----------------------------------------------------------------------*
-** End data
-**----------------------------------------------------------------------*
-*END-OF-SELECTION.
-*
-** Si el puntero de datos no esta incializado no hago nada porque el mensaje ya sale
-** en la propia lectura de datos. Si esta asignado, entonces lo que hago es mirar si esta lleno.
-** Si no lo esta saco el mensaje correspondiente.
-*  IF <it_datos> IS ASSIGNED.
-*    IF <it_datos> IS INITIAL.
-*      MESSAGE s017 WITH ms_view-tabname.
-*    ENDIF.
-** Lectura de datos
-*    CALL SCREEN 9001.
-*  ENDIF.
 
 *----------------------------------------------------------------------*
 * Includes

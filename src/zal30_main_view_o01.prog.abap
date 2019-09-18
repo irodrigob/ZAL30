@@ -39,6 +39,7 @@ MODULE alv_view OUTPUT.
 
 * Layout
     ms_layout-col_opt = abap_true.
+    ms_layout-cwidth_opt = abap_true.
     ms_layout-stylefname = zif_al30_data=>cv_field_style.
 
 * Activo el evento de validación de datos
@@ -68,7 +69,7 @@ MODULE alv_view OUTPUT.
   ELSE.
 
     " Se vuelve a indicar que tenga en cuenta las columnas optimizadas. Hay que ponerlo antes del refresh para que funcione
-    mo_alv->set_frontend_layout( EXPORTING is_layout = VALUE #( cwidth_opt = abap_true ) ).
+    mo_alv->set_frontend_layout( EXPORTING is_layout = ms_layout ).
 
     mo_alv->refresh_table_display( EXPORTING is_stable = ms_stable ).
 
@@ -110,4 +111,13 @@ MODULE status_9001 OUTPUT.
 
 
   CLEAR mv_okcode_9001.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  STATUS_9002  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE status_9002 OUTPUT.
+  SET PF-STATUS '9002'.
+  SET TITLEBAR 'T-3' WITH ms_conf_screen-origin_tcode_text.
 ENDMODULE.

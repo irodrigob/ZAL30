@@ -76,6 +76,19 @@ MODULE read_view INPUT.
 * Proceso de validez y lectura de la vista para las pantallas
   PERFORM process_load_view_dynpro.
 
+* Si la transacción original que se llama no es la transacción directa del programa
+* entonces se va a mirar:
+* 1) Si la vista no tiene pantalla de selección definida se va directamente a la dynpro de datos
+* 2) Si la vista tiene pantalla de selección definida se va la dynpro donde estará la pantalla de selección
+  IF ms_conf_screen-origin_tcode NE zif_al30_data=>cs_prog_tcode-view.
+    READ TABLE mt_fields TRANSPORTING NO FIELDS WITH KEY sel_screen = abap_true.
+    IF sy-subrc = 0.
+      SET SCREEN 9002. LEAVE SCREEN.
+    ELSE.
+      SET SCREEN 9001. LEAVE SCREEN.
+    ENDIF.
+  ENDIF.
+
 ENDMODULE.
 *&---------------------------------------------------------------------*
 *& Module INIT_9000 OUTPUT
@@ -116,4 +129,20 @@ ENDMODULE.
 *&---------------------------------------------------------------------*
 MODULE selection_screen OUTPUT.
   PERFORM selection_screen.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  EXIT_9002  INPUT
+*&---------------------------------------------------------------------*
+MODULE exit_9002 INPUT.
+  SET SCREEN 0. LEAVE SCREEN.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_9002  INPUT
+*&---------------------------------------------------------------------*
+MODULE user_command_9002 INPUT.
+  CASE mv_okcode_9002.
+    WHEN 'EXECUTE'. " Se pasa a la pantalla de resultados
+      mv_read_data_view = abap_true. " Indica que se quiere leer los datos
+      SET SCREEN 9001. LEAVE SCREEN.
+  ENDCASE.
 ENDMODULE.

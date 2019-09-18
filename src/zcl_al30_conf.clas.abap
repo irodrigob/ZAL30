@@ -917,6 +917,15 @@ CLASS ZCL_AL30_CONF IMPLEMENTATION.
         EXPORTING
           textid = zcx_al30=>view_dont_exist.
 
+    ELSE.
+* Funcion para leer vistas: DD_VIEW_GET
+      " Si es una vista la descripción que se recupera no es correcta.
+      IF es_dd02v-tabclass = 'VIEW'.
+        SELECT SINGLE ddtext INTO es_dd02v-ddtext
+               FROM dd25t
+               WHERE viewname = lv_name
+                     AND ddlanguage = iv_langu.
+      ENDIF.
     ENDIF.
 
   ENDMETHOD.
