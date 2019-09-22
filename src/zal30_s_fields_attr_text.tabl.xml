@@ -4,7 +4,9 @@
   <asx:values>
    <DD02V>
     <TABNAME>ZAL30_S_FIELDS_ATTR_TEXT</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
     <TABCLASS>INTTAB</TABCLASS>
+    <DDTEXT>AL30 - Text attribute fields</DDTEXT>
    </DD02V>
    <DD03P_TABLE>
     <DD03P>

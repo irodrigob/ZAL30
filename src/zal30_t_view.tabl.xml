@@ -4,8 +4,10 @@
   <asx:values>
    <DD02V>
     <TABNAME>ZAL30_T_VIEW</TABNAME>
+    <DDLANGUAGE>E</DDLANGUAGE>
     <TABCLASS>TRANSP</TABCLASS>
     <CLIDEP>X</CLIDEP>
+    <DDTEXT>AL30 - Customizing of table/view</DDTEXT>
     <MAINFLAG>X</MAINFLAG>
     <CONTFLAG>A</CONTFLAG>
    </DD02V>
