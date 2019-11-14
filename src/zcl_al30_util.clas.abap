@@ -5,18 +5,10 @@ CLASS zcl_al30_util DEFINITION
 
   PUBLIC SECTION.
 
-
+    TYPES:
 *"* public components of class ZCL_AL30_DATA
 *"* do not include other source files here!!!
-    TYPES: BEGIN OF ts_keys,
-             objname    TYPE e071k-objname,
-             object     TYPE e071k-object,
-             mastertype TYPE e071k-mastertype,
-             mastername TYPE e071k-mastername,
-             viewname   TYPE e071k-viewname,
-             key        TYPE e071k-tabkey,
-           END OF ts_keys.
-    TYPES: tt_keys TYPE STANDARD TABLE OF ts_keys WITH EMPTY KEY .
+      tt_keys TYPE STANDARD TABLE OF trobj_name .
 
     CLASS-METHODS fill_return
       IMPORTING
@@ -107,7 +99,7 @@ CLASS zcl_al30_util DEFINITION
         is_wa          TYPE any
         it_fieldlist   TYPE ddfields
       EXPORTING
-        ev_keys_trkorr TYPE e071k-tabkey
+        ev_keys_trkorr TYPE trobj_name
       RAISING
         zcx_al30.
 *"* protected components of class ZCL_AL30_DATA
@@ -285,96 +277,71 @@ CLASS zcl_al30_util IMPLEMENTATION.
 
 
   METHOD conv_data_2_keys_trkorr.
+    FIELD-SYMBOLS <wa> TYPE any.
+    FIELD-SYMBOLS <ls_field_list> TYPE LINE OF ddfields.
+    FIELD-SYMBOLS <field> TYPE any.
     DATA lo_struct_ref TYPE REF TO cl_abap_structdescr.
-    DATA ls_key TYPE LINE OF tt_keys.
-    DATA lt_tables TYPE STANDARD TABLE OF tabname.
+    DATA lt_field_list TYPE ddfields.
+    DATA ls_key TYPE trobj_name.
+
 
     CLEAR et_keys_trkorr.
-
-    " Primero hay que mirar el tipo de tabla pasada.
-    SELECT SINGLE tabclass FROM dd02l INTO @DATA(lv_tabclass)
-             WHERE tabname  = @iv_tabname
-               AND as4local = 'A'.
-
-    IF lv_tabclass = 'VIEW'.
-      " Si es una vista hay que leer sus tablas
-      SELECT tabname INTO TABLE lt_tables
-             FROM dd26s
-             WHERE viewname = iv_tabname.
-*
-    ELSE. " Si es una tabla se añade la tabla directamente
-      INSERT iv_tabname INTO TABLE lt_tables.
-    ENDIF.
 
 * Mediante el RTTS obtengo la definicion de la tabla. Cualquier excepcion o error lanzo una excepcion generica.
     TRY.
 
-        " Se recorre las tablas para ir montando la clave
-        LOOP AT lt_tables ASSIGNING FIELD-SYMBOL(<ls_tables>).
-          lo_struct_ref ?= cl_abap_typedescr=>describe_by_name( iv_tabname ).
+        lo_struct_ref ?= cl_abap_typedescr=>describe_by_name( iv_tabname ).
 
-          IF lo_struct_ref IS BOUND.
+        IF lo_struct_ref IS BOUND.
 
-            CALL METHOD lo_struct_ref->get_ddic_field_list
-              EXPORTING
-                p_including_substructres = abap_true
-              RECEIVING
-                p_field_list             = DATA(lt_field_list)
-              EXCEPTIONS
-                not_found                = 1
-                no_ddic_type             = 2
-                OTHERS                   = 3.
-            IF sy-subrc NE 0.
-              RAISE EXCEPTION TYPE zcx_al30
-                EXPORTING
-                  textid = zcx_al30=>invalid_params.
-            ENDIF.
-
-* Se recorre los valores para ir construyendo la clave.
-            LOOP AT it_values ASSIGNING FIELD-SYMBOL(<wa>).
-              CLEAR: ls_key.
-
-              TRY.
-                  CALL METHOD conv_wa_2_keys_trkorr
-                    EXPORTING
-                      is_wa          = <wa>
-                      it_fieldlist   = lt_field_list
-                    IMPORTING
-                      ev_keys_trkorr = ls_key-key.
-
-                  IF lv_tabclass = 'VIEW'.
-                    ls_key-mastername = ls_key-viewname = iv_tabname.
-                    ls_key-objname = <ls_tables>.
-                    ls_key-mastertype = 'VDAT'.
-                    ls_key-object = 'TABU'.
-                  ELSE. " En una tabla todo los campos sin iguales
-                    ls_key-mastername = ls_key-objname = ls_key-viewname = iv_tabname.
-                    ls_key-mastertype = ls_key-object = 'TABU'.
-                  ENDIF.
-
-                  APPEND ls_key TO et_keys_trkorr.
-
-                CATCH zcx_al30 .
-                  RAISE EXCEPTION TYPE zcx_al30
-                    EXPORTING
-                      textid = zcx_al30=>invalid_params.
-              ENDTRY.
-
-
-            ENDLOOP.
-          ELSE.
+          CALL METHOD lo_struct_ref->get_ddic_field_list
+            EXPORTING
+              p_including_substructres = abap_true
+            RECEIVING
+              p_field_list             = lt_field_list
+            EXCEPTIONS
+              not_found                = 1
+              no_ddic_type             = 2
+              OTHERS                   = 3.
+          IF sy-subrc NE 0.
             RAISE EXCEPTION TYPE zcx_al30
               EXPORTING
                 textid = zcx_al30=>invalid_params.
           ENDIF.
-        ENDLOOP.
+
+* Se recorre los valores para ir construyendo la clave.
+          LOOP AT it_values ASSIGNING <wa>.
+            CLEAR: ls_key.
+
+            TRY.
+                CALL METHOD conv_wa_2_keys_trkorr
+                  EXPORTING
+                    is_wa          = <wa>
+                    it_fieldlist   = lt_field_list
+                  IMPORTING
+                    ev_keys_trkorr = ls_key.
+
+                APPEND ls_key TO et_keys_trkorr.
+
+              CATCH zcx_al30 .
+                RAISE EXCEPTION TYPE zcx_al30
+                  EXPORTING
+                    textid = zcx_al30=>invalid_params.
+            ENDTRY.
+
+
+          ENDLOOP.
+        ELSE.
+          RAISE EXCEPTION TYPE zcx_al30
+            EXPORTING
+              textid = zcx_al30=>invalid_params.
+        ENDIF.
+
       CATCH cx_root.
         RAISE EXCEPTION TYPE zcx_al30
           EXPORTING
             textid = zcx_al30=>invalid_params.
     ENDTRY.
-
-
   ENDMETHOD.
 
 
@@ -578,21 +545,30 @@ CLASS zcl_al30_util IMPLEMENTATION.
           textid = zcx_al30=>invalid_params.
     ENDIF.
 
-* La cabecera depende si hablamos de vista o tabla
+* Si la tabla que se pasa es una vista la información a rellenar es distinta a la de una tabla normal.
     IF ls_dd02l-tabclass = 'VIEW'.
-      APPEND VALUE #( pgmid = 'R3TR' object = 'VDAT' obj_name = iv_tabname objfunc = iv_objfunc ) TO lt_e071.
-    ELSE.
-      APPEND VALUE #( pgmid = 'R3TR' object = 'TABU' obj_name = iv_tabname objfunc = iv_objfunc ) TO lt_e071.
-    ENDIF.
+      " Se busca la tabla ráiz de la vista
+      SELECT SINGLE roottab INTO @DATA(lv_roottab)
+             FROM dd25v
+             WHERE viewname = @iv_tabname.
 
-* Se añade las entradas de los campos clave. Esta estructura ya tiene los campos informados si es una vista o
-* o es una tabla normal
-    LOOP AT it_keys ASSIGNING FIELD-SYMBOL(<ls_key>).
-      APPEND VALUE #( pgmid = 'R3TR' object = <ls_key>-object
-                      mastertype = <ls_key>-mastertype mastername = <ls_key>-mastername
-                      objname = <ls_key>-objname viewname = <ls_key>-viewname
-                      tabkey = <ls_key>-key  ) TO lt_e071k.
-    ENDLOOP.
+      " Dato de la cabecera
+      APPEND VALUE #( pgmid = 'R3TR' object = 'VDAT' obj_name = iv_tabname objfunc = iv_objfunc ) TO lt_e071.
+
+* Se Añade las entradas de los campos clave
+      LOOP AT it_keys ASSIGNING FIELD-SYMBOL(<ls_key>).
+        APPEND VALUE #( pgmid = 'R3TR' object = 'TABU' mastertype = 'VDAT' mastername = iv_tabname objname = lv_roottab VIEWNAME = iv_tabname tabkey = <ls_key>  ) TO lt_e071k.
+      ENDLOOP.
+
+    ELSE.
+* Se llenan los datos de la cabecera
+      APPEND VALUE #( pgmid = 'R3TR' object = 'TABU' obj_name = iv_tabname objfunc = iv_objfunc ) TO lt_e071.
+
+* Se Añade las entradas de los campos clave
+      LOOP AT it_keys ASSIGNING <ls_key>.
+        APPEND VALUE #( pgmid = 'R3TR' object = 'TABU' mastertype = 'TABU' mastername = iv_tabname objname = iv_tabname tabkey = <ls_key>  ) TO lt_e071k.
+      ENDLOOP.
+    ENDIF.
 
 *   Categoria de la tabla
     IF ls_dd02l-contflag = 'C' OR ls_dd02l-contflag = 'G'.
@@ -639,7 +615,6 @@ CLASS zcl_al30_util IMPLEMENTATION.
     CLEAR es_return.
 
     TRY.
-
         " Se convierte los valores a una clave para poder asignarla a una orden de transporte
         conv_data_2_keys_trkorr( EXPORTING it_values = it_values iv_tabname = iv_tabname IMPORTING et_keys_trkorr = DATA(lt_keys) ).
 

@@ -25,7 +25,19 @@ ENDMODULE.                 " EXIT_9000  INPUT
 *&      Module  EXIT_9001  INPUT
 *&---------------------------------------------------------------------*
 MODULE exit_9001 INPUT.
-  SET SCREEN 9000. LEAVE SCREEN.
+  " Si la transacción de llamada no es la misma que la original es que se accede a los
+  " datos pasando por la dynpro 9002 o directamente a la 9001(si no hay campos de selección). En
+  " ese caso lo que hacemos es irnos a la dynpro 9002, si hay campos de selección, o salir si no los tienes.
+  IF ms_conf_screen-origin_tcode NE zif_al30_data=>cs_prog_tcode-view.
+    READ TABLE mt_fields TRANSPORTING NO FIELDS WITH KEY sel_screen = abap_true.
+    IF sy-subrc = 0.
+      SET SCREEN 9002. LEAVE SCREEN.
+    ELSE.
+      SET SCREEN 0. LEAVE SCREEN.
+    ENDIF.
+  ELSE.
+    SET SCREEN 9000. LEAVE SCREEN.
+  ENDIF.
 ENDMODULE.
 *&---------------------------------------------------------------------*
 *&      Module  USER_COMMAND_9001  INPUT

@@ -674,9 +674,12 @@ FORM grabar_datos .
         ct_datos         = <it_datos>
         cv_order         = mv_orden_transporte.
 
-    MESSAGE ID ls_return-id TYPE ls_return-type
-                  NUMBER ls_return-number
-                  WITH ls_return-message_v1 ls_return-message_v2 ls_return-message_v3 ls_return-message_v4.
+    IF ls_return IS NOT INITIAL.
+
+      MESSAGE ID ls_return-id TYPE ls_return-type
+                    NUMBER ls_return-number
+                    WITH ls_return-message_v1 ls_return-message_v2 ls_return-message_v3 ls_return-message_v4.
+    ENDIF.
 
     " Si no hay error se realiza el mismo ajuste en la tabla que cuando se leen los datos.
     IF ls_return-type NE zif_al30_data=>cs_msg_type-error.

@@ -95,146 +95,156 @@ CLASS zcl_al30_view DEFINITION
         !is_view             TYPE zal30_t_view
         !it_fields_ddic      TYPE dd03ptab .
 
-  PROTECTED SECTION.
+protected section.
+
+  types:
 *"* protected components of class ZCL_AL30_VIEW
 *"* do not include other source files here!!!
-
-    TYPES: BEGIN OF ts_main_change_log,
+    BEGIN OF ts_main_change_log,
              tabname   TYPE tabname,
              tabkey    TYPE cdtabkey,
              chngind   TYPE cdchngind,
              fieldname TYPE fieldname,
              value_new TYPE cdfldvaln,
              value_old TYPE cdfldvalo,
-           END OF ts_main_change_log.
-    TYPES: tt_main_change_log TYPE STANDARD TABLE OF ts_main_change_log.
+           END OF ts_main_change_log .
+  types:
+    tt_main_change_log TYPE STANDARD TABLE OF ts_main_change_log .
 
-    DATA mo_exit_class TYPE REF TO object.
-    DATA mt_fields TYPE zif_al30_data=>tt_fields_view.
-    DATA mt_fields_text TYPE zif_al30_data=>tt_fields_text_view.
-    DATA mt_fields_ddic TYPE dd03ptab.
-    DATA ms_view TYPE zal30_t_view.
-    DATA mo_original_data TYPE REF TO data.
+  data MO_EXIT_CLASS type ref to OBJECT .
+  data MT_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW .
+  data MT_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW .
+  data MT_FIELDS_DDIC type DD03PTAB .
+  data MS_VIEW type ZAL30_T_VIEW .
+  data MO_ORIGINAL_DATA type ref to DATA .
+  data MV_ABORT_SAVE type SAP_BOOL .
 
-    METHODS exit_after_save_data
-      IMPORTING
-        !it_data       TYPE STANDARD TABLE
-        !it_data_del   TYPE STANDARD TABLE
-        !iv_error_save TYPE sap_bool .
-    METHODS exit_before_save_data
-      CHANGING
-        !ct_data     TYPE STANDARD TABLE
-        !ct_data_del TYPE STANDARD TABLE .
-    METHODS reset_data
-      CHANGING
-        !ct_datos     TYPE STANDARD TABLE
-        !ct_datos_del TYPE STANDARD TABLE .
-    METHODS exit_check_auth_data_read
-      IMPORTING
-        !is_row_data   TYPE any
-      RETURNING
-        VALUE(rv_auth) TYPE sap_bool .
-    METHODS exit_in_process_data_read
-      CHANGING
-        !cs_row_data TYPE any .
-    METHODS exit_before_read_data
-      CHANGING
-        !ct_data TYPE STANDARD TABLE .
-    METHODS exit_verify_field_data
-      IMPORTING
-        !iv_fieldname TYPE any
-        !iv_value     TYPE any
-      EXPORTING
-        es_return     TYPE bapiret2 .
-
-    METHODS exit_verify_change_row_data
-      EXPORTING
-        VALUE(es_return) TYPE bapiret2
-      CHANGING
-        cs_row_data      TYPE any .
-    METHODS add_fields_texttable
-      IMPORTING
-        iv_view   TYPE tabname
-        it_fields TYPE zif_al30_data=>tt_fields_view
-      CHANGING
-        ct_fcat   TYPE lvc_t_fcat.
-    METHODS add_edit_fields
-      CHANGING
-        ct_fcat TYPE lvc_t_fcat.
-    METHODS get_lvc_fieldcat
-      IMPORTING
-        VALUE(is_view) TYPE zal30_t_view
-      RETURNING
-        VALUE(rt_fcat) TYPE lvc_t_fcat.
-    METHODS exit_process_catalog_of_field
-      CHANGING
-        VALUE(cs_fieldcat) TYPE lvc_s_fcat.
-    METHODS create_sql_read
-      IMPORTING is_filters TYPE zif_al30_data=>ts_filter_read_data
-      EXPORTING
-                et_cols    TYPE adbc_column_tab
-                ev_sql     TYPE string.
-    METHODS create_join_sql_texttable
-      RETURNING
-        VALUE(rv_result) TYPE string.
-    METHODS lock_table
-      IMPORTING
-                iv_table TYPE ocus-table
-      RAISING   zcx_al30.
-    METHODS unlock_table
-      IMPORTING
-        iv_table TYPE tabname.
-    METHODS save_data_erased
-      IMPORTING
-        iv_allow_request TYPE sap_bool
-      EXPORTING
-        es_return        TYPE bapiret2
-      CHANGING
-        ct_datos_del     TYPE STANDARD TABLE
-        cv_order         TYPE e070-trkorr.
-    METHODS save_change_log
-      IMPORTING
-        it_datos     TYPE STANDARD TABLE
-        it_datos_del TYPE STANDARD TABLE.
-
-    METHODS fill_change_log
-      IMPORTING
-        it_data       TYPE STANDARD TABLE
-      CHANGING
-        ct_change_log TYPE tt_main_change_log.
-    METHODS conv_data_2_changelog_key
-      IMPORTING
-        is_data        TYPE any
-        it_fields_ddic TYPE dd03ptab
-      RETURNING
-        VALUE(rv_key)  TYPE cdtabkey.
-    METHODS save_data_inup
-      IMPORTING
-                it_data           TYPE STANDARD TABLE
-                iv_save_transport TYPE sap_bool
-      EXPORTING
-                es_return         TYPE bapiret2
-      CHANGING  cv_order          TYPE e070-trkorr
-                cv_save_error     TYPE sap_bool.
-    METHODS fill_changelog_values
-      IMPORTING
-        iv_tabname    TYPE zal30_t_view-tabname
-        iv_chngind    TYPE cdchngind
-        it_fields     TYPE dd03ptab
-        is_data       TYPE any
-      CHANGING
-        ct_change_log TYPE zcl_al30_view=>tt_main_change_log .
-    METHODS search_row_original_data
-      IMPORTING
-        is_data        TYPE any
-        iv_tabname     TYPE zal30_t_view-tabname
-      EXPORTING
-        VALUE(es_data) TYPE any.
-    METHODS create_where_sql
-      IMPORTING
-        is_filters      TYPE zif_al30_data=>ts_filter_read_data
-      RETURNING
-        VALUE(rv_where) TYPE string.
+  methods EXIT_AFTER_SAVE_DATA
+    importing
+      !IT_DATA type STANDARD TABLE
+      !IT_DATA_DEL type STANDARD TABLE
+      !IV_ERROR_SAVE type SAP_BOOL .
+  methods EXIT_BEFORE_SAVE_DATA
+    exporting
+      !EV_ABORT_SAVE type SAP_BOOL
+      !ET_RETURN type BAPIRET2_T
+    changing
+      !CT_DATA type STANDARD TABLE
+      !CT_DATA_DEL type STANDARD TABLE .
+  methods RESET_DATA
+    changing
+      !CT_DATOS type STANDARD TABLE
+      !CT_DATOS_DEL type STANDARD TABLE .
+  methods EXIT_CHECK_AUTH_DATA_READ
+    importing
+      !IS_ROW_DATA type ANY
+    returning
+      value(RV_AUTH) type SAP_BOOL .
+  methods EXIT_IN_PROCESS_DATA_READ
+    changing
+      !CS_ROW_DATA type ANY .
+  methods EXIT_BEFORE_READ_DATA
+    changing
+      !CT_DATA type STANDARD TABLE .
+  methods EXIT_VERIFY_FIELD_DATA
+    importing
+      !IV_FIELDNAME type ANY
+      !IV_VALUE type ANY
+    exporting
+      !ES_RETURN type BAPIRET2 .
+  methods EXIT_VERIFY_CHANGE_ROW_DATA
+    exporting
+      value(ES_RETURN) type BAPIRET2
+    changing
+      !CS_ROW_DATA type ANY .
+  methods ADD_FIELDS_TEXTTABLE
+    importing
+      !IV_VIEW type TABNAME
+      !IT_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW
+    changing
+      !CT_FCAT type LVC_T_FCAT .
+  methods ADD_EDIT_FIELDS
+    changing
+      !CT_FCAT type LVC_T_FCAT .
+  methods GET_LVC_FIELDCAT
+    importing
+      value(IS_VIEW) type ZAL30_T_VIEW
+    returning
+      value(RT_FCAT) type LVC_T_FCAT .
+  methods EXIT_PROCESS_CATALOG_OF_FIELD
+    changing
+      value(CS_FIELDCAT) type LVC_S_FCAT .
+  methods CREATE_SQL_READ
+    importing
+      !IS_FILTERS type ZIF_AL30_DATA=>TS_FILTER_READ_DATA
+    exporting
+      !ET_COLS type ADBC_COLUMN_TAB
+      !EV_SQL type STRING .
+  methods CREATE_JOIN_SQL_TEXTTABLE
+    returning
+      value(RV_RESULT) type STRING .
+  methods LOCK_TABLE
+    importing
+      !IV_TABLE type OCUS-TABLE
+    raising
+      ZCX_AL30 .
+  methods UNLOCK_TABLE
+    importing
+      !IV_TABLE type TABNAME .
+  methods SAVE_DATA_ERASED
+    importing
+      !IV_ALLOW_REQUEST type SAP_BOOL
+    exporting
+      !ES_RETURN type BAPIRET2
+    changing
+      !CT_DATOS_DEL type STANDARD TABLE
+      !CV_ORDER type E070-TRKORR .
+  methods SAVE_CHANGE_LOG
+    importing
+      !IT_DATOS type STANDARD TABLE
+      !IT_DATOS_DEL type STANDARD TABLE .
+  methods FILL_CHANGE_LOG
+    importing
+      !IT_DATA type STANDARD TABLE
+    changing
+      !CT_CHANGE_LOG type TT_MAIN_CHANGE_LOG .
+  methods CONV_DATA_2_CHANGELOG_KEY
+    importing
+      !IS_DATA type ANY
+      !IT_FIELDS_DDIC type DD03PTAB
+    returning
+      value(RV_KEY) type CDTABKEY .
+  methods SAVE_DATA_INUP
+    importing
+      !IT_DATA type STANDARD TABLE
+      !IV_SAVE_TRANSPORT type SAP_BOOL
+    exporting
+      !ES_RETURN type BAPIRET2
+    changing
+      !CV_ORDER type E070-TRKORR
+      !CV_SAVE_ERROR type SAP_BOOL .
+  methods FILL_CHANGELOG_VALUES
+    importing
+      !IV_TABNAME type ZAL30_T_VIEW-TABNAME
+      !IV_CHNGIND type CDCHNGIND
+      !IT_FIELDS type DD03PTAB
+      !IS_DATA type ANY
+    changing
+      !CT_CHANGE_LOG type ZCL_AL30_VIEW=>TT_MAIN_CHANGE_LOG .
+  methods SEARCH_ROW_ORIGINAL_DATA
+    importing
+      !IS_DATA type ANY
+      !IV_TABNAME type ZAL30_T_VIEW-TABNAME
+    exporting
+      value(ES_DATA) type ANY .
+  methods CREATE_WHERE_SQL
+    importing
+      !IS_FILTERS type ZIF_AL30_DATA=>TS_FILTER_READ_DATA
+    returning
+      value(RV_WHERE) type STRING .
+  methods SHOW_POPUP_ERROR_MESSAGES
+    changing
+      !CT_RETURN type BAPIRET2_T .
   PRIVATE SECTION.
 
 *"* private components of class ZCL_AL30_VIEW
@@ -243,7 +253,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_al30_view IMPLEMENTATION.
+CLASS ZCL_AL30_VIEW IMPLEMENTATION.
 
 
   METHOD add_edit_fields.
@@ -641,6 +651,9 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
     DATA ld_metodo TYPE seocpdname.
 
+    CLEAR: et_return,
+           ev_abort_save.
+
     IF mo_exit_class IS BOUND.
 
 * Monto el método al cual se llamará de la clase de exit.
@@ -648,9 +661,12 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
       TRY.
           CALL METHOD mo_exit_class->(ld_metodo)
+            IMPORTING
+              ev_abort_save = ev_abort_save
+              et_return     = et_return
             CHANGING
-              ct_data     = ct_data
-              ct_data_del = ct_data_del.
+              ct_data       = ct_data
+              ct_data_del   = ct_data_del.
 
         CATCH cx_root.
       ENDTRY.
@@ -1239,97 +1255,116 @@ CLASS zcl_al30_view IMPLEMENTATION.
       INSERT <ls_datos> INTO TABLE <lt_datos>.
     ENDLOOP.
 
-
     " Exit antes de grabar los datos
     exit_before_save_data(
+      IMPORTING
+        ev_abort_save = mv_abort_save
+        et_return     = DATA(lt_return)
       CHANGING
         ct_data = <lt_datos>
         ct_data_del = ct_datos_del ).
 
-    " El proceso de grabación solo se realiza cuando hay datos para grabar.
-    IF <lt_datos> IS NOT INITIAL OR ct_datos_del IS NOT INITIAL.
+    show_popup_error_messages( CHANGING ct_return = lt_return ).
+
+    IF ( mv_abort_save EQ abap_true OR
+         ( line_exists( lt_return[ type = 'A' ] ) OR
+           line_exists( lt_return[ type = 'X' ] ) OR
+           line_exists( lt_return[ type = 'E' ] ) ) ).
+
+      IF lt_return IS INITIAL.
+
+        "No data changed
+        es_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-success iv_number = '039' ).
+      ENDIF.
+
+    ELSE.
+
+      " El proceso de grabación solo se realiza cuando hay datos para grabar.
+      IF <lt_datos> IS NOT INITIAL OR ct_datos_del IS NOT INITIAL.
 
 * Si hay datos para borrar se llama al método encarlo de hacerlo
-      IF ct_datos_del IS NOT INITIAL.
-        CALL METHOD save_data_erased
-          EXPORTING
-            iv_allow_request = iv_allow_request
-          IMPORTING
-            es_return        = es_return
-          CHANGING
-            ct_datos_del     = ct_datos_del
-            cv_order         = cv_order.
-      ENDIF.
-
-      " Si no hay errores, por el borrado, se continua el proceso.
-      IF es_return-type NE zif_al30_data=>cs_msg_type-error.
-        CLEAR es_return. " Se limpia posibles mensajes succes del proceso de borrado
-
-        DATA(lv_save_error) = abap_false.
-
-        " Si hay datos modificados se procede a realizar los INSert o UPDate.
-        IF <lt_datos> IS NOT INITIAL.
-
-          save_data_inup( EXPORTING it_data = <lt_datos>
-                                    iv_save_transport = iv_allow_request
-                          IMPORTING es_return = es_return
-
-                          CHANGING cv_order = cv_order
-                                   cv_save_error = lv_save_error ).
-
-        ENDIF.
-
-        IF lv_save_error = abap_false. " Si no hay errores en la grabación
-
-          " Se hace el commit
-          COMMIT WORK AND WAIT.
-
-          " Se informa que se han grabado los datos
-          es_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-success iv_number = '023' ).
-
-          " Si la tabla tiene marcada la opción de log de modificación se ejecuta el proceso donde se informará de los cambios
-          IF ms_view-change_log = abap_true.
-            save_change_log( EXPORTING it_datos = <lt_datos>
-                                       it_datos_del = ct_datos_del ).
-          ENDIF.
-
-
-
-        ELSE.
-          " Si hay errores pero el es_return esta en blanco le paso un mensaje genérico
-          IF es_return IS INITIAL.
-            es_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error iv_number = '022' ).
-          ENDIF.
-
-          ROLLBACK WORK. " Se deshace todos los cambios, incluidos lo del borrado
-        ENDIF.
-
-
-        " Exit de después de grabar tanto si ha ido bien como si no.
-        exit_after_save_data(
+        IF ct_datos_del IS NOT INITIAL.
+          CALL METHOD save_data_erased
             EXPORTING
-              it_data      = <lt_datos>
-              it_data_del = ct_datos_del
-              iv_error_save = lv_save_error ).
+              iv_allow_request = iv_allow_request
+            IMPORTING
+              es_return        = es_return
+            CHANGING
+              ct_datos_del     = ct_datos_del
+              cv_order         = cv_order.
+        ENDIF.
+
+        " Si no hay errores, por el borrado, se continua el proceso.
+        IF es_return-type NE zif_al30_data=>cs_msg_type-error.
+          CLEAR es_return. " Se limpia posibles mensajes succes del proceso de borrado
+
+          DATA(lv_save_error) = abap_false.
+
+          " Si hay datos modificados se procede a realizar los INSert o UPDate.
+          IF <lt_datos> IS NOT INITIAL.
+
+            save_data_inup( EXPORTING it_data = <lt_datos>
+                                      iv_save_transport = iv_allow_request
+                            IMPORTING es_return = es_return
+
+                            CHANGING cv_order = cv_order
+                                     cv_save_error = lv_save_error ).
+
+          ENDIF.
+
+          IF lv_save_error = abap_false. " Si no hay errores en la grabación
+
+            " Se hace el commit
+            COMMIT WORK AND WAIT.
+
+            " Se informa que se han grabado los datos
+            es_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-success iv_number = '023' ).
+
+            " Si la tabla tiene marcada la opción de log de modificación se ejecuta el proceso donde se informará de los cambios
+            IF ms_view-change_log = abap_true.
+              save_change_log( EXPORTING it_datos = <lt_datos>
+                                         it_datos_del = ct_datos_del ).
+            ENDIF.
 
 
-        " Si no hay errores se resetea los datos para utilizalos como si viniese del diccionario y se actualiza los datos originales
-        IF lv_save_error = abap_false.
-          reset_data( CHANGING ct_datos = ct_datos
-                               ct_datos_del = ct_datos_del ).
 
-          " Los datos ya grabados se vuelcan a la tabla de datos originales. Se vuelca la tabla que se pasa por parámetro que es la que contiene todos los datos léidos.
-          ASSIGN mo_original_data->* TO <lt_original_data>.
-          CLEAR <lt_original_data>.
-          INSERT LINES OF ct_datos INTO TABLE <lt_original_data>.
+          ELSE.
+            " Si hay errores pero el es_return esta en blanco le paso un mensaje genérico
+            IF es_return IS INITIAL.
+              es_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error iv_number = '022' ).
+            ENDIF.
+
+            ROLLBACK WORK. " Se deshace todos los cambios, incluidos lo del borrado
+          ENDIF.
+
+
+          " Exit de después de grabar tanto si ha ido bien como si no.
+          exit_after_save_data(
+              EXPORTING
+                it_data      = <lt_datos>
+                it_data_del = ct_datos_del
+                iv_error_save = lv_save_error ).
+
+
+          " Si no hay errores se resetea los datos para utilizalos como si viniese del diccionario y se actualiza los datos originales
+          IF lv_save_error = abap_false.
+            reset_data( CHANGING ct_datos = ct_datos
+                                 ct_datos_del = ct_datos_del ).
+
+            " Los datos ya grabados se vuelcan a la tabla de datos originales. Se vuelca la tabla que se pasa por parámetro que es la que contiene todos los datos léidos.
+            ASSIGN mo_original_data->* TO <lt_original_data>.
+            CLEAR <lt_original_data>.
+            INSERT LINES OF ct_datos INTO TABLE <lt_original_data>.
+
+          ENDIF.
+
 
         ENDIF.
 
-
+      ELSE. " Si no hay datos y no tampoco borrado se informa un mensaje indicandolo
+        es_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-success iv_number = '039' ).
       ENDIF.
 
-    ELSE. " Si no hay datos y no tampoco borrado se informa un mensaje indicandolo
-      es_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-success iv_number = '039' ).
     ENDIF.
 
   ENDMETHOD.
@@ -1521,6 +1556,49 @@ CLASS zcl_al30_view IMPLEMENTATION.
     mt_fields = it_fields_view.
     mt_fields_text = it_fields_text_view.
     mt_fields_ddic = it_fields_ddic.
+  ENDMETHOD.
+
+
+  METHOD show_popup_error_messages.
+
+    IF ct_return IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    TRY.
+        cl_salv_table=>factory( IMPORTING r_salv_table = DATA(lo_salv_table)
+                                CHANGING  t_table      = ct_return ).
+
+        IF lo_salv_table IS BOUND.
+
+          lo_salv_table->get_columns( )->set_optimize( abap_true ).
+
+          lo_salv_table->get_columns( )->get_column(: 'ID' )->set_visible( if_salv_c_bool_sap=>false ),
+                                                      'TYPE' )->set_visible( if_salv_c_bool_sap=>false ),
+                                                      'NUMBER' )->set_visible( if_salv_c_bool_sap=>false ),
+                                                      'LOG_NO' )->set_visible( if_salv_c_bool_sap=>false ),
+                                                      'LOG_MSG_NO' )->set_visible( if_salv_c_bool_sap=>false ),
+                                                      'MESSAGE_V1' )->set_visible( if_salv_c_bool_sap=>false ),
+                                                      'MESSAGE_V2' )->set_visible( if_salv_c_bool_sap=>false ),
+                                                      'MESSAGE_V3' )->set_visible( if_salv_c_bool_sap=>false ),
+                                                      'MESSAGE_V4' )->set_visible( if_salv_c_bool_sap=>false ),
+                                                      'PARAMETER' )->set_visible( if_salv_c_bool_sap=>false ),
+                                                      'FIELD' )->set_visible( if_salv_c_bool_sap=>false ),
+                                                      'SYSTEM' )->set_visible( if_salv_c_bool_sap=>false ).
+
+          lo_salv_table->get_columns( )->set_column_position( columnname = 'ROW'
+                                                              position   = 1 ).
+          lo_salv_table->set_screen_popup( start_column = '5'
+                                           end_column   = '100'
+                                           start_line   = '5'
+                                           end_line     = '10' ).
+          lo_salv_table->display( ).
+        ENDIF.
+
+      CATCH cx_salv_msg ##NO_HANDLER.
+      CATCH cx_salv_not_found ##NO_HANDLER.
+    ENDTRY.
+
   ENDMETHOD.
 
 

@@ -646,11 +646,15 @@ CLASS ZCL_AL30_CONF IMPLEMENTATION.
 * pasarÃ¡ a la tabla de diccionario
     LOOP AT et_fields_ddic ASSIGNING <ls_dd03p>.
 
-      MOVE-CORRESPONDING <ls_dd03p> TO ls_fields_text.
-      ls_fields_text-spras = <ls_dd03p>-ddlanguage.
-      ls_fields_text-pos_ddic = <ls_dd03p>-position.
-      APPEND ls_fields_text TO et_fields_text.
-      CLEAR ls_fields_text.
+      " Sin lenguaje no se añade a la tabla de textos. Eso ocurre cuando hay idiomas configurados en el sistema pero
+      " no se ha cargado su libreria de textos. Sin ese idioma luego se producen errores al grabar.
+      IF <ls_dd03p>-ddlanguage IS NOT INITIAL.
+        MOVE-CORRESPONDING <ls_dd03p> TO ls_fields_text.
+        ls_fields_text-spras = <ls_dd03p>-ddlanguage.
+        ls_fields_text-pos_ddic = <ls_dd03p>-position.
+        APPEND ls_fields_text TO et_fields_text.
+        CLEAR ls_fields_text.
+      ENDIF.
 
       " En la tabla de campos solo aparecerá una vez
       READ TABLE et_fields TRANSPORTING NO FIELDS WITH KEY fieldname = <ls_dd03p>-fieldname.
@@ -942,7 +946,8 @@ CLASS ZCL_AL30_CONF IMPLEMENTATION.
       INSERT VALUE #( sign = 'I' option = 'EQ' low = iv_langu ) INTO TABLE lt_r_lang.
     ENDIF.
 
-    SELECT * INTO CORRESPONDING FIELDS OF TABLE et_fields_text FROM zal30_t_fieldst WHERE spras IN lt_r_lang.
+    SELECT * INTO CORRESPONDING FIELDS OF TABLE et_fields_text FROM zal30_t_fieldst WHERE spras IN lt_r_lang
+                                                                                          AND tabname = iv_name_view.
 
   ENDMETHOD.
 
