@@ -18,6 +18,12 @@ TYPES: BEGIN OF ts_control_data,
        END OF ts_control_data.
 TYPES: tt_control_data TYPE STANDARD TABLE OF ts_control_data.
 
+TYPES: BEGIN OF ts_opt_selscreen_field_text,
+         text TYPE string,
+         len  TYPE i,
+       END OF ts_opt_selscreen_field_text.
+TYPES: tt_opt_selscreen_field_text TYPE STANDARD TABLE OF ts_opt_selscreen_field_text WITH EMPTY KEY.
+
 TYPES: BEGIN OF ts_sel_screen,
          tabname       TYPE tabname,
          selid         TYPE rsdynsel-selid,
@@ -25,7 +31,7 @@ TYPES: BEGIN OF ts_sel_screen,
          where_clauses TYPE rsds_twhere,
          expressions   TYPE rsds_texpr,
          fields        TYPE rsdsfields_t,
-         fields_text   TYPE wcb_rsdstexts_tab,
+         fields_text   TYPE STANDARD TABLE OF rsdstexts WITH EMPTY KEY,
        END OF ts_sel_screen.
 TYPES tt_sel_screen TYPE STANDARD TABLE OF ts_sel_screen WITH EMPTY KEY.
 

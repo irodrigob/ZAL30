@@ -101,7 +101,7 @@
        <CONT_NAME>SCREEN</CONT_NAME>
        <TYPE>TEXT</TYPE>
        <NAME>ZAL30_T_VIEW-TABNAME</NAME>
-       <TEXT>Tabla__________</TEXT>
+       <TEXT>Tabellenname___</TEXT>
        <LINE>001</LINE>
        <COLUMN>003</COLUMN>
        <LENGTH>015</LENGTH>

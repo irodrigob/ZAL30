@@ -1064,9 +1064,7 @@ ENDFORM.
 *& text
 *&---------------------------------------------------------------------*
 FORM selection_screen .
-  DATA lt_fields TYPE rsdsfields_t.
-  DATA lt_fields_text TYPE wcb_rsdstexts_tab.
-  DATA lt_fields_ranges TYPE rsds_trange.
+  DATA lt_opt_text TYPE tt_opt_selscreen_field_text.
 
   IF ms_view-tabname IS NOT INITIAL.
 
@@ -1078,6 +1076,9 @@ FORM selection_screen .
       APPEND INITIAL LINE TO ms_conf_screen-sel_screen ASSIGNING <ls_sel_screen>.
       <ls_sel_screen>-tabname = ms_view-tabname.
 
+      " Se obtiene el tamaño del texto del campo donde se guardará el texto
+      DATA(lv_text_len) = CAST cl_abap_elemdescr( cl_abap_typedescr=>describe_by_name( zif_al30_data=>cs_selection_screen_view-data_element_text_field ) )->output_length.
+
       " Se construyen los campos que tienen marcado la opción de pantalla de selección
       " El tipo de campo será 'S' para indicar que es un select options
       LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WHERE sel_screen = abap_true.
@@ -1087,8 +1088,43 @@ FORM selection_screen .
 
         INSERT VALUE #( tablename = lv_tabname fieldname = <ls_fields>-fieldname
                         type = 'S' ) INTO TABLE <ls_sel_screen>-fields.
-        INSERT VALUE #( tablename = lv_tabname fieldname = <ls_fields>-fieldname text = <ls_fields>-reptext )
-               INTO TABLE <ls_sel_screen>-fields_text.
+
+        " El texto se tomará el que tenga mayor longitud y no supere los 30 carácteres
+        READ TABLE mt_fields_text ASSIGNING FIELD-SYMBOL(<ls_fields_text>)
+                                  WITH KEY tabname = <ls_fields>-tabname
+                                           fieldname = <ls_fields>-fieldname.
+        IF sy-subrc = 0.
+          " Se informan todos los textos en una tabla junto a su longitud, el que sea más largo y no supere el tamaño del campo ese será el escogido.
+          " El motivo es simple, ya que cada uno puede tener el texto que quiera en elemento de datos o de manera manual. Y no siempre el texto más largo
+          " estará en el campo donde debería. Ejemplo el elemento de datos XUBNAME tiene el mejor texto en la cabecera.
+          CLEAR lt_opt_text.
+          IF <ls_fields_text>-scrtext_l IS NOT INITIAL.
+            INSERT VALUE #( text = <ls_fields_text>-scrtext_l len = strlen( <ls_fields_text>-scrtext_l ) ) INTO TABLE lt_opt_text.
+          ENDIF.
+          IF <ls_fields_text>-scrtext_m IS NOT INITIAL.
+            INSERT VALUE #( text = <ls_fields_text>-scrtext_m len = strlen( <ls_fields_text>-scrtext_m ) ) INTO TABLE lt_opt_text.
+          ENDIF.
+          IF <ls_fields_text>-scrtext_s IS NOT INITIAL.
+            INSERT VALUE #( text = <ls_fields_text>-scrtext_s len = strlen( <ls_fields_text>-scrtext_s ) ) INTO TABLE lt_opt_text.
+          ENDIF.
+          IF <ls_fields_text>-reptext IS NOT INITIAL.
+            INSERT VALUE #( text = <ls_fields_text>-reptext len = strlen( <ls_fields_text>-reptext ) ) INTO TABLE lt_opt_text.
+          ENDIF.
+          " Debería haber textos porque sino el campo saldrá sin texto
+          IF lt_opt_text IS NOT INITIAL.
+            SORT lt_opt_text BY len DESCENDING. " Me quedo con la longitud más alta
+            READ TABLE lt_opt_text ASSIGNING FIELD-SYMBOL(<ls_opt_text>) INDEX 1.
+
+            INSERT VALUE #( tablename = lv_tabname fieldname = <ls_fields>-fieldname text = <ls_opt_text>-text )
+                   INTO TABLE <ls_sel_screen>-fields_text.
+
+          ELSE.
+            INSERT VALUE #( tablename = lv_tabname fieldname = <ls_fields>-fieldname text = <ls_fields>-reptext ) INTO TABLE <ls_sel_screen>-fields_text.
+          ENDIF.
+        ELSE. " Si no hay texto se pone el texto del campo
+          INSERT VALUE #( tablename = lv_tabname fieldname = <ls_fields>-fieldname text = <ls_fields>-reptext )
+          INTO TABLE <ls_sel_screen>-fields_text.
+        ENDIF.
       ENDLOOP.
 
     ENDIF.

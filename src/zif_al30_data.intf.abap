@@ -69,6 +69,7 @@ INTERFACE zif_al30_data
       where_clauses TYPE rsds_twhere,
       expressions   TYPE rsds_texpr,
     END OF ts_filter_read_data .
+  TYPES: tt_strings TYPE STANDARD TABLE OF string WITH EMPTY KEY.
 
   CONSTANTS:
     BEGIN OF cs_internal_tables,
@@ -146,4 +147,7 @@ INTERFACE zif_al30_data
                no_output   TYPE fieldname VALUE 'NO_OUTPUT',
                checkbox    TYPE fieldname VALUE 'CHECKBOX',
              END OF cs_fix_field_conf.
+  CONSTANTS: BEGIN OF cs_selection_screen_view,
+               data_element_text_field TYPE string VALUE 'RSDSTEXTS-TEXT',
+             END OF cs_selection_screen_view.
 ENDINTERFACE.

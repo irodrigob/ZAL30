@@ -42,8 +42,8 @@ CLASS zcl_al30_util DEFINITION
     CLASS-METHODS get_fields_struc
       IMPORTING
         !iv_struc        TYPE any
-      RETURNING
-        VALUE(rt_fields) TYPE string_t .
+      EXPORTING
+        et_fields TYPE zif_al30_data=>tt_strings .
     CLASS-METHODS allowed_transport
       RETURNING
         VALUE(rv_allowed) TYPE sap_bool .
@@ -494,11 +494,11 @@ CLASS zcl_al30_util IMPLEMENTATION.
 
   METHOD get_fields_struc.
 
-    CLEAR rt_fields.
+    CLEAR et_fields.
 
     DATA(lo_struc) = CAST cl_abap_structdescr( cl_abap_typedescr=>describe_by_name( iv_struc ) ).
 
-    rt_fields = VALUE #( FOR <components> IN lo_struc->get_components( ) ( <components>-name ) ).
+    et_fields = VALUE #( FOR <components> IN lo_struc->get_components( ) ( <components>-name ) ).
 
   ENDMETHOD.
 

@@ -549,7 +549,8 @@ ENDFORM.
 FORM enabled_field_texts_source .
 
 * Sacamos los campos asociados a los atributos de texto
-  DATA(lt_fields_alv) = zcl_al30_util=>get_fields_struc( zif_al30_data=>cv_fields_attr_text ).
+  zcl_al30_util=>get_fields_struc( EXPORTING iv_struc = zif_al30_data=>cv_fields_attr_text
+                                   IMPORTING et_fields = DATA(lt_fields_alv) ).
 
   LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>).
 
