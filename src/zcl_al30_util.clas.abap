@@ -10,6 +10,8 @@ CLASS zcl_al30_util DEFINITION
 *"* do not include other source files here!!!
       tt_keys TYPE STANDARD TABLE OF trobj_name .
 
+
+
     CLASS-METHODS fill_return
       IMPORTING
         !iv_type         TYPE any
@@ -41,7 +43,7 @@ CLASS zcl_al30_util DEFINITION
         !et_values TYPE zif_al30_data=>tt_key_value .
     CLASS-METHODS get_fields_struc
       IMPORTING
-        !iv_struc        TYPE any
+        !iv_struc TYPE any
       EXPORTING
         et_fields TYPE zif_al30_data=>tt_strings .
     CLASS-METHODS allowed_transport
@@ -392,40 +394,27 @@ CLASS zcl_al30_util IMPLEMENTATION.
 
 
   METHOD f4_view.
-    TYPES: BEGIN OF ty_values,
-             tabname TYPE tabname,
-             text    TYPE as4text,
-           END OF ty_values.
-
-    DATA lt_values TYPE STANDARD TABLE OF ty_values.
     DATA lt_return_tab TYPE TABLE OF ddshretval.
     FIELD-SYMBOLS <ls_return_tab> TYPE ddshretval.
-    FIELD-SYMBOLS <ls_values> TYPE ty_values.
 
-    SELECT a~tabname b~ddtext INTO TABLE lt_values
-           FROM zal30_t_view AS a LEFT OUTER JOIN dd02t AS b ON
-                b~tabname = a~tabname
-                AND b~ddlanguage = sy-langu.
+    NEW zcl_al30_controller(  )->view_list( IMPORTING et_view_list = DATA(lt_view_list) ).
 
-    IF sy-subrc = 0.
+    IF lt_view_list IS NOT INITIAL.
       CALL FUNCTION 'F4IF_INT_TABLE_VALUE_REQUEST'
         EXPORTING
-          retfield    = 'TABNAME'
+          retfield    = 'VIEW_NAME'
           dynpprog    = iv_program
           dynpnr      = iv_dynpro
           dynprofield = iv_dynprofield
           value_org   = 'S'
         TABLES
-          value_tab   = lt_values
+          value_tab   = lt_view_list
           return_tab  = lt_return_tab[].
 
 * Miro que registro se ha seleccionado y lo devuelvo al parámetro.
       READ TABLE lt_return_tab ASSIGNING <ls_return_tab> INDEX 1.
       IF sy-subrc = 0.
-        READ TABLE lt_values ASSIGNING <ls_values> INDEX <ls_return_tab>-recordpos.
-        IF sy-subrc = 0.
-          ev_view = <ls_values>-tabname.
-        ENDIF.
+        ev_view = <ls_return_tab>-fieldval.
       ENDIF.
 
     ELSE.
@@ -557,7 +546,7 @@ CLASS zcl_al30_util IMPLEMENTATION.
 
 * Se Añade las entradas de los campos clave
       LOOP AT it_keys ASSIGNING FIELD-SYMBOL(<ls_key>).
-        APPEND VALUE #( pgmid = 'R3TR' object = 'TABU' mastertype = 'VDAT' mastername = iv_tabname objname = lv_roottab VIEWNAME = iv_tabname tabkey = <ls_key>  ) TO lt_e071k.
+        APPEND VALUE #( pgmid = 'R3TR' object = 'TABU' mastertype = 'VDAT' mastername = iv_tabname objname = lv_roottab viewname = iv_tabname tabkey = <ls_key>  ) TO lt_e071k.
       ENDLOOP.
 
     ELSE.

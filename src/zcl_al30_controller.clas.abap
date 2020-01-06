@@ -8,6 +8,14 @@ CLASS zcl_al30_controller DEFINITION
 *"* public components of class ZCL_AL30_CONTROLLER
 *"* do not include other source files here!!!
     METHODS constructor .
+    "! <p class="shorttext synchronized" lang="en">View List created</p>
+    "!
+    "! @parameter et_view_list | <p class="shorttext synchronized" lang="en">View list</p>
+    METHODS view_list
+      IMPORTING
+        !iv_langu     TYPE sylangu DEFAULT sy-langu
+      EXPORTING
+        !et_view_list TYPE zcl_al30_view=>tt_view_list.
     METHODS read_view
       IMPORTING
         !iv_name_view        TYPE tabname
@@ -736,5 +744,10 @@ CLASS zcl_al30_controller IMPLEMENTATION.
     rv_have = mo_view->view_have_user_auth( iv_view ).
   ENDMETHOD.
 
+
+  METHOD view_list.
+    mo_view->view_list( EXPORTING iv_langu = iv_langu
+                        IMPORTING et_view_list = et_view_list ).
+  ENDMETHOD.
 
 ENDCLASS.

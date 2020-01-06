@@ -98,6 +98,12 @@
      <LANGU>E</LANGU>
      <DESCRIPT>Check the contents of field</DESCRIPT>
     </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>VIEW_LIST</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>View List created</DESCRIPT>
+    </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>
  </asx:abap>

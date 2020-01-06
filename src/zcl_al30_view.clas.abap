@@ -6,7 +6,20 @@ CLASS zcl_al30_view DEFINITION
 *"* public components of class ZCL_AL30_VIEW
 *"* do not include other source files here!!!
     TYPE-POOLS adbc .
+    TYPES: BEGIN OF ts_view_list,
+             view_name TYPE zal30_t_view-tabname,
+             view_desc TYPE dd02t-ddtext,
+           END OF ts_view_list.
+    TYPES: tt_view_list TYPE STANDARD TABLE OF ts_view_list WITH EMPTY KEY.
 
+    "! <p class="shorttext synchronized" lang="en">View List created</p>
+    "! View list created. Useful for use in the F4.
+    "! @parameter et_view_list | <p class="shorttext synchronized" lang="en">View list</p>
+    METHODS view_list
+      IMPORTING
+        !iv_langu     TYPE sylangu DEFAULT sy-langu
+      EXPORTING
+        !et_view_list TYPE tt_view_list.
     METHODS read_data
       IMPORTING
         is_filters TYPE zif_al30_data=>ts_filter_read_data
@@ -95,156 +108,156 @@ CLASS zcl_al30_view DEFINITION
         !is_view             TYPE zal30_t_view
         !it_fields_ddic      TYPE dd03ptab .
 
-protected section.
+  PROTECTED SECTION.
 
-  types:
+    TYPES:
 *"* protected components of class ZCL_AL30_VIEW
 *"* do not include other source files here!!!
-    BEGIN OF ts_main_change_log,
-             tabname   TYPE tabname,
-             tabkey    TYPE cdtabkey,
-             chngind   TYPE cdchngind,
-             fieldname TYPE fieldname,
-             value_new TYPE cdfldvaln,
-             value_old TYPE cdfldvalo,
-           END OF ts_main_change_log .
-  types:
-    tt_main_change_log TYPE STANDARD TABLE OF ts_main_change_log .
+      BEGIN OF ts_main_change_log,
+        tabname   TYPE tabname,
+        tabkey    TYPE cdtabkey,
+        chngind   TYPE cdchngind,
+        fieldname TYPE fieldname,
+        value_new TYPE cdfldvaln,
+        value_old TYPE cdfldvalo,
+      END OF ts_main_change_log .
+    TYPES:
+      tt_main_change_log TYPE STANDARD TABLE OF ts_main_change_log .
 
-  data MO_EXIT_CLASS type ref to OBJECT .
-  data MT_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW .
-  data MT_FIELDS_TEXT type ZIF_AL30_DATA=>TT_FIELDS_TEXT_VIEW .
-  data MT_FIELDS_DDIC type DD03PTAB .
-  data MS_VIEW type ZAL30_T_VIEW .
-  data MO_ORIGINAL_DATA type ref to DATA .
-  data MV_ABORT_SAVE type SAP_BOOL .
+    DATA mo_exit_class TYPE REF TO object .
+    DATA mt_fields TYPE zif_al30_data=>tt_fields_view .
+    DATA mt_fields_text TYPE zif_al30_data=>tt_fields_text_view .
+    DATA mt_fields_ddic TYPE dd03ptab .
+    DATA ms_view TYPE zal30_t_view .
+    DATA mo_original_data TYPE REF TO data .
+    DATA mv_abort_save TYPE sap_bool .
 
-  methods EXIT_AFTER_SAVE_DATA
-    importing
-      !IT_DATA type STANDARD TABLE
-      !IT_DATA_DEL type STANDARD TABLE
-      !IV_ERROR_SAVE type SAP_BOOL .
-  methods EXIT_BEFORE_SAVE_DATA
-    exporting
-      !EV_ABORT_SAVE type SAP_BOOL
-      !ET_RETURN type BAPIRET2_T
-    changing
-      !CT_DATA type STANDARD TABLE
-      !CT_DATA_DEL type STANDARD TABLE .
-  methods RESET_DATA
-    changing
-      !CT_DATOS type STANDARD TABLE
-      !CT_DATOS_DEL type STANDARD TABLE .
-  methods EXIT_CHECK_AUTH_DATA_READ
-    importing
-      !IS_ROW_DATA type ANY
-    returning
-      value(RV_AUTH) type SAP_BOOL .
-  methods EXIT_IN_PROCESS_DATA_READ
-    changing
-      !CS_ROW_DATA type ANY .
-  methods EXIT_BEFORE_READ_DATA
-    changing
-      !CT_DATA type STANDARD TABLE .
-  methods EXIT_VERIFY_FIELD_DATA
-    importing
-      !IV_FIELDNAME type ANY
-      !IV_VALUE type ANY
-    exporting
-      !ES_RETURN type BAPIRET2 .
-  methods EXIT_VERIFY_CHANGE_ROW_DATA
-    exporting
-      value(ES_RETURN) type BAPIRET2
-    changing
-      !CS_ROW_DATA type ANY .
-  methods ADD_FIELDS_TEXTTABLE
-    importing
-      !IV_VIEW type TABNAME
-      !IT_FIELDS type ZIF_AL30_DATA=>TT_FIELDS_VIEW
-    changing
-      !CT_FCAT type LVC_T_FCAT .
-  methods ADD_EDIT_FIELDS
-    changing
-      !CT_FCAT type LVC_T_FCAT .
-  methods GET_LVC_FIELDCAT
-    importing
-      value(IS_VIEW) type ZAL30_T_VIEW
-    returning
-      value(RT_FCAT) type LVC_T_FCAT .
-  methods EXIT_PROCESS_CATALOG_OF_FIELD
-    changing
-      value(CS_FIELDCAT) type LVC_S_FCAT .
-  methods CREATE_SQL_READ
-    importing
-      !IS_FILTERS type ZIF_AL30_DATA=>TS_FILTER_READ_DATA
-    exporting
-      !ET_COLS type ADBC_COLUMN_TAB
-      !EV_SQL type STRING .
-  methods CREATE_JOIN_SQL_TEXTTABLE
-    returning
-      value(RV_RESULT) type STRING .
-  methods LOCK_TABLE
-    importing
-      !IV_TABLE type OCUS-TABLE
-    raising
-      ZCX_AL30 .
-  methods UNLOCK_TABLE
-    importing
-      !IV_TABLE type TABNAME .
-  methods SAVE_DATA_ERASED
-    importing
-      !IV_ALLOW_REQUEST type SAP_BOOL
-    exporting
-      !ES_RETURN type BAPIRET2
-    changing
-      !CT_DATOS_DEL type STANDARD TABLE
-      !CV_ORDER type E070-TRKORR .
-  methods SAVE_CHANGE_LOG
-    importing
-      !IT_DATOS type STANDARD TABLE
-      !IT_DATOS_DEL type STANDARD TABLE .
-  methods FILL_CHANGE_LOG
-    importing
-      !IT_DATA type STANDARD TABLE
-    changing
-      !CT_CHANGE_LOG type TT_MAIN_CHANGE_LOG .
-  methods CONV_DATA_2_CHANGELOG_KEY
-    importing
-      !IS_DATA type ANY
-      !IT_FIELDS_DDIC type DD03PTAB
-    returning
-      value(RV_KEY) type CDTABKEY .
-  methods SAVE_DATA_INUP
-    importing
-      !IT_DATA type STANDARD TABLE
-      !IV_SAVE_TRANSPORT type SAP_BOOL
-    exporting
-      !ES_RETURN type BAPIRET2
-    changing
-      !CV_ORDER type E070-TRKORR
-      !CV_SAVE_ERROR type SAP_BOOL .
-  methods FILL_CHANGELOG_VALUES
-    importing
-      !IV_TABNAME type ZAL30_T_VIEW-TABNAME
-      !IV_CHNGIND type CDCHNGIND
-      !IT_FIELDS type DD03PTAB
-      !IS_DATA type ANY
-    changing
-      !CT_CHANGE_LOG type ZCL_AL30_VIEW=>TT_MAIN_CHANGE_LOG .
-  methods SEARCH_ROW_ORIGINAL_DATA
-    importing
-      !IS_DATA type ANY
-      !IV_TABNAME type ZAL30_T_VIEW-TABNAME
-    exporting
-      value(ES_DATA) type ANY .
-  methods CREATE_WHERE_SQL
-    importing
-      !IS_FILTERS type ZIF_AL30_DATA=>TS_FILTER_READ_DATA
-    returning
-      value(RV_WHERE) type STRING .
-  methods SHOW_POPUP_ERROR_MESSAGES
-    changing
-      !CT_RETURN type BAPIRET2_T .
+    METHODS exit_after_save_data
+      IMPORTING
+        !it_data       TYPE STANDARD TABLE
+        !it_data_del   TYPE STANDARD TABLE
+        !iv_error_save TYPE sap_bool .
+    METHODS exit_before_save_data
+      EXPORTING
+        !ev_abort_save TYPE sap_bool
+        !et_return     TYPE bapiret2_t
+      CHANGING
+        !ct_data       TYPE STANDARD TABLE
+        !ct_data_del   TYPE STANDARD TABLE .
+    METHODS reset_data
+      CHANGING
+        !ct_datos     TYPE STANDARD TABLE
+        !ct_datos_del TYPE STANDARD TABLE .
+    METHODS exit_check_auth_data_read
+      IMPORTING
+        !is_row_data   TYPE any
+      RETURNING
+        VALUE(rv_auth) TYPE sap_bool .
+    METHODS exit_in_process_data_read
+      CHANGING
+        !cs_row_data TYPE any .
+    METHODS exit_before_read_data
+      CHANGING
+        !ct_data TYPE STANDARD TABLE .
+    METHODS exit_verify_field_data
+      IMPORTING
+        !iv_fieldname TYPE any
+        !iv_value     TYPE any
+      EXPORTING
+        !es_return    TYPE bapiret2 .
+    METHODS exit_verify_change_row_data
+      EXPORTING
+        VALUE(es_return) TYPE bapiret2
+      CHANGING
+        !cs_row_data     TYPE any .
+    METHODS add_fields_texttable
+      IMPORTING
+        !iv_view   TYPE tabname
+        !it_fields TYPE zif_al30_data=>tt_fields_view
+      CHANGING
+        !ct_fcat   TYPE lvc_t_fcat .
+    METHODS add_edit_fields
+      CHANGING
+        !ct_fcat TYPE lvc_t_fcat .
+    METHODS get_lvc_fieldcat
+      IMPORTING
+        VALUE(is_view) TYPE zal30_t_view
+      RETURNING
+        VALUE(rt_fcat) TYPE lvc_t_fcat .
+    METHODS exit_process_catalog_of_field
+      CHANGING
+        VALUE(cs_fieldcat) TYPE lvc_s_fcat .
+    METHODS create_sql_read
+      IMPORTING
+        !is_filters TYPE zif_al30_data=>ts_filter_read_data
+      EXPORTING
+        !et_cols    TYPE adbc_column_tab
+        !ev_sql     TYPE string .
+    METHODS create_join_sql_texttable
+      RETURNING
+        VALUE(rv_result) TYPE string .
+    METHODS lock_table
+      IMPORTING
+        !iv_table TYPE ocus-table
+      RAISING
+        zcx_al30 .
+    METHODS unlock_table
+      IMPORTING
+        !iv_table TYPE tabname .
+    METHODS save_data_erased
+      IMPORTING
+        !iv_allow_request TYPE sap_bool
+      EXPORTING
+        !es_return        TYPE bapiret2
+      CHANGING
+        !ct_datos_del     TYPE STANDARD TABLE
+        !cv_order         TYPE e070-trkorr .
+    METHODS save_change_log
+      IMPORTING
+        !it_datos     TYPE STANDARD TABLE
+        !it_datos_del TYPE STANDARD TABLE .
+    METHODS fill_change_log
+      IMPORTING
+        !it_data       TYPE STANDARD TABLE
+      CHANGING
+        !ct_change_log TYPE tt_main_change_log .
+    METHODS conv_data_2_changelog_key
+      IMPORTING
+        !is_data        TYPE any
+        !it_fields_ddic TYPE dd03ptab
+      RETURNING
+        VALUE(rv_key)   TYPE cdtabkey .
+    METHODS save_data_inup
+      IMPORTING
+        !it_data           TYPE STANDARD TABLE
+        !iv_save_transport TYPE sap_bool
+      EXPORTING
+        !es_return         TYPE bapiret2
+      CHANGING
+        !cv_order          TYPE e070-trkorr
+        !cv_save_error     TYPE sap_bool .
+    METHODS fill_changelog_values
+      IMPORTING
+        !iv_tabname    TYPE zal30_t_view-tabname
+        !iv_chngind    TYPE cdchngind
+        !it_fields     TYPE dd03ptab
+        !is_data       TYPE any
+      CHANGING
+        !ct_change_log TYPE zcl_al30_view=>tt_main_change_log .
+    METHODS search_row_original_data
+      IMPORTING
+        !is_data       TYPE any
+        !iv_tabname    TYPE zal30_t_view-tabname
+      EXPORTING
+        VALUE(es_data) TYPE any .
+    METHODS create_where_sql
+      IMPORTING
+        !is_filters     TYPE zif_al30_data=>ts_filter_read_data
+      RETURNING
+        VALUE(rv_where) TYPE string .
+    METHODS show_popup_error_messages
+      CHANGING
+        !ct_return TYPE bapiret2_t .
   PRIVATE SECTION.
 
 *"* private components of class ZCL_AL30_VIEW
@@ -1731,6 +1744,19 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
     rv_have = abap_false.
 
     SELECT SINGLE auth_user INTO rv_have FROM zal30_t_view WHERE tabname = iv_view.
+
+  ENDMETHOD.
+
+
+  METHOD view_list.
+
+    CLEAR: et_view_list.
+
+
+    SELECT a~tabname as view_name b~ddtext as view_desc INTO TABLE et_view_list
+           FROM zal30_t_view AS a LEFT OUTER JOIN dd02t AS b ON
+                b~tabname = a~tabname
+                AND b~ddlanguage = iv_langu.
 
   ENDMETHOD.
 ENDCLASS.
