@@ -740,37 +740,52 @@ FORM check_autorization CHANGING ps_auth TYPE sap_bool
   ps_auth = abap_true. " Por defecto se tiene autorizacion
   ps_mode = zif_al30_data=>cv_mode_change. " Puede modificar
 
-* Se mira si tiene control de autorización por usuario
-  IF mo_controller->view_have_user_auth( zal30_t_view-tabname ) = abap_true.
-    DATA(lv_level_auth) = mo_controller->get_level_auth_view( iv_user = sy-uname iv_view = ms_view-tabname ).
+  DATA(lv_level_auth) = mo_controller->check_authorization_view( iv_view_name   = zal30_t_view-tabname
+                                           iv_view_action = COND #( WHEN ps_mode = zif_al30_data=>cv_mode_change THEN zif_al30_data=>cs_action_auth-update ELSE zif_al30_data=>cs_action_auth-show )
+                                           iv_user        = sy-uname ).
 
-    " Segun el nivel de autorización cambiará que es lo que puede hacer.
-    CASE lv_level_auth.
-      WHEN zif_al30_data=>cs_level_auth_user-non.
-        ps_auth = abap_false.
-      WHEN zif_al30_data=>cs_level_auth_user-read.
-        ps_mode = zif_al30_data=>cv_mode_view.
-      WHEN zif_al30_data=>cs_level_auth_user-full.
-        " Nada, valores por defecto
-    ENDCASE.
-  ENDIF.
+  " Segun el nivel de autorización cambiará que es lo que puede hacer.
+  CASE lv_level_auth.
+    WHEN zif_al30_data=>cs_level_auth_user-non.
+      ps_auth = abap_false.
+    WHEN zif_al30_data=>cs_level_auth_user-read.
+      ps_mode = zif_al30_data=>cv_mode_view.
+    WHEN zif_al30_data=>cs_level_auth_user-full.
+      " Nada, valores por defecto
+  ENDCASE.
 
-  IF ps_auth = abap_true.
-    IF mo_controller->view_have_sap_auth( zal30_t_view-tabname ).
 
-      TRY.
-          CALL METHOD mo_controller->check_authorization
-            EXPORTING
-              iv_view_name   = zal30_t_view-tabname
-              iv_view_action = COND #( WHEN ps_mode = zif_al30_data=>cv_mode_change THEN zif_al30_data=>cs_action_auth-update ELSE zif_al30_data=>cs_action_auth-show ).
-
-        CATCH zcx_al30 .
-          ps_auth = abap_false.
-      ENDTRY.
-
-    ENDIF.
-
-  ENDIF.
+** Se mira si tiene control de autorización por usuario
+*  IF mo_controller->view_have_user_auth( zal30_t_view-tabname ) = abap_true.
+*    DATA(lv_level_auth) = mo_controller->get_level_auth_view( iv_user = sy-uname iv_view = ms_view-tabname ).
+*
+*    " Segun el nivel de autorización cambiará que es lo que puede hacer.
+*    CASE lv_level_auth.
+*      WHEN zif_al30_data=>cs_level_auth_user-non.
+*        ps_auth = abap_false.
+*      WHEN zif_al30_data=>cs_level_auth_user-read.
+*        ps_mode = zif_al30_data=>cv_mode_view.
+*      WHEN zif_al30_data=>cs_level_auth_user-full.
+*        " Nada, valores por defecto
+*    ENDCASE.
+*  ENDIF.
+*
+*  IF ps_auth = abap_true.
+*    IF mo_controller->view_have_sap_auth( zal30_t_view-tabname ).
+*
+*      TRY.
+*          CALL METHOD mo_controller->check_sap_authorization
+*            EXPORTING
+*              iv_view_name   = zal30_t_view-tabname
+*              iv_view_action = COND #( WHEN ps_mode = zif_al30_data=>cv_mode_change THEN zif_al30_data=>cs_action_auth-update ELSE zif_al30_data=>cs_action_auth-show ).
+*
+*        CATCH zcx_al30 .
+*          ps_auth = abap_false.
+*      ENDTRY.
+*
+*    ENDIF.
+*
+*  ENDIF.
 
 ENDFORM.                    " CHECK_AUTORIZATION
 *&---------------------------------------------------------------------*

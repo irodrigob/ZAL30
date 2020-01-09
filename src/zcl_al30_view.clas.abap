@@ -59,7 +59,7 @@ CLASS zcl_al30_view DEFINITION
         VALUE(es_return) TYPE bapiret2
       CHANGING
         !cs_row_data     TYPE any .
-    METHODS check_authorization
+    METHODS check_sap_authorization
       IMPORTING
         !iv_view_name   TYPE tabname
         !iv_view_action TYPE any DEFAULT 'U'
@@ -313,7 +313,7 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD check_authorization.
+  METHOD check_sap_authorization.
     DATA ld_view_name TYPE dd25v-viewname.
 
     ld_view_name = iv_view_name.

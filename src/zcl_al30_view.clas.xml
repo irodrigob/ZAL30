@@ -22,12 +22,6 @@
    <DESCRIPTIONS>
     <SEOCOMPOTX>
      <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
-     <CMPNAME>CHECK_AUTHORIZATION</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>Check authorization for editing or viewing</DESCRIPT>
-    </SEOCOMPOTX>
-    <SEOCOMPOTX>
-     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
      <CMPNAME>CREATE_IT_DATA_VIEW</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Create the internal table for display data of the view</DESCRIPT>

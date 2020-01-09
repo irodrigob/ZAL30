@@ -46,29 +46,3 @@ INCLUDE zal30_main_view_f01.
 INCLUDE zal30_main_view_o01.
 
 INCLUDE zal30_main_view_i01.
-*&---------------------------------------------------------------------*
-*& Module SCREEN_FIELDS_9000 OUTPUT
-*&---------------------------------------------------------------------*
-*&
-*&---------------------------------------------------------------------*
-MODULE screen_fields_9000 OUTPUT.
-
-  " Desactivo el campo de entrada de la tabla porque ya viene preinformado
-  LOOP AT SCREEN.
-
-    " En el caso que la transacción de origen no sea distinta a la del programa y la tabla
-    " esta informando lo que se hace es proteger el campo para que no se pueda cambiar. El motivo
-    " es que viene de una transacción por parámetro y se evita que pueda cambiar de tabla.
-    " Además se marca que se ha deshabilitado el campo de entrada de la tabla.
-    IF screen-name = 'ZAL30_T_VIEW-TABNAME' .
-      IF ms_conf_screen-origin_tcode NE zif_al30_data=>cs_prog_tcode-view
-         AND ms_view-tabname IS NOT INITIAL.
-        screen-input = 0.
-      ELSE.
-        screen-input = 1.
-      ENDIF.
-    ENDIF.
-    MODIFY SCREEN.
-
-  ENDLOOP.
-ENDMODULE.

@@ -4,6 +4,7 @@ INTERFACE zif_al30_data
 
   TYPES:
     tv_operation TYPE c LENGTH 1 .
+  TYPES: tv_action_auth TYPE c LENGTH 1.
   TYPES:
     BEGIN OF ts_key_value,
       key   TYPE string,
@@ -116,8 +117,8 @@ INTERFACE zif_al30_data
     END OF cs_level_auth_user .
   CONSTANTS:
     BEGIN OF cs_action_auth,
-      update TYPE c LENGTH 1 VALUE 'U',
-      show   TYPE c LENGTH 1 VALUE 'S',
+      update TYPE tv_action_auth VALUE 'U',
+      show   TYPE tv_action_auth VALUE 'S',
     END OF cs_action_auth .
   CONSTANTS:
     BEGIN OF cs_alias_sql,

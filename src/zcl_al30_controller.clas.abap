@@ -134,12 +134,24 @@ CLASS zcl_al30_controller DEFINITION
       EXPORTING
         !ev_diff_fields          TYPE sap_bool
         !ev_diff_text            TYPE sap_bool .
-    METHODS check_authorization
+    METHODS check_sap_authorization
       IMPORTING
         !iv_view_name   TYPE tabname
         !iv_view_action TYPE any DEFAULT zif_al30_data=>cs_action_auth-update
       RAISING
         zcx_al30 .
+    "! <p class="shorttext synchronized" lang="en">Check the authorization level in view</p>
+    "!
+    "! @parameter iv_view_name | <p class="shorttext synchronized" lang="en">View name</p>
+    "! @parameter iv_view_action | <p class="shorttext synchronized" lang="en">'U' Update 'S' Show</p>
+    "! @parameter iv_user | <p class="shorttext synchronized" lang="en">Username</p>
+    "! @parameter rv_level_auth | <p class="shorttext synchronized" lang="en">Level auth</p>
+    METHODS check_authorization_view
+      IMPORTING
+                !iv_view_name        TYPE tabname
+                !iv_view_action      TYPE any
+                !iv_user             TYPE syuname
+      RETURNING VALUE(rv_level_auth) TYPE zal30_e_level_auth .
     METHODS transport_data_entries
       IMPORTING
         !it_data         TYPE STANDARD TABLE
@@ -329,23 +341,35 @@ CLASS zcl_al30_controller IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD check_authorization.
+  METHOD check_authorization_view.
 
 
-    TRY.
-        CALL METHOD mo_view->check_authorization
-          EXPORTING
-            iv_view_name   = iv_view_name
-            iv_view_action = iv_view_action.
-      CATCH zcx_al30 .
-        RAISE EXCEPTION TYPE zcx_al30
-          EXPORTING
-            textid = zcx_al30=>no_authorization.
-    ENDTRY.
+    " Primera validación es si tiene autorización a medida por tabla, si la tabla lo tiene habilitado.
+    "Si no lo tiene se marca el nivel que se le haya pasado. Si no se le ha pasado nada o se le pasa actualización es que tiene acceso a todo
+    rv_level_auth = COND #( WHEN view_have_user_auth( iv_view_name ) = abap_true
+                            THEN get_level_auth_view( iv_user = COND #( WHEN iv_user IS INITIAL THEN sy-uname ELSE iv_user ) iv_view = iv_view_name )
+                            ELSE COND #( WHEN iv_view_action = zif_al30_data=>cs_action_auth-show
+                                         THEN zif_al30_data=>cs_level_auth_user-read ELSE zif_al30_data=>cs_level_auth_user-full ) ).
 
+    " Si en la primera no tiene autorización ya no se valida el resto
+    IF rv_level_auth NE zif_al30_data=>cs_level_auth_user-non.
 
+      " Segunda si tiene habilitada la áutorización a nivel de SAP se ejecuta según el nivel de autorización del paso anterior.
+      " Si no tiene habilitado que valide la autorización en SAP se queda con el nivel anterior.
+      TRY.
+          " Se determina la acción de la vista para pasarsela al método
+          DATA(lv_view_action) = COND zif_al30_data=>tv_action_auth( WHEN rv_level_auth = zif_al30_data=>cs_level_auth_user-read THEN zif_al30_data=>cs_action_auth-show
+                                                                     ELSE zif_al30_data=>cs_action_auth-update ).
+          IF view_have_sap_auth( iv_view_name ) = abap_true.
+            check_sap_authorization( iv_view_name = iv_view_name
+                                          iv_view_action = lv_view_action ).
+          ENDIF.
 
+        CATCH zcx_al30 . " Si hay excepción no tendrá autorización
+          rv_level_auth = zif_al30_data=>cs_level_auth_user-non.
+      ENDTRY.
 
+    ENDIF.
 
   ENDMETHOD.
 
@@ -384,6 +408,27 @@ CLASS zcl_al30_controller IMPLEMENTATION.
   METHOD check_exit_class.
 
     rs_return = mo_conf->check_exit_class( iv_exit_class = iv_exit_class ).
+
+  ENDMETHOD.
+
+
+  METHOD check_sap_authorization.
+
+
+    TRY.
+        CALL METHOD mo_view->check_sap_authorization
+          EXPORTING
+            iv_view_name   = iv_view_name
+            iv_view_action = iv_view_action.
+      CATCH zcx_al30 .
+        RAISE EXCEPTION TYPE zcx_al30
+          EXPORTING
+            textid = zcx_al30=>no_authorization.
+    ENDTRY.
+
+
+
+
 
   ENDMETHOD.
 
@@ -749,5 +794,4 @@ CLASS zcl_al30_controller IMPLEMENTATION.
     mo_view->view_list( EXPORTING iv_langu = iv_langu
                         IMPORTING et_view_list = et_view_list ).
   ENDMETHOD.
-
 ENDCLASS.
