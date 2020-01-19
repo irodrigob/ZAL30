@@ -4,6 +4,7 @@ INTERFACE zif_al30_data
 
   TYPES:
     tv_operation TYPE c LENGTH 1 .
+  TYPES: tt_r_tabname TYPE RANGE OF tabname.
   TYPES: tv_action_auth TYPE c LENGTH 1.
   TYPES:
     BEGIN OF ts_key_value,

@@ -10,10 +10,13 @@ CLASS zcl_al30_controller DEFINITION
     METHODS constructor .
     "! <p class="shorttext synchronized" lang="en">View List created</p>
     "!
+    "! @parameter iv_langu | <p class="shorttext synchronized" lang="en">language</p>
+    "! @parameter it_r_views | <p class="shorttext synchronized" lang="en">Views to filter</p>
     "! @parameter et_view_list | <p class="shorttext synchronized" lang="en">View list</p>
     METHODS view_list
       IMPORTING
         !iv_langu     TYPE sylangu DEFAULT sy-langu
+        !it_r_views   TYPE zif_al30_data=>tt_r_tabname OPTIONAL
       EXPORTING
         !et_view_list TYPE zcl_al30_view=>tt_view_list.
     METHODS read_view
@@ -792,6 +795,7 @@ CLASS zcl_al30_controller IMPLEMENTATION.
 
   METHOD view_list.
     mo_view->view_list( EXPORTING iv_langu = iv_langu
+                                  it_r_views = it_r_views
                         IMPORTING et_view_list = et_view_list ).
   ENDMETHOD.
 ENDCLASS.

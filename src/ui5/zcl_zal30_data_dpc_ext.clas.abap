@@ -18,6 +18,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
   METHOD getviewsset_get_entityset.
     DATA lv_langu TYPE sylangu.
     DATA lv_user TYPE string.
+    DATA lt_r_views TYPE zif_al30_data=>tt_r_tabname.
 
     CLEAR et_entityset.
 
@@ -36,12 +37,22 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
 
     ENDIF.
 
+    " Usuario
     READ TABLE it_filter_select_options ASSIGNING <ls_filter> WITH KEY property = 'USER'.
     IF sy-subrc = 0.
       READ TABLE <ls_filter>-select_options ASSIGNING <ls_select_options> INDEX 1.
       IF sy-subrc = 0.
         lv_user = <ls_select_options>-low.
       ENDIF.
+    ENDIF.
+
+    " Vistas
+    READ TABLE it_filter_select_options ASSIGNING <ls_filter> WITH KEY property = 'VIEWNAME'.
+    IF sy-subrc = 0.
+      LOOP AT <ls_filter>-select_options ASSIGNING <ls_select_options>.
+        INSERT VALUE #( sign = <ls_select_options>-sign option = <ls_select_options>-option
+                        low = <ls_select_options>-low high = <ls_select_options>-high ) INTO TABLE lt_r_views.
+      ENDLOOP.
     ENDIF.
 
     " Si no hay idioma o no es válido entonces se informa el idioma del sistema
@@ -51,10 +62,12 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
       EXPORTING
         iv_user  = lv_user
         iv_langu = lv_langu
+        it_r_views = lt_r_views
       IMPORTING
         et_views = DATA(lt_views) ).
 
-    et_entityset = VALUE #( FOR <wa> IN lt_views ( view_name = <wa>-view_name view_desc = <wa>-view_desc ) ).
+    et_entityset = VALUE #( FOR <wa> IN lt_views ( view_name = <wa>-view_name view_desc = <wa>-view_desc
+                                                   level_auth = <wa>-level_auth ) ).
 
 
   ENDMETHOD.
@@ -67,7 +80,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
   METHOD checkauthviewset_get_entity.
 
     " Se recupera la vista pasada
-    READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_key_tab>) WITH KEY name = 'VIEW_NAME'.
+    READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_key_tab>) WITH KEY name = 'VIEWNAME'.
     IF sy-subrc = 0.
       er_entity-level_auth = mo_controller->check_authorization_view( iv_view_name   = CONV #( <ls_key_tab>-value ) ).
       er_entity-view_name = <ls_key_tab>-value.

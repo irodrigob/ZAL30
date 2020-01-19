@@ -14,10 +14,13 @@ CLASS zcl_al30_view DEFINITION
 
     "! <p class="shorttext synchronized" lang="en">View List created</p>
     "! View list created. Useful for use in the F4.
+    "! @parameter iv_langu | <p class="shorttext synchronized" lang="en">Language</p>
+    "! @parameter it_r_views | <p class="shorttext synchronized" lang="en">Views to filter</p>
     "! @parameter et_view_list | <p class="shorttext synchronized" lang="en">View list</p>
     METHODS view_list
       IMPORTING
         !iv_langu     TYPE sylangu DEFAULT sy-langu
+        !it_r_views   TYPE zif_al30_data=>tt_r_tabname OPTIONAL
       EXPORTING
         !et_view_list TYPE tt_view_list.
     METHODS read_data
@@ -266,7 +269,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_AL30_VIEW IMPLEMENTATION.
+CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD add_edit_fields.
@@ -1753,10 +1756,11 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
     CLEAR: et_view_list.
 
 
-    SELECT a~tabname as view_name b~ddtext as view_desc INTO TABLE et_view_list
+    SELECT a~tabname AS view_name b~ddtext AS view_desc INTO TABLE et_view_list
            FROM zal30_t_view AS a LEFT OUTER JOIN dd02t AS b ON
                 b~tabname = a~tabname
-                AND b~ddlanguage = iv_langu.
+                AND b~ddlanguage = iv_langu
+                WHERE a~tabname IN it_r_views.
 
   ENDMETHOD.
 ENDCLASS.
