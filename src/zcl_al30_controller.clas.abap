@@ -243,6 +243,31 @@ CLASS zcl_al30_controller DEFINITION
         !it_fields_ddic          TYPE dd03ptab
         !is_view                 TYPE zal30_t_view .
 
+    "! <p class="shorttext synchronized" lang="en">Read info of a data element</p>
+    "!
+    "! @parameter iv_dtel | <p class="shorttext synchronized" lang="en">Data element</p>
+    "! @parameter es_info | <p class="shorttext synchronized" lang="en">info</p>
+    METHODS read_single_data_element
+      IMPORTING
+        !iv_dtel  TYPE rollname
+        !iv_langu TYPE sylangu DEFAULT sy-langu
+      EXPORTING
+        !es_info  TYPE dd04v
+      RAISING
+        zcx_al30 .
+
+    "! <p class="shorttext synchronized" lang="en">Read info in all languages</p>
+    "!
+    "! @parameter iv_dtel | <p class="shorttext synchronized" lang="en">Data element</p>
+    "! @parameter et_info | <p class="shorttext synchronized" lang="en">Information in each language</p>
+    METHODS read_data_element_all_lang
+      IMPORTING
+        !iv_dtel TYPE rollname
+      EXPORTING
+        !et_info TYPE zcl_al30_conf=>tt_info_data
+      RAISING
+        zcx_al30 .
+
   PROTECTED SECTION.
 *"* private components of class ZCL_AL30_CONTROLLER
 *"* do not include other source files here!!!
@@ -798,4 +823,14 @@ CLASS zcl_al30_controller IMPLEMENTATION.
                                   it_r_views = it_r_views
                         IMPORTING et_view_list = et_view_list ).
   ENDMETHOD.
+  METHOD read_data_element_all_lang.
+    mo_conf->read_data_element_all_lang( EXPORTING iv_dtel = iv_dtel
+                                         IMPORTING et_info = et_info ).
+  ENDMETHOD.
+
+  METHOD read_single_data_element.
+    mo_conf->read_single_data_element( EXPORTING iv_dtel = iv_dtel
+                                       IMPORTING es_info = es_info ).
+  ENDMETHOD.
+
 ENDCLASS.

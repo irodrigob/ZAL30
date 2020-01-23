@@ -158,3 +158,16 @@ MODULE check_class_exit INPUT.
   ENDIF.
 
 ENDMODULE.                 " CHECK_CLASS_EXIT  INPUT
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_9004  INPUT
+*&---------------------------------------------------------------------*
+MODULE user_command_9004 INPUT.
+
+  CASE mv_okcode_9004.
+    WHEN 'ADD_VIR'. " Añadir campo virtual
+      PERFORM add_virtual_field.
+    WHEN 'CANCEL'.
+      SET SCREEN 0. LEAVE SCREEN.
+  ENDCASE.
+
+ENDMODULE.

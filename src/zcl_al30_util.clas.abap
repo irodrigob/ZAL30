@@ -86,6 +86,15 @@ CLASS zcl_al30_util DEFINITION
         !cv_order   TYPE e070-trkorr
       RAISING
         zcx_al30 .
+
+    "! <p class="shorttext synchronized" lang="en">Check if exist the data element</p>
+    "!
+    "! @parameter iv_dtel | <p class="shorttext synchronized" lang="en">Data element</p>
+    "! @parameter rv_exist | <p class="shorttext synchronized" lang="en">Exist or not</p>
+    CLASS-METHODS exist_data_element
+      IMPORTING
+                !iv_dtel        TYPE rollname
+      RETURNING VALUE(rv_exist) TYPE sap_bool.
   PROTECTED SECTION.
 
     CLASS-METHODS conv_data_2_keys_trkorr
@@ -622,4 +631,16 @@ CLASS zcl_al30_util IMPLEMENTATION.
     ENDTRY.
 
   ENDMETHOD.
+  METHOD exist_data_element.
+    SELECT SINGLE @abap_true INTO @DATA(lv_exist)
+           FROM dd04l
+           WHERE rollname = @iv_dtel
+                 AND as4local = 'A'.
+    IF sy-subrc = 0.
+      rv_exist = abap_true.
+    ELSE.
+      rv_exist = abap_false.
+    ENDIF.
+  ENDMETHOD.
+
 ENDCLASS.

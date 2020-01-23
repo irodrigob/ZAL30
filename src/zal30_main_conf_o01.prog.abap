@@ -184,6 +184,7 @@ MODULE alv_gen OUTPUT.
 
 * Layout
       ms_layout_gen-stylefname = 'CELLTAB'.
+      ms_layout_gen-cwidth_opt = abap_true.
 
 * Campos con dropdown
       mo_alv_gen->set_drop_down_table(
@@ -207,6 +208,10 @@ MODULE alv_gen OUTPUT.
 * Activo el evento de validación de datos
       CREATE OBJECT mo_event_receiver_gen.
       SET HANDLER mo_event_receiver_gen->handle_data_changed FOR mo_alv_gen.
+      SET HANDLER mo_event_receiver_gen->handle_toolbar FOR mo_alv_gen.
+
+      " Se lanza el evento para que pinta la barra de herramientas
+      mo_alv_gen->set_toolbar_interactive( ).
 
     ELSE.
 
@@ -362,12 +367,16 @@ MODULE toolbar_fields OUTPUT.
       CLEAR mt_buttongroup.
 
 * Parametros: Codigo, icono, tipo, texto, tooltip
-* Verificación de integridad de datos
-      PERFORM fill_button_table USING mc_check_dict '@38@' cntb_btype_button space TEXT-b02.
-* Sincronización de datos
-      PERFORM fill_button_table USING mc_sync_dict '@39@' cntb_btype_button space TEXT-b01.
-* Selección de idioma
-      PERFORM fill_button_table USING mc_lang_menu space cntb_btype_dropdown TEXT-b03 TEXT-b03.
+      " Verificación de integridad de datos
+      PERFORM fill_button_table USING cs_toolbar_functions-check_dict icon_check cntb_btype_button space TEXT-b02.
+      " Sincronización de datos
+      PERFORM fill_button_table USING cs_toolbar_functions-sync_dict icon_generate cntb_btype_button space TEXT-b01.
+      " Selección de idioma
+      PERFORM fill_button_table USING cs_toolbar_functions-lang_menu space cntb_btype_dropdown TEXT-b03 TEXT-b03.
+      " Añadir campos virtuales
+      PERFORM fill_button_table USING cs_toolbar_functions-virtual_field icon_virtual_phio_class cntb_btype_button TEXT-b04 TEXT-b04.
+      " Borrar campos
+      PERFORM fill_button_table USING cs_toolbar_functions-delete_field icon_delete_row cntb_btype_button TEXT-b05 TEXT-b05.
 
 * Paso los botones a la barra de herramientras
       CALL METHOD mo_toolbar_fields->add_button_group
@@ -389,3 +398,12 @@ MODULE toolbar_fields OUTPUT.
     ENDIF.
   ENDIF.
 ENDMODULE.                 " TOOLBAR_FIELDS  OUTPUT
+*&---------------------------------------------------------------------*
+*& Module STATUS_9004 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_9004 OUTPUT.
+  SET PF-STATUS 'P9004'.
+  SET TITLEBAR 'T9004'.
+ENDMODULE.

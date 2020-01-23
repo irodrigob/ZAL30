@@ -71,6 +71,12 @@
     <T100>
      <SPRSL>E</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
+     <MSGNR>010</MSGNR>
+     <TEXT>The virtual field &amp; already exists</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>011</MSGNR>
      <TEXT>Error adding the text of the table/view &amp;</TEXT>
     </T100>
@@ -127,6 +133,12 @@
      <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>020</MSGNR>
      <TEXT>SQL Error: &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZCA_AL30</ARBGB>
+     <MSGNR>021</MSGNR>
+     <TEXT>The data element &amp; does not exist</TEXT>
     </T100>
     <T100>
      <SPRSL>E</SPRSL>
@@ -266,12 +278,25 @@
      <MSGNR>044</MSGNR>
      <TEXT>No data selected</TEXT>
     </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZCA_AL30</ARBGB>
+     <MSGNR>063</MSGNR>
+     <TEXT>No fields selected</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZCA_AL30</ARBGB>
+     <MSGNR>064</MSGNR>
+     <TEXT>No valid fields selected</TEXT>
+    </T100>
    </T100>
    <I18N_LANGS>
     <LANGU>4</LANGU>
     <LANGU>6</LANGU>
     <LANGU>I</LANGU>
     <LANGU>L</LANGU>
+    <LANGU>S</LANGU>
     <LANGU>W</LANGU>
    </I18N_LANGS>
    <T100T>
@@ -292,6 +317,11 @@
     </T100T>
     <T100T>
      <SPRSL>L</SPRSL>
+     <ARBGB>ZCA_AL30</ARBGB>
+     <STEXT>Message of AL30</STEXT>
+    </T100T>
+    <T100T>
+     <SPRSL>S</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
      <STEXT>Message of AL30</STEXT>
     </T100T>
@@ -1001,6 +1031,221 @@
      <SPRSL>L</SPRSL>
      <MSGNR>040</MSGNR>
      <TEXT>You are not authorized to view certain records.</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>000</MSGNR>
+     <TEXT>&amp; &amp; &amp; &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>001</MSGNR>
+     <TEXT>La vista &amp; no existe</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>002</MSGNR>
+     <TEXT>Los campos string no están permitidos en la vista &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>003</MSGNR>
+     <TEXT>La tabla/vista no permite el mantenimiento de datos</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>004</MSGNR>
+     <TEXT>Error al insertar la vista &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>005</MSGNR>
+     <TEXT>La vista &amp; ha sido grabada</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>006</MSGNR>
+     <TEXT>Error al borrar la vista &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>007</MSGNR>
+     <TEXT>Error al borrar los campos de la vista &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>008</MSGNR>
+     <TEXT>La vista &amp; ha sido borrada</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>009</MSGNR>
+     <TEXT>La vista &amp; ya existe</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>011</MSGNR>
+     <TEXT>Error al añadir los textos de la tabla/vista &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>012</MSGNR>
+     <TEXT>Error al obtener el catálogo de campos del ALV</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>013</MSGNR>
+     <TEXT>Error al obtener los campos del ddic de la tabla/vista &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>014</MSGNR>
+     <TEXT>Error al añadir los textos de la tabla/vista &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>015</MSGNR>
+     <TEXT>Error en la pestaña de atributos generales</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>016</MSGNR>
+     <TEXT>Error en la pestaña de texto</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>017</MSGNR>
+     <TEXT>Sin entrada</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>018</MSGNR>
+     <TEXT>Error al crear la tabla dinámica de la tabla &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>019</MSGNR>
+     <TEXT>Error en la lectura de los campos propios</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>020</MSGNR>
+     <TEXT>Error SQL: &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>022</MSGNR>
+     <TEXT>Se ha producido un error grabando los datos</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>023</MSGNR>
+     <TEXT>Datos grabados</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>024</MSGNR>
+     <TEXT>Hay diferencias entre los campos de la vista y del diccionario</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>025</MSGNR>
+     <TEXT>No hay diferencias de configuración en la vista &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>026</MSGNR>
+     <TEXT>Error al instanciar la clase &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>027</MSGNR>
+     <TEXT>Los textos de la vista &amp; actualizados</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>028</MSGNR>
+     <TEXT>Registros añadidos en la orden &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>029</MSGNR>
+     <TEXT>Error al añadir los registros a la orden &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>030</MSGNR>
+     <TEXT>La clase de exist &amp; no existe</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>031</MSGNR>
+     <TEXT>La interface &amp; no esta implementada en la clase</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>032</MSGNR>
+     <TEXT>No estáis autorizados para ver determinados registros</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>033</MSGNR>
+     <TEXT>Acción cancelada</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>034</MSGNR>
+     <TEXT>Campo obligatorio</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>035</MSGNR>
+     <TEXT>La configuración de la vista se ha autoajustado</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>036</MSGNR>
+     <TEXT>Hay diferencias entre los campos de la vista &amp; y la tabla/vista</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>037</MSGNR>
+     <TEXT>Error al grabar la vista &amp;</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>038</MSGNR>
+     <TEXT>Se ha producido un error borrando los datos</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>039</MSGNR>
+     <TEXT>No hay modificaciones</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>040</MSGNR>
+     <TEXT>La operación &amp; no es válida</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>041</MSGNR>
+     <TEXT>No tienes autorización</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>042</MSGNR>
+     <TEXT>Solo tienes permisos de lectura</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>043</MSGNR>
+     <TEXT>Existe un registro con la misma clave</TEXT>
+    </item>
+    <item>
+     <SPRSL>S</SPRSL>
+     <MSGNR>044</MSGNR>
+     <TEXT>No se han seleccionado datos</TEXT>
     </item>
     <item>
      <SPRSL>W</SPRSL>

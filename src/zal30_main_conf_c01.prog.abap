@@ -6,7 +6,7 @@ CLASS lcl_event_text DEFINITION.
   PUBLIC SECTION.
     METHODS:
       handle_data_changed
-                    FOR EVENT data_changed OF cl_gui_alv_grid
+                  FOR EVENT data_changed OF cl_gui_alv_grid
         IMPORTING er_data_changed.
 ENDCLASS.                    "lcl_event_text DEFINITION
 
@@ -101,8 +101,13 @@ CLASS lcl_event_gen DEFINITION.
   PUBLIC SECTION.
     METHODS:
       handle_data_changed
-                    FOR EVENT data_changed OF cl_gui_alv_grid
+                  FOR EVENT data_changed OF cl_gui_alv_grid
         IMPORTING er_data_changed.
+
+    METHODS:
+      handle_toolbar
+                  FOR EVENT toolbar OF cl_gui_alv_grid
+        IMPORTING e_object e_interactive.
 ENDCLASS.                    "lcl_event_text DEFINITION
 
 *----------------------------------------------------------------------*
@@ -124,11 +129,6 @@ CLASS lcl_event_gen IMPLEMENTATION.
 * ello no tengo más remedio que hacer yo los cambios manualmente, de esta manera los
 * datos se verán siempre actualizados.
     ASSIGN er_data_changed->mp_mod_rows->* TO <tbl>.
-
-* la tabla MT_MOD_CELLS contiene las filas exactas cambiadas. Pero este no coincide
-* con lo que hay en MP_MOD_ROWS, ya que solo contiene los registros modificados.
-* Por eso tengo que hacer mi propio "tabix" para saber que posicion leer.
-    ld_tabix = 1.
 
 * El objetivo es capturar si el origen de datos ha sido modificados. Si es así, se llama al procedimiento que actualiza los valores
     DATA(lv_source_text_change) = abap_false.
@@ -164,7 +164,20 @@ CLASS lcl_event_gen IMPLEMENTATION.
         DATA(lv_tech_change) = abap_true.
       ENDIF.
 
-      ADD 1 TO ld_tabix.
+      " Si el campo modificado es el elemento de datos virtual hay que chequear que sea valido
+      IF <ls_mod_cells>-fieldname = zif_al30_data=>cs_fix_field_conf-virtual_dtel.
+        IF zcl_al30_util=>exist_data_element( CONV #( <ls_mod_cells>-value ) ) = abap_false.
+          CALL METHOD er_data_changed->add_protocol_entry
+            EXPORTING
+              i_msgid     = 'ZAL30'
+              i_msgno     = '021'
+              i_msgty     = zif_al30_data=>cs_msg_type-error
+              i_fieldname = <ls_mod_cells>-fieldname " Se escoge el último campo de la clave
+              i_msgv1     = <ls_mod_cells>-value
+              i_row_id    = <ls_mod_cells>-row_id
+              i_tabix     = <ls_mod_cells>-tabix.
+        ENDIF.
+      ENDIF.
 
     ENDLOOP.
 
@@ -186,5 +199,12 @@ CLASS lcl_event_gen IMPLEMENTATION.
     CALL METHOD mo_alv_gen->refresh_table_display( EXPORTING is_stable = ms_stable ).
 
   ENDMETHOD.                    "handle_data_changed
+
+  METHOD handle_toolbar.
+
+    " Se añade un separador
+    INSERT VALUE #( butn_type = zif_al30_data=>cs_alv_toolbar_type-separator  ) INTO TABLE e_object->mt_toolbar.
+
+  ENDMETHOD.
 
 ENDCLASS.

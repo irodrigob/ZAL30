@@ -28,8 +28,8 @@ INTERFACE zif_al30_data
       fieldname TYPE fieldname.
       INCLUDE TYPE zal30_s_fields_attr_general.
       INCLUDE TYPE zal30_s_fields_info_ddic.
-  TYPES:
-         END OF ts_fields_view .
+    TYPES:
+    END OF ts_fields_view .
   TYPES:
     tt_fields_view TYPE STANDARD TABLE OF ts_fields_view .
   TYPES:
@@ -39,32 +39,32 @@ INTERFACE zif_al30_data
       pos_ddic  TYPE tabfdpos,
       spras     TYPE spras.
       INCLUDE TYPE zal30_s_fields_attr_text.
-  TYPES:
-         END OF ts_fields_text_view .
+    TYPES:
+    END OF ts_fields_text_view .
   TYPES:
     tt_fields_text_view TYPE STANDARD TABLE OF ts_fields_text_view .
   TYPES:
     BEGIN OF ts_fields_view_alv.
       INCLUDE TYPE ts_fields_view.
-  TYPES:
-    reptext TYPE reptext,
-    celltab TYPE lvc_t_styl,
+    TYPES:
+      reptext TYPE reptext,
+      celltab TYPE lvc_t_styl,
     END OF ts_fields_view_alv .
   TYPES:
     tt_fields_view_alv TYPE STANDARD TABLE OF ts_fields_view_alv .
   TYPES:
     BEGIN OF ts_fields_text_view_alv.
       INCLUDE TYPE ts_fields_text_view.
-  TYPES:
-    celltab TYPE lvc_t_styl,
+    TYPES:
+      celltab TYPE lvc_t_styl,
     END OF ts_fields_text_view_alv .
   TYPES:
     tt_fields_text_view_alv TYPE STANDARD TABLE OF ts_fields_text_view_alv .
   TYPES:
     BEGIN OF ts_default_values_create.
       INCLUDE TYPE zal30_t_view.
-  TYPES:
-         END OF ts_default_values_create .
+    TYPES:
+    END OF ts_default_values_create .
   TYPES:
     BEGIN OF ts_filter_read_data,
       fields_ranges TYPE rsds_trange,
@@ -142,14 +142,23 @@ INTERFACE zif_al30_data
       view          TYPE sytcode VALUE 'ZAL30_MAIN_VIEW',
     END OF cs_prog_tcode .
   CONSTANTS: BEGIN OF cs_fix_field_conf,
-               sel_screen  TYPE fieldname VALUE 'SEL_SCREEN',
-               source_text TYPE fieldname VALUE 'SOURCE_TEXT',
-               tech        TYPE fieldname VALUE 'TECH',
-               mandatory   TYPE fieldname VALUE 'MANDATORY',
-               no_output   TYPE fieldname VALUE 'NO_OUTPUT',
-               checkbox    TYPE fieldname VALUE 'CHECKBOX',
+               sel_screen   TYPE fieldname VALUE 'SEL_SCREEN',
+               source_text  TYPE fieldname VALUE 'SOURCE_TEXT',
+               tech         TYPE fieldname VALUE 'TECH',
+               mandatory    TYPE fieldname VALUE 'MANDATORY',
+               no_output    TYPE fieldname VALUE 'NO_OUTPUT',
+               checkbox     TYPE fieldname VALUE 'CHECKBOX',
+               virtual      TYPE fieldname VALUE 'VIRTUAL',
+               virtual_dtel TYPE fieldname VALUE 'VIRTUAL_DTEL',
              END OF cs_fix_field_conf.
   CONSTANTS: BEGIN OF cs_selection_screen_view,
                data_element_text_field TYPE string VALUE 'RSDSTEXTS-TEXT',
              END OF cs_selection_screen_view.
+  CONSTANTS: BEGIN OF cs_virtual_fields,
+               prefix TYPE fieldname VALUE 'VIR_',
+             END OF cs_virtual_fields.
+  CONSTANTS: BEGIN OF cs_alv_toolbar_type,
+               separator TYPE tb_btype VALUE 3,
+               button    TYPE tb_btype VALUE 0,
+             END OF cs_alv_toolbar_type.
 ENDINTERFACE.

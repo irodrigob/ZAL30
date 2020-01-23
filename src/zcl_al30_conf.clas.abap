@@ -5,7 +5,8 @@ CLASS zcl_al30_conf DEFINITION
   PUBLIC SECTION.
 *"* public components of class ZCL_AL30_CONF
 *"* do not include other source files here!!!
-    TYPE-POOLS abap .
+
+    TYPES: tt_info_data TYPE STANDARD TABLE OF dd04v WITH EMPTY KEY.
 
     METHODS read_view
       IMPORTING
@@ -124,6 +125,31 @@ CLASS zcl_al30_conf DEFINITION
         !et_dd05m     TYPE dd05mttyp
       RAISING
         zcx_al30 .
+    "! <p class="shorttext synchronized" lang="en">Read info of a data element</p>
+    "!
+    "! @parameter iv_dtel | <p class="shorttext synchronized" lang="en">Data element</p>
+    "! @parameter es_info | <p class="shorttext synchronized" lang="en">info</p>
+    METHODS read_single_data_element
+      IMPORTING
+        !iv_dtel  TYPE rollname
+        !iv_langu TYPE sylangu DEFAULT sy-langu
+      EXPORTING
+        !es_info  TYPE dd04v
+      RAISING
+        zcx_al30 .
+
+    "! <p class="shorttext synchronized" lang="en">Read info in all languages</p>
+    "!
+    "! @parameter iv_dtel | <p class="shorttext synchronized" lang="en">Data element</p>
+    "! @parameter et_info | <p class="shorttext synchronized" lang="en">Information in each language</p>
+    METHODS read_data_element_all_lang
+      IMPORTING
+        !iv_dtel TYPE rollname
+      EXPORTING
+        !et_info TYPE tt_info_data
+      RAISING
+        zcx_al30 .
+
   PROTECTED SECTION.
 
 *"* protected components of class ZCL_AL30_CONF
@@ -166,11 +192,11 @@ CLASS zcl_al30_conf DEFINITION
         !et_fields       TYPE zif_al30_data=>tt_fields_view
         !et_fields_text  TYPE zif_al30_data=>tt_fields_text_view
         !et_fields_ddic  TYPE dd03ptab .
-    METHODS adjust_fields_text
+    METHODS adjust_fields_view
       IMPORTING
-        !it_fields      TYPE zif_al30_data=>tt_fields_view
         !it_fields_ddic TYPE dd03ptab
       CHANGING
+        !ct_fields      TYPE zif_al30_data=>tt_fields_view
         !ct_fields_text TYPE zif_al30_data=>tt_fields_text_view .
     METHODS fill_default_values_fields
       CHANGING
@@ -194,13 +220,13 @@ ENDCLASS.
 
 
 
-CLASS ZCL_AL30_CONF IMPLEMENTATION.
+CLASS zcl_al30_conf IMPLEMENTATION.
 
 
-  METHOD adjust_fields_text.
+  METHOD adjust_fields_view.
     DATA ls_fields_text TYPE LINE OF zif_al30_data=>tt_fields_text_view.
 
-    LOOP AT it_fields ASSIGNING FIELD-SYMBOL(<ls_fields>).
+    LOOP AT ct_fields ASSIGNING FIELD-SYMBOL(<ls_fields>).
 
       " Si el texto se introduce manual solo tendré que actualizar la posición donde debe salir, que será la misma que la del campo
       CASE <ls_fields>-source_text.
@@ -222,7 +248,17 @@ CLASS ZCL_AL30_CONF IMPLEMENTATION.
 
           ENDLOOP.
       ENDCASE.
-    ENDLOOP..
+    ENDLOOP.
+
+    " Obtenemos la última posición usada
+    DATA(lv_position) = REDUCE #( INIT x = 0 FOR <wa> IN ct_fields NEXT x = COND #( WHEN <wa>-position > x THEN <wa>-position ELSE x ) ).
+    lv_position = lv_position + 1.
+
+    " Se ajusta aquellos campos que no tienen posición.
+    LOOP AT ct_fields ASSIGNING <ls_fields> WHERE position IS INITIAL.
+      <ls_fields>-position = lv_position.
+      lv_position = lv_position + 1.
+    ENDLOOP.
 
 
   ENDMETHOD.
@@ -922,6 +958,11 @@ CLASS ZCL_AL30_CONF IMPLEMENTATION.
           textid = zcx_al30=>view_dont_exist.
 
     ELSE.
+      " Pongo el campo idioma siempre porque si no esta traducido no se informa. Y es necesario para el resto de procesos.
+      LOOP AT et_dd03p ASSIGNING FIELD-SYMBOL(<ls_dd03p>).
+        <ls_dd03p>-ddlanguage = iv_langu.
+      ENDLOOP.
+
 * Funcion para leer vistas: DD_VIEW_GET
       " Si es una vista la descripción que se recupera no es correcta.
       IF es_dd02v-tabclass = 'VIEW'.
@@ -999,9 +1040,9 @@ CLASS ZCL_AL30_CONF IMPLEMENTATION.
       ev_text_view = ls_dd02v-ddtext. " Texto de la tabla
 
       " Se completan los textos en base a los datos del diccionario
-      adjust_fields_text( EXPORTING it_fields = mt_fields
-                                    it_fields_ddic = mt_fields_ddic
-                                    CHANGING ct_fields_text = mt_fields_text  ).
+      adjust_fields_view( EXPORTING it_fields_ddic = mt_fields_ddic
+                          CHANGING ct_fields = mt_fields
+                                   ct_fields_text = mt_fields_text  ).
 
 
       " Se orden los campos por su posición
@@ -1193,4 +1234,59 @@ CLASS ZCL_AL30_CONF IMPLEMENTATION.
 
     ENDIF.
   ENDMETHOD.
+  METHOD read_single_data_element.
+
+    CLEAR: es_info.
+
+    CALL FUNCTION 'DDIF_DTEL_GET'
+      EXPORTING
+        name          = iv_dtel
+        langu         = iv_langu
+      IMPORTING
+        dd04v_wa      = es_info
+      EXCEPTIONS
+        illegal_input = 1
+        OTHERS        = 2.
+    IF sy-subrc NE 0 OR es_info IS INITIAL.
+      RAISE EXCEPTION TYPE zcx_al30
+        EXPORTING
+          textid = zcx_al30=>data_element_not_exist.
+
+    ELSE.
+      " Se informa el idioma porque no se devuelve
+      es_info-ddlanguage = iv_langu.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD read_data_element_all_lang.
+
+    CLEAR et_info.
+
+    get_logon_languages( IMPORTING et_lang = DATA(lt_lang) ).
+
+    LOOP AT lt_lang ASSIGNING FIELD-SYMBOL(<ls_lang>).
+
+      TRY.
+          read_single_data_element( EXPORTING iv_dtel = iv_dtel
+                                              iv_langu = <ls_lang>-lang
+                                    IMPORTING es_info = DATA(ls_info) ).
+
+          INSERT ls_info INTO TABLE et_info.
+
+        CATCH zcx_al30.
+      ENDTRY.
+
+    ENDLOOP.
+
+    " Si al final de la búsqueda no existen datos en ningun idioma se lanza la excepción que el
+    " elemento de datos no existe
+    IF et_info IS INITIAL.
+      RAISE EXCEPTION TYPE zcx_al30
+        EXPORTING
+          textid = zcx_al30=>data_element_not_exist.
+    ENDIF.
+
+  ENDMETHOD.
+
 ENDCLASS.

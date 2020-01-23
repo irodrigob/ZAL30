@@ -25,17 +25,20 @@ DATA mt_fields_text_orig TYPE zif_al30_data=>tt_fields_text_view_alv.
 *----------------------------------------------------------------------*
 DATA mc_hndl_source_text TYPE int4 VALUE '1'.
 
-* Submenu de idiomas
-CONSTANTS mc_lang_menu TYPE ui_func VALUE 'LANG_MENU'.
-
-* Verificacion de diccionario
-CONSTANTS mc_check_dict TYPE ui_func VALUE 'FC2'.
-
-* Sincronizacion con el diccionario
-CONSTANTS mc_sync_dict TYPE ui_func VALUE 'FC1'.
-
-* Id del boton de menu de idioma
-CONSTANTS mc_id_lang_button TYPE ui_func VALUE 'LANG_'.
+CONSTANTS: BEGIN OF cs_toolbar_functions,
+             " Submenu de idiomas
+             lang_menu      TYPE ui_func VALUE 'LANG_MENU',
+             " Verificacion de diccionario
+             check_dict     TYPE ui_func VALUE 'FC2',
+             " Sincronizacion con el diccionario
+             sync_dict      TYPE ui_func VALUE 'FC1',
+             " Añadir campo virtual
+             virtual_field  TYPE ui_func VALUE 'VIRTUAL_FIELD',
+             " Id del boton de menu de idioma
+             id_lang_button TYPE ui_func VALUE 'LANG_',
+             " Borrar campo
+             delete_field   TYPE ui_func VALUE 'DEL_FIELD',
+           END OF cs_toolbar_functions.
 
 *----------------------------------------------------------------------*
 * Variables
@@ -138,3 +141,13 @@ DATA mt_evts_toolbar_fields TYPE TABLE OF cntl_simple_event.
 CLASS lcl_event_toolbar_fields DEFINITION DEFERRED.
 DATA mo_event_toolbar_fields TYPE REF TO lcl_event_toolbar_fields.
 DATA mt_buttongroup TYPE ttb_button.
+
+*----------------------------------------------------------------------*
+* Declaración para la dynpro de añadir campo virtual
+*----------------------------------------------------------------------*
+DATA mv_okcode_9004 TYPE syucomm.
+DATA: BEGIN OF ms_virtual_field,
+        text_prefix TYPE string,
+        name        TYPE fieldname,
+        dtel        TYPE zal30_e_virtual_rollname,
+      END OF ms_virtual_field.

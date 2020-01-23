@@ -24,10 +24,12 @@
       <RSFDO>
        <PARAMETER>INPUT</PARAMETER>
        <KIND>P</KIND>
+       <INDEX> 001</INDEX>
       </RSFDO>
       <RSFDO>
        <PARAMETER>OUTPUT</PARAMETER>
        <KIND>P</KIND>
+       <INDEX> 002</INDEX>
       </RSFDO>
      </DOCUMENTATION>
     </item>
@@ -48,14 +50,26 @@
       <RSFDO>
        <PARAMETER>INPUT</PARAMETER>
        <KIND>P</KIND>
+       <INDEX> 001</INDEX>
       </RSFDO>
       <RSFDO>
        <PARAMETER>OUTPUT</PARAMETER>
        <KIND>P</KIND>
+       <INDEX> 002</INDEX>
       </RSFDO>
      </DOCUMENTATION>
     </item>
    </FUNCTIONS>
+   <I18N_TPOOL>
+    <item>
+     <LANGUAGE>S</LANGUAGE>
+     <TEXTPOOL>
+      <item>
+       <ID>R</ID>
+      </item>
+     </TEXTPOOL>
+    </item>
+   </I18N_TPOOL>
   </asx:values>
  </asx:abap>
 </abapGit>

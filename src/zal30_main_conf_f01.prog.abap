@@ -401,6 +401,9 @@ FORM read_view  USING    pe_name_view
 * Ajuste de campos y textos de los listados
   PERFORM adjust_field_and_text.
 
+  " Ajuste de campos virtuales
+  PERFORM enabled_virtual_fields.
+
 ENDFORM.                    " READ_VIEW
 *&---------------------------------------------------------------------*
 *&      Form  EXPAND_FIELDS
@@ -426,7 +429,7 @@ ENDFORM.                    " EXPAND_FIELDS
 *       text
 *----------------------------------------------------------------------*
 FORM fill_button_table  USING fcode  TYPE ui_func
-                              icon   TYPE iconname
+                              icon  TYPE any "iconname
                               type   TYPE tb_btype
                               text   TYPE text40
                               tip.
@@ -680,7 +683,7 @@ FORM submenu_languages  USING pe_posx pe_posy.
   mo_controller->get_logon_languages( IMPORTING et_lang = DATA(lt_languages) ).
 
   LOOP AT lt_languages ASSIGNING FIELD-SYMBOL(<ls_logon_lang>).
-    CONCATENATE mc_id_lang_button <ls_logon_lang>-lang INTO lv_fcode.
+    CONCATENATE cs_toolbar_functions-id_lang_button <ls_logon_lang>-lang INTO lv_fcode.
     lv_text = <ls_logon_lang>-description.
 
 * Si el idioma de visualización es el mismo que se esta leyendo la opcion del
@@ -723,6 +726,9 @@ FORM adjust_field_and_text .
 * Activación/desacticacion del campo de checkbox si el campo es técnico
   PERFORM enabled_field_tech.
 
+  " Ajuste de campos virtuales
+  PERFORM enabled_virtual_fields.
+
 ENDFORM.
 *&---------------------------------------------------------------------*
 *&      Form  ALV_FIELDCAT_GEN
@@ -747,22 +753,21 @@ FORM alv_fieldcat_gen .
     CASE <ls_fieldcat>-fieldname.
       WHEN 'FIELDNAME'. " Nombre del campo
 * El nombre del campo se pone en todos
-        <ls_fieldcat>-col_opt = abap_true.
         ls_fieldcat_gen = <ls_fieldcat>.
+        ls_fieldcat_gen-col_opt = abap_true.
+
+      WHEN 'POSITION'. " Posición
+        ls_fieldcat_gen = <ls_fieldcat>.
+        ls_fieldcat_gen-edit = abap_true.
+        ls_fieldcat_gen-col_pos = 3.
 
       WHEN 'REPTEXT'. " Texto cabecera
         <ls_fieldcat>-col_opt = abap_true.
 
 * El texto de cabecera se pone siempre.
         ls_fieldcat_gen = <ls_fieldcat>.
-
 * En los atributos generales ha de salir en la segunda posicion justo despues del nombre del campo.
         ls_fieldcat_gen-col_pos = 2.
-
-      WHEN 'KEY_DDIC'. " Indicador de campo clave
-        ls_fieldcat_gen = <ls_fieldcat>.
-        ls_fieldcat_gen-checkbox = abap_true.
-
 
 * Opciones de visualización van a los atributos principales
       WHEN 'NO_OUTPUT' OR 'TECH' OR 'MANDATORY'.
@@ -771,6 +776,7 @@ FORM alv_fieldcat_gen .
         ls_fieldcat_gen-checkbox = abap_true.
         ls_fieldcat_gen-edit = abap_true.
         ls_fieldcat_gen-outputlen = 9.
+
       WHEN 'SOURCE_TEXT'.  " Origen del texto del campo
         <ls_fieldcat>-col_opt = abap_true.
         ls_fieldcat_gen = <ls_fieldcat>.
@@ -782,19 +788,7 @@ FORM alv_fieldcat_gen .
         " Se carga los valores para el dropdown
         PERFORM load_dropdown_source_text.
 
-* Indicador de campo que pertenece a la tabla de textos
-      WHEN 'FIELD_TEXTTABLE'.
-        ls_fieldcat_gen-fieldname = <ls_fieldcat>-fieldname.
-        ls_fieldcat_gen-checkbox = abap_true.
-        ls_fieldcat_gen-coltext = TEXT-c01.
-        ls_fieldcat_gen-col_pos = 12.
 
-* Indicador que es el campo idioma de la tabla de textos
-      WHEN 'LANG_TEXTTABLE'.
-        ls_fieldcat_gen-fieldname = <ls_fieldcat>-fieldname.
-        ls_fieldcat_gen-checkbox = abap_true.
-        ls_fieldcat_gen-coltext = TEXT-c02.
-        ls_fieldcat_gen-col_pos = 13.
       WHEN 'CHECKBOX'. " Indicador si es un campo de checkbox
         ls_fieldcat_gen-fieldname = <ls_fieldcat>-fieldname.
         ls_fieldcat_gen-checkbox = abap_true.
@@ -808,6 +802,45 @@ FORM alv_fieldcat_gen .
         ls_fieldcat_gen-coltext = TEXT-c04.
         ls_fieldcat_gen-col_pos = 11.
         ls_fieldcat_gen-edit = abap_true.
+
+
+
+      WHEN 'ADD_DESC'. " Añadir de la descripción
+        ls_fieldcat_gen = <ls_fieldcat>.
+        ls_fieldcat_gen-edit = abap_false.
+        ls_fieldcat_gen-col_pos = 12.
+        ls_fieldcat_gen-checkbox = abap_true.
+        <ls_fieldcat>-col_opt = abap_true.
+
+      WHEN 'VIRTUAL'. " Indicador de campo virtual
+        ls_fieldcat_gen = <ls_fieldcat>.
+        ls_fieldcat_gen-col_pos = 20.
+        ls_fieldcat_gen-checkbox = abap_true.
+
+      WHEN 'VIRTUAL_DTEL'. " Elemento de datos
+        ls_fieldcat_gen = <ls_fieldcat>.
+        ls_fieldcat_gen-edit = abap_true.
+        ls_fieldcat_gen-col_pos = 22.
+
+* Indicador de campo que pertenece a la tabla de textos
+      WHEN 'FIELD_TEXTTABLE'.
+        ls_fieldcat_gen-fieldname = <ls_fieldcat>-fieldname.
+        ls_fieldcat_gen-checkbox = abap_true.
+        ls_fieldcat_gen-coltext = TEXT-c01.
+        ls_fieldcat_gen-col_pos = 100.
+
+* Indicador que es el campo idioma de la tabla de textos
+      WHEN 'LANG_TEXTTABLE'.
+        ls_fieldcat_gen-fieldname = <ls_fieldcat>-fieldname.
+        ls_fieldcat_gen-checkbox = abap_true.
+        ls_fieldcat_gen-coltext = TEXT-c02.
+        ls_fieldcat_gen-col_pos = 110.
+
+      WHEN 'KEY_DDIC'. " Indicador de campo clave
+        ls_fieldcat_gen = <ls_fieldcat>.
+        ls_fieldcat_gen-checkbox = abap_true.
+        ls_fieldcat_gen-col_pos = 120.
+
 
     ENDCASE.
 
@@ -1035,4 +1068,136 @@ FORM enabled_field_tech .
     ENDIF.
   ENDLOOP.
 
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form ADJUST_VIRTUAL_FIELDS
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+FORM enabled_virtual_fields .
+
+  LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>).
+
+
+    DATA(lv_style) = COND #( WHEN <ls_fields>-virtual = abap_true THEN cl_gui_alv_grid=>mc_style_enabled ELSE cl_gui_alv_grid=>mc_style_disabled  ).
+
+    " Elemento de datos del campo virtual
+    READ TABLE <ls_fields>-celltab  ASSIGNING FIELD-SYMBOL(<ls_celltab>)
+                                    WITH KEY fieldname = zif_al30_data=>cs_fix_field_conf-virtual_dtel.
+    IF sy-subrc NE 0.
+      INSERT VALUE #( fieldname = zif_al30_data=>cs_fix_field_conf-virtual_dtel
+                      style = lv_style )
+                      INTO TABLE <ls_fields>-celltab.
+    ELSE.
+      <ls_celltab>-style = lv_style.
+    ENDIF.
+
+  ENDLOOP.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form ADD_VIRTUAL_FIELD
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+FORM add_virtual_field .
+  " Se chequea el campo virtual no exista
+  DATA(lv_field) = |{ zif_al30_data=>cs_virtual_fields-prefix }{ ms_virtual_field-name }|.
+  READ TABLE mt_fields TRANSPORTING NO FIELDS WITH KEY fieldname = lv_field.
+
+  IF sy-subrc NE 0.
+
+    " Se leen los datos del elementos en todos los idiomas
+    TRY.
+        mo_controller->read_data_element_all_lang( EXPORTING iv_dtel = ms_virtual_field-dtel
+                                                    IMPORTING et_info = DATA(lt_info_dtel) ).
+
+        " Se busca la última posición usada
+        DATA(lv_position) = REDUCE #( INIT x = 0 FOR <wa> IN mt_fields NEXT x = COND #( WHEN <wa>-position > x THEN <wa>-position ELSE x ) ).
+        lv_position = lv_position + 1.
+
+        " Se busca el texto del idioma de visualización para informarlo en el campo virtual
+        READ TABLE lt_info_dtel INTO DATA(ls_info_dtel) WITH KEY ddlanguage = mv_lang_vis.
+
+        " Se inserta en la tabla de campos
+        INSERT VALUE #( tabname = zal30_t_view-tabname
+                        fieldname = lv_field
+                        position = lv_position
+                        pos_ddic = lv_position
+                        source_text = zif_al30_data=>cs_source_text-dictionary
+                        virtual = abap_true
+                        virtual_dtel = ms_virtual_field-dtel
+                        reptext = ls_info_dtel-reptext ) INTO TABLE mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>).
+
+        " Se añaden los textos
+        LOOP AT lt_info_dtel ASSIGNING FIELD-SYMBOL(<ls_info_dtel>).
+          DATA(ls_field_text) = CORRESPONDING zif_al30_data=>ts_fields_text_view_alv( <ls_fields> ).
+          ls_field_text = CORRESPONDING #( BASE ( ls_field_text ) <ls_info_dtel> ).
+          ls_field_text-spras = <ls_info_dtel>-ddlanguage.
+
+          <ls_fields>-reptext = COND #( WHEN <ls_info_dtel>-ddlanguage = mv_lang_vis THEN ls_field_text-reptext ELSE <ls_fields>-reptext ).
+
+          INSERT ls_field_text INTO TABLE mt_fields_text.
+
+          " Se añade el mismo registro a la tabla de textos original por si cambian textos y los quieren volver a dejar
+          INSERT ls_field_text INTO TABLE mt_fields_text_orig.
+
+        ENDLOOP.
+
+        " Se lanza el proceso que ajusta los campos virtuales
+        PERFORM enabled_virtual_fields.
+
+        mo_alv_gen->refresh_table_display( EXPORTING is_stable = ms_stable ).
+        mo_alv_text->refresh_table_display( EXPORTING is_stable = ms_stable ).
+
+
+        cl_gui_cfw=>flush( ).
+
+        SET SCREEN 0. LEAVE SCREEN.
+
+      CATCH zcx_al30.
+        MESSAGE s021 WITH ms_virtual_field-dtel DISPLAY LIKE zif_al30_data=>cs_msg_type-error.
+    ENDTRY.
+
+  ELSE.
+    MESSAGE s010 WITH ms_virtual_field-name DISPLAY LIKE zif_al30_data=>cs_msg_type-error.
+  ENDIF.
+
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form SHOW_DYNP_ADD_VIRTUAL_FIELD
+*&---------------------------------------------------------------------*
+FORM show_dynp_add_virtual_field .
+  CLEAR: ms_virtual_field.
+
+  " Se pone el prefijo para que salga en la dynpro
+  ms_virtual_field-text_prefix = |{ TEXT-i01 } { zif_al30_data=>cs_virtual_fields-prefix }|.
+
+  CALL SCREEN 9004 STARTING AT 5 2 ENDING AT 70 5.
+ENDFORM.
+
+FORM delete_fields.
+
+  mo_alv_gen->get_selected_rows( IMPORTING et_index_rows = DATA(lt_rows) ).
+
+  DATA(lv_valid_fields) = abap_false.
+  LOOP AT lt_rows ASSIGNING FIELD-SYMBOL(<ls_rows>).
+    READ TABLE mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) INDEX <ls_rows>-index.
+    IF sy-subrc = 0.
+      " Solo se pueden borrar campos virtuales
+      IF <ls_fields>-virtual = abap_true.
+        lv_valid_fields = abap_true.
+        DELETE mt_fields_text WHERE fieldname = <ls_fields>-fieldname.
+        DELETE mt_fields INDEX <ls_rows>-index.
+      ENDIF.
+    ENDIF.
+  ENDLOOP.
+  IF sy-subrc NE 0.
+    MESSAGE s063.
+  ELSE.
+    IF lv_valid_fields = abap_false.
+      MESSAGE s064.
+    ENDIF.
+  ENDIF.
 ENDFORM.
