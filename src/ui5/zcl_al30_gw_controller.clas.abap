@@ -32,6 +32,13 @@ CLASS zcl_al30_gw_controller DEFINITION
                 !iv_view_action      TYPE any OPTIONAL
                 !iv_user             TYPE syuname OPTIONAL
       RETURNING VALUE(rv_level_auth) TYPE zal30_e_level_auth .
+    METHODS read_view
+      IMPORTING
+        !iv_view_name TYPE tabname
+        !iv_langu     TYPE sylangu DEFAULT sy-langu
+      EXPORTING
+        !et_fields    TYPE zif_al30_ui5_data=>tt_view_fields.
+
   PROTECTED SECTION.
     DATA mo_controller TYPE REF TO zcl_al30_controller.
   PRIVATE SECTION.
@@ -82,4 +89,30 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
+  METHOD read_view.
+
+    " Se lee los campos de la vista
+    mo_controller->read_view(
+      EXPORTING
+        iv_name_view        = iv_view_name
+        iv_read_ddic        = abap_false
+        iv_langu            = iv_langu
+      IMPORTING
+        et_fields_view      = DATA(lt_fields_view)
+        et_fields_text_view = DATA(lt_fields_text_view) ).
+
+    " Para gateway la estructura de campos y textos es la misma y hay que fusionar
+    LOOP AT lt_fields_view ASSIGNING FIELD-SYMBOL(<ls_fields_view>).
+      DATA(ls_fields) = CORRESPONDING zif_al30_ui5_data=>ts_view_fields( <ls_fields_view> ).
+
+      " Se buscan sus textos y en caso de encontrarlos se informan en la tabla
+      READ TABLE lt_fields_text_view ASSIGNING FIELD-SYMBOL(<ls_fields_text_view>) WITH KEY fieldname = <ls_fields_view>-fieldname.
+      IF sy-subrc = 0.
+        ls_fields = CORRESPONDING #( BASE ( ls_fields ) <ls_fields_text_view> ).
+      ENDIF.
+      INSERT ls_fields INTO TABLE et_fields.
+    ENDLOOP.
+
+  ENDMETHOD.
+
 ENDCLASS.

@@ -6,5 +6,11 @@ INTERFACE zif_al30_ui5_data
   TYPES: level_auth TYPE zal30_e_level_auth,
          END OF ts_view_list_auth.
   TYPES: tt_view_list_auth TYPE STANDARD TABLE OF ts_view_list_auth WITH EMPTY KEY.
+  TYPES: BEGIN OF ts_view_fields.
+      INCLUDE TYPE zif_al30_data=>ts_fields_view.
+      INCLUDE TYPE zal30_s_fields_attr_text.
+  TYPES:
+         END OF ts_view_fields.
+  TYPES: tt_view_fields TYPE STANDARD TABLE OF ts_view_fields WITH EMPTY KEY.
 
 ENDINTERFACE.

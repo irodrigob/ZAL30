@@ -4,7 +4,7 @@
   <asx:values>
    <VSEOINTERF>
     <CLSNAME>ZIF_AL30_EXIT_CLASS</CLSNAME>
-    <LANGU>S</LANGU>
+    <LANGU>E</LANGU>
     <DESCRIPT>AL30 - Interface for exit</DESCRIPT>
     <EXPOSURE>2</EXPOSURE>
     <STATE>1</STATE>
