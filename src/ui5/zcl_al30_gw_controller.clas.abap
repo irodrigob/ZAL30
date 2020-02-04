@@ -159,6 +159,9 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
   METHOD read_data.
     FIELD-SYMBOLS <data> TYPE STANDARD TABLE.
 
+    " Si el modo pasado no es el esperado se le pone el de visualizar
+    DATA(lv_mode) = COND #( WHEN iv_mode = zif_al30_data=>cv_mode_change OR iv_mode = zif_al30_data=>cv_mode_view THEN iv_mode ELSE zif_al30_data=>cv_mode_view ).
+
     " Se llama al proceso que creará la tabla interna para poder leer los datos
     create_it_data_view( EXPORTING iv_view_name = iv_view_name
                                    iv_langu = iv_langu

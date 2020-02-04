@@ -10,6 +10,7 @@ CLASS zcl_zal30_data_dpc_ext DEFINITION
     METHODS getviewsset_get_entityset REDEFINITION.
     METHODS checkauthviewset_get_entity REDEFINITION.
     METHODS readviewset_get_entityset REDEFINITION.
+    METHODS readdataset_get_entity REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -133,6 +134,49 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
       DATA(ls_entityset) = CORRESPONDING  zcl_zal30_data_mpc=>ts_readview( <ls_fields> ).
       INSERT ls_entityset INTO TABLE et_entityset.
     ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD readdataset_get_entity.
+    DATA lv_langu TYPE sylangu.
+    DATA lv_viewname TYPE tabname.
+    DATA lv_mode TYPE c LENGTH 1.
+
+    CLEAR: er_entity.
+
+    " Se recupera el diioma
+    READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_key_tab>) WITH KEY name = 'LANGU'.
+    IF sy-subrc = 0.
+      CALL FUNCTION 'CONVERSION_EXIT_ISOLA_INPUT'
+        EXPORTING
+          input            = <ls_key_tab>-value
+        IMPORTING
+          output           = lv_langu
+        EXCEPTIONS
+          unknown_language = 1
+          OTHERS           = 2.
+    ENDIF.
+
+    " Nombre de la vista
+    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'VIEWNAME'.
+    IF sy-subrc = 0.
+      lv_viewname = <ls_key_tab>-value.
+    ENDIF.
+
+    " Modo de edición
+    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'MODE'.
+    IF sy-subrc = 0.
+      lv_mode = <ls_key_tab>-value.
+    ENDIF.
+
+    " Se llama al controlador para leer los datos
+    mo_controller->read_data(
+      EXPORTING
+        iv_view_name = lv_viewname
+        iv_langu     = lv_langu
+        iv_mode      = lv_mode
+      IMPORTING
+        ev_data      = er_entity-data ).
 
   ENDMETHOD.
 
