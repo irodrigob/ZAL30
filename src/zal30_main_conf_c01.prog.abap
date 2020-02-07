@@ -121,7 +121,7 @@ CLASS lcl_event_gen IMPLEMENTATION.
     FIELD-SYMBOLS <ls_mod_cells> TYPE LINE OF lvc_t_modi.
     FIELD-SYMBOLS <tbl> TYPE zif_al30_data=>tt_fields_view_alv.
     FIELD-SYMBOLS <wa> TYPE LINE OF zif_al30_data=>tt_fields_view_alv.
-    DATA ld_tabix TYPE sytabix.
+    DATA lv_tabix TYPE sytabix.
 
 * Recupero los datos modificados para actualizarlo a la tabla principal.
 * No sería porque al llamar el método "check_changed_data" el ALV ya lo hace. Pero
@@ -130,12 +130,17 @@ CLASS lcl_event_gen IMPLEMENTATION.
 * datos se verán siempre actualizados.
     ASSIGN er_data_changed->mp_mod_rows->* TO <tbl>.
 
+* la tabla MT_MOD_CELLS contiene las filas exactas cambiadas. Pero este no coincide
+* con lo que hay en MP_MOD_ROWS, ya que solo contiene los registros modificados.
+* Por eso tengo que hacer mi propio "tabix" para saber que posicion leer.
+    lv_tabix = 1.
+
 * El objetivo es capturar si el origen de datos ha sido modificados. Si es así, se llama al procedimiento que actualiza los valores
     DATA(lv_source_text_change) = abap_false.
     LOOP AT er_data_changed->mt_mod_cells ASSIGNING <ls_mod_cells>.
       AT NEW row_id.
 * Leo el registro modificado asociado al ROW_ID
-        READ TABLE <tbl> ASSIGNING <wa> INDEX ld_tabix.
+        READ TABLE <tbl> ASSIGNING <wa> INDEX lv_tabix.
         IF sy-subrc = 0.
 * Leo el registro de la tabla global
           READ TABLE mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) INDEX <ls_mod_cells>-row_id.
@@ -152,6 +157,7 @@ CLASS lcl_event_gen IMPLEMENTATION.
           ENDIF.
         ENDIF.
       ENDAT.
+      lv_tabix = lv_tabix + 1.
 
       " Se comprueba el campo de origen de texto. Esto activa una variable que realiza al final del proceso
       " se resincronizan la editabilidad de los campos de texto y sus valores.
@@ -169,13 +175,16 @@ CLASS lcl_event_gen IMPLEMENTATION.
         IF zcl_al30_util=>exist_data_element( CONV #( <ls_mod_cells>-value ) ) = abap_false.
           CALL METHOD er_data_changed->add_protocol_entry
             EXPORTING
-              i_msgid     = 'ZAL30'
+              i_msgid     = 'ZCA_AL30'
               i_msgno     = '021'
               i_msgty     = zif_al30_data=>cs_msg_type-error
               i_fieldname = <ls_mod_cells>-fieldname " Se escoge el último campo de la clave
               i_msgv1     = <ls_mod_cells>-value
               i_row_id    = <ls_mod_cells>-row_id
               i_tabix     = <ls_mod_cells>-tabix.
+        ELSE.
+          PERFORM update_dtel_virtual_field IN PROGRAM (sy-cprog) USING <ls_mod_cells>-value
+                                                                  CHANGING <ls_fields>.
         ENDIF.
       ENDIF.
 

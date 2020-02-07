@@ -1,3 +1,4 @@
+"! <p class="shorttext synchronized">AL30 - Operations of view</p>
 CLASS zcl_al30_view DEFINITION
   PUBLIC
   CREATE PUBLIC .
@@ -6,68 +7,111 @@ CLASS zcl_al30_view DEFINITION
 *"* public components of class ZCL_AL30_VIEW
 *"* do not include other source files here!!!
     TYPE-POOLS adbc .
-    TYPES: BEGIN OF ts_view_list,
-             view_name TYPE zal30_t_view-tabname,
-             view_desc TYPE dd02t-ddtext,
-           END OF ts_view_list.
-    TYPES: tt_view_list TYPE STANDARD TABLE OF ts_view_list WITH EMPTY KEY.
 
-    "! <p class="shorttext synchronized" lang="en">View List created</p>
+    TYPES:
+      BEGIN OF ts_view_list,
+        view_name TYPE zal30_t_view-tabname,
+        view_desc TYPE dd02t-ddtext,
+      END OF ts_view_list .
+    TYPES:
+      tt_view_list TYPE STANDARD TABLE OF ts_view_list WITH EMPTY KEY .
+
+    "! <p class="shorttext synchronized">View List created</p>
     "! View list created. Useful for use in the F4.
-    "! @parameter iv_langu | <p class="shorttext synchronized" lang="en">Language</p>
-    "! @parameter it_r_views | <p class="shorttext synchronized" lang="en">Views to filter</p>
-    "! @parameter et_view_list | <p class="shorttext synchronized" lang="en">View list</p>
+    "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    "! @parameter it_r_views | <p class="shorttext synchronized">Views to filter</p>
+    "! @parameter et_view_list | <p class="shorttext synchronized">View list</p>
     METHODS view_list
       IMPORTING
         !iv_langu     TYPE sylangu DEFAULT sy-langu
         !it_r_views   TYPE zif_al30_data=>tt_r_tabname OPTIONAL
       EXPORTING
-        !et_view_list TYPE tt_view_list.
+        !et_view_list TYPE tt_view_list .
+    "! <p class="shorttext synchronized">Read data of view</p>
     METHODS read_data
       IMPORTING
-        is_filters TYPE zif_al30_data=>ts_filter_read_data
+        !is_filters TYPE zif_al30_data=>ts_filter_read_data
       EXPORTING
-        !es_return TYPE bapiret2
+        !es_return  TYPE bapiret2
       CHANGING
-        !co_data   TYPE REF TO data .
+        !co_data    TYPE REF TO data .
+    "! <p class="shorttext synchronized">Get fieldcat for the display the view</p>
     METHODS get_fieldcat_view
       IMPORTING
         !iv_mode     TYPE char1
       EXPORTING
         !es_return   TYPE bapiret2
         !et_fieldcat TYPE lvc_t_fcat .
+    "! <p class="shorttext synchronized">Create the internal table for display data of the view</p>
     METHODS create_it_data_view
       IMPORTING
         !iv_mode   TYPE char1
       EXPORTING
         !et_data   TYPE REF TO data
         !es_return TYPE bapiret2 .
+    "! <p class="shorttext synchronized">Save the data in the view.</p>
     METHODS save_data
       IMPORTING
         !iv_allow_request TYPE sap_bool DEFAULT abap_false
       EXPORTING
-        !es_return        TYPE bapiret2
+        !et_return        TYPE bapiret2_t
       CHANGING
         !ct_datos_del     TYPE STANDARD TABLE
         !ct_datos         TYPE STANDARD TABLE
         !cv_order         TYPE e070-trkorr .
+    "! <p class="shorttext synchronized">Check the contents of field</p>
     METHODS verify_field_data
       IMPORTING
         !iv_fieldname TYPE any
         !iv_value     TYPE any
       EXPORTING
-        es_return     TYPE bapiret2 .
+        !es_return    TYPE bapiret2 .
+    "! <p class="shorttext synchronized">Verify change row data + execute exit</p>
+    "!
+    "! @parameter et_return | <p class="shorttext synchronized">Return table</p>
     METHODS verify_change_row_data
+      IMPORTING
+        !iv_row          TYPE bapi_line
       EXPORTING
-        VALUE(es_return) TYPE bapiret2
+        VALUE(et_return) TYPE bapiret2_t
       CHANGING
         !cs_row_data     TYPE any .
+    "! <p class="shorttext synchronized">Verify row data</p>
+    "! This method enters both when modifying / inserting fields, and when recording data
+    "! @parameter iv_row | <p class="shorttext synchronized">Row number</p>
+    "! @parameter is_row_data | <p class="shorttext synchronized">Row data</p>
+    "! @parameter iv_save_process | <p class="shorttext synchronized" >Enter in save process</p>
+    "! @parameter et_return | <p class="shorttext synchronized">Return table</p>
+    METHODS verify_row_data
+      IMPORTING
+        !iv_row          TYPE bapi_line
+        !is_row_data     TYPE any
+        !iv_save_process TYPE sap_bool DEFAULT abap_false
+        !no_exit         TYPE sap_bool DEFAULT abap_false
+      EXPORTING
+        VALUE(et_return) TYPE bapiret2_t.
+    "! <p class="shorttext synchronized">Verify data to be save</p>
+    "! This exit is called when recording data
+    "! @parameter it_data | <p class="shorttext synchronized">Data</p>
+    "! @parameter it_data_del | <p class="shorttext synchronized">Data deleted</p>
+    "! @parameter iv_save_process | <p class="shorttext synchronized" >Enter in save process</p>
+    "! @parameter et_return | <p class="shorttext synchronized">return</p>
+    METHODS verify_save_data
+      IMPORTING
+        it_data          TYPE STANDARD TABLE
+        it_data_del      TYPE STANDARD TABLE
+        !iv_save_process TYPE sap_bool DEFAULT abap_false
+      EXPORTING
+        et_return        TYPE bapiret2_t.
+
+    "! <p class="shorttext synchronized">Check SAP authorization</p>
     METHODS check_sap_authorization
       IMPORTING
         !iv_view_name   TYPE tabname
         !iv_view_action TYPE any DEFAULT 'U'
       RAISING
         zcx_al30 .
+    "! <p class="shorttext synchronized">Transport table entries</p>
     METHODS transport_entries
       IMPORTING
         !it_data         TYPE STANDARD TABLE
@@ -75,41 +119,57 @@ CLASS zcl_al30_view DEFINITION
         !cv_order        TYPE e070-trkorr
       RETURNING
         VALUE(rs_return) TYPE bapiret2 .
+    "! <p class="shorttext synchronized">Returns if the view has marked authorization per user</p>
     METHODS view_have_user_auth
       IMPORTING
         !iv_view       TYPE tabname
       RETURNING
         VALUE(rv_have) TYPE sap_bool .
+    "! <p class="shorttext synchronized">Returns if the view has marked authorization per SAP</p>
     METHODS view_have_sap_auth
       IMPORTING
         !iv_view       TYPE tabname
       RETURNING
         VALUE(rv_have) TYPE sap_bool .
+    "! <p class="shorttext synchronized">Get level authorization of the view</p>
     METHODS get_level_auth_view
       IMPORTING
         !iv_view             TYPE tabname
         !iv_user             TYPE syuname DEFAULT sy-uname
       RETURNING
         VALUE(rv_level_auth) TYPE zal30_e_level_auth .
+    "! <p class="shorttext synchronized">The view has the auto-tuning option checked</p>
     METHODS view_have_auto_adjust
       IMPORTING
         !iv_view       TYPE tabname
       RETURNING
         VALUE(rv_have) TYPE sap_bool .
+    "! <p class="shorttext synchronized">Lock the view and the text table</p>
     METHODS lock_view
       RAISING
         zcx_al30 .
+    "! <p class="shorttext synchronized">Instance the exit class</p>
     METHODS instance_exit_class
       IMPORTING
         !iv_exit_class   TYPE zal30_e_exit_class
       RETURNING
         VALUE(rs_return) TYPE bapiret2 .
+    "! <p class="shorttext synchronized">Set the data configuration of the view</p>
     METHODS set_data_conf_view
       IMPORTING
         !it_fields_view      TYPE zif_al30_data=>tt_fields_view
         !it_fields_text_view TYPE zif_al30_data=>tt_fields_text_view
         !is_view             TYPE zal30_t_view
         !it_fields_ddic      TYPE dd03ptab .
+    "! <p class="shorttext synchronized">Set editable mode the ALV Data</p>
+    "!
+    "! @parameter it_data | <p class="shorttext synchronized">Data</p>
+    "! @parameter ev_edit_mode | <p class="shorttext synchronized">Edit mode</p>
+    METHODS set_edit_mode_alv
+      IMPORTING
+        !it_data      TYPE STANDARD TABLE
+      EXPORTING
+        !ev_edit_mode TYPE cdchngind.
 
   PROTECTED SECTION.
 
@@ -133,13 +193,14 @@ CLASS zcl_al30_view DEFINITION
     DATA mt_fields_ddic TYPE dd03ptab .
     DATA ms_view TYPE zal30_t_view .
     DATA mo_original_data TYPE REF TO data .
-    DATA mv_abort_save TYPE sap_bool .
 
+    "! <p class="shorttext synchronized">Exit after save data</p>
     METHODS exit_after_save_data
       IMPORTING
         !it_data       TYPE STANDARD TABLE
         !it_data_del   TYPE STANDARD TABLE
         !iv_error_save TYPE sap_bool .
+    "! <p class="shorttext synchronized">Exit before save data</p>
     METHODS exit_before_save_data
       EXPORTING
         !ev_abort_save TYPE sap_bool
@@ -147,66 +208,97 @@ CLASS zcl_al30_view DEFINITION
       CHANGING
         !ct_data       TYPE STANDARD TABLE
         !ct_data_del   TYPE STANDARD TABLE .
+    "! <p class="shorttext synchronized">update reset fields</p>
     METHODS reset_data
       CHANGING
         !ct_datos     TYPE STANDARD TABLE
         !ct_datos_del TYPE STANDARD TABLE .
+    "! <p class="shorttext synchronized">Exit for check authorization in data read</p>
     METHODS exit_check_auth_data_read
       IMPORTING
         !is_row_data   TYPE any
       RETURNING
         VALUE(rv_auth) TYPE sap_bool .
+    "! <p class="shorttext synchronized">Exit in data read process</p>
     METHODS exit_in_process_data_read
       CHANGING
         !cs_row_data TYPE any .
+    "! <p class="shorttext synchronized">Exit after read data</p>
+    METHODS exit_after_read_data
+      CHANGING
+        !ct_data TYPE STANDARD TABLE .
+    "! <p class="shorttext synchronized">Exit before read data</p>
     METHODS exit_before_read_data
       CHANGING
         !ct_data TYPE STANDARD TABLE .
+    "! <p class="shorttext synchronized">Exit for verify field data</p>
     METHODS exit_verify_field_data
       IMPORTING
         !iv_fieldname TYPE any
         !iv_value     TYPE any
       EXPORTING
         !es_return    TYPE bapiret2 .
+    "! <p class="shorttext synchronized">Exit for verify and change row data</p>
     METHODS exit_verify_change_row_data
+      IMPORTING
+        !iv_row          TYPE bapi_line OPTIONAL
       EXPORTING
-        VALUE(es_return) TYPE bapiret2
+        VALUE(et_return) TYPE bapiret2_t
       CHANGING
         !cs_row_data     TYPE any .
+    "! <p class="shorttext synchronized">Exit for verify row data</p>
+    METHODS exit_verify_row_data
+      IMPORTING
+        !iv_row          TYPE bapi_line OPTIONAL
+        !is_row_data     TYPE any
+        !iv_save_process TYPE sap_bool DEFAULT abap_false
+      EXPORTING
+        VALUE(et_return) TYPE bapiret2_t.
+
+
+    "! <p class="shorttext synchronized">Add fields of text table</p>
     METHODS add_fields_texttable
       IMPORTING
         !iv_view   TYPE tabname
         !it_fields TYPE zif_al30_data=>tt_fields_view
       CHANGING
         !ct_fcat   TYPE lvc_t_fcat .
+    "! <p class="shorttext synchronized">Add edit fiels to the internal table</p>
     METHODS add_edit_fields
       CHANGING
         !ct_fcat TYPE lvc_t_fcat .
+    "! <p class="shorttext synchronized">Get fieldcatalog of table and text view</p>
     METHODS get_lvc_fieldcat
       IMPORTING
         VALUE(is_view) TYPE zal30_t_view
       RETURNING
         VALUE(rt_fcat) TYPE lvc_t_fcat .
+    "! <p class="shorttext synchronized">Exit for the field catalog</p>
     METHODS exit_process_catalog_of_field
       CHANGING
         VALUE(cs_fieldcat) TYPE lvc_s_fcat .
+    "! <p class="shorttext synchronized">Create SQL for read</p>
     METHODS create_sql_read
       IMPORTING
         !is_filters TYPE zif_al30_data=>ts_filter_read_data
       EXPORTING
         !et_cols    TYPE adbc_column_tab
         !ev_sql     TYPE string .
+    "! <p class="shorttext synchronized">Create join for the select to the text table</p>
     METHODS create_join_sql_texttable
       RETURNING
         VALUE(rv_result) TYPE string .
+    "! <p class="shorttext synchronized">Lock table</p>
     METHODS lock_table
       IMPORTING
         !iv_table TYPE ocus-table
       RAISING
         zcx_al30 .
+    "! <p class="shorttext synchronized">Unlock table</p>
     METHODS unlock_table
       IMPORTING
         !iv_table TYPE tabname .
+    "! <p class="shorttext synchronized">Save data deleted</p>
     METHODS save_data_erased
       IMPORTING
         !iv_allow_request TYPE sap_bool
@@ -215,21 +307,25 @@ CLASS zcl_al30_view DEFINITION
       CHANGING
         !ct_datos_del     TYPE STANDARD TABLE
         !cv_order         TYPE e070-trkorr .
+    "! <p class="shorttext synchronized">Save changelog</p>
     METHODS save_change_log
       IMPORTING
         !it_datos     TYPE STANDARD TABLE
         !it_datos_del TYPE STANDARD TABLE .
+    "! <p class="shorttext synchronized">Fill the change log</p>
     METHODS fill_change_log
       IMPORTING
         !it_data       TYPE STANDARD TABLE
       CHANGING
         !ct_change_log TYPE tt_main_change_log .
+    "! <p class="shorttext synchronized">Convert data to changelog key</p>
     METHODS conv_data_2_changelog_key
       IMPORTING
         !is_data        TYPE any
         !it_fields_ddic TYPE dd03ptab
       RETURNING
         VALUE(rv_key)   TYPE cdtabkey .
+    "! <p class="shorttext synchronized">Save the new data or update data</p>
     METHODS save_data_inup
       IMPORTING
         !it_data           TYPE STANDARD TABLE
@@ -239,6 +335,7 @@ CLASS zcl_al30_view DEFINITION
       CHANGING
         !cv_order          TYPE e070-trkorr
         !cv_save_error     TYPE sap_bool .
+    "! <p class="shorttext synchronized">Fill change log values</p>
     METHODS fill_changelog_values
       IMPORTING
         !iv_tabname    TYPE zal30_t_view-tabname
@@ -247,20 +344,71 @@ CLASS zcl_al30_view DEFINITION
         !is_data       TYPE any
       CHANGING
         !ct_change_log TYPE zcl_al30_view=>tt_main_change_log .
+    "! <p class="shorttext synchronized">Search row of the original data</p>
     METHODS search_row_original_data
       IMPORTING
         !is_data       TYPE any
         !iv_tabname    TYPE zal30_t_view-tabname
       EXPORTING
         VALUE(es_data) TYPE any .
+    "! <p class="shorttext synchronized">Create where to the sql</p>
     METHODS create_where_sql
       IMPORTING
         !is_filters     TYPE zif_al30_data=>ts_filter_read_data
       RETURNING
         VALUE(rv_where) TYPE string .
-    METHODS show_popup_error_messages
+
+    "! <p class="shorttext synchronized">Add virtual fields</p>
+    "!
+    "! @parameter it_fields | <p class="shorttext synchronized">Fields of view</p>
+    "! @parameter ct_fcat | <p class="shorttext synchronized">Fieldcatalog</p>
+    METHODS add_fields_virtual
+      IMPORTING
+        it_fields TYPE zif_al30_data=>tt_fields_view
       CHANGING
-        !ct_return TYPE bapiret2_t .
+        ct_fcat   TYPE lvc_t_fcat .
+    "! <p class="shorttext synchronized">field value ajust for SQL Where</p>
+    "!
+    "! @parameter iv_tabname | <p class="shorttext synchronized">Table name</p>
+    "! @parameter iv_fieldname | <p class="shorttext synchronized">Field name</p>
+    "! @parameter cv_value | <p class="shorttext synchronized">Value</p>
+    METHODS field_value_adjust_sql
+      IMPORTING
+        iv_tabname   TYPE zal30_t_view-tabname
+        iv_fieldname TYPE rsdstabs-prim_fname
+      CHANGING
+        cv_value     TYPE any.
+    "! <p class="shorttext synchronized">Internal verification row data</p>
+    "! This method enters both when modifying / inserting fields, and when recording data
+    "! @parameter iv_row | <p class="shorttext synchronized">Row number</p>
+    "! @parameter is_row_data | <p class="shorttext synchronized">Row data</p>
+    "! @parameter et_return | <p class="shorttext synchronized">Return table</p>
+    METHODS internal_verify_row_data
+      IMPORTING
+        iv_row      TYPE bapi_line
+        is_row_data TYPE any
+      EXPORTING
+        et_return   TYPE bapiret2_t.
+    "! <p class="shorttext synchronized">Exit for verify the data to be save</p>
+    "! It allows the data to be recorded or deleted before performing the recording process
+    "! @parameter it_data | <p class="shorttext synchronized">Data to be update or insert</p>
+    "! @parameter it_data_del | <p class="shorttext synchronized">Data to be delete</p>
+    "! @parameter et_return | <p class="shorttext synchronized">return</p>
+    METHODS exit_verify_save_data
+      IMPORTING
+        it_data     TYPE STANDARD TABLE
+        it_data_del TYPE STANDARD TABLE
+      EXPORTING
+        et_return   TYPE bapiret2_t.
+    "! <p class="shorttext synchronized">Exit to set editable mode the ALV Data</p>
+    "!
+    "! @parameter it_data | <p class="shorttext synchronized">Data</p>
+    "! @parameter ev_edit_mode | <p class="shorttext synchronized">Edit mode</p>
+    METHODS exit_set_edit_mode_alv
+      IMPORTING
+        !it_data      TYPE STANDARD TABLE
+      EXPORTING
+        !ev_edit_mode TYPE cdchngind.
   PRIVATE SECTION.
 
 *"* private components of class ZCL_AL30_VIEW
@@ -279,39 +427,33 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
 
 * Se añade el campo de estilo
-    INSERT VALUE #( fieldname = zif_al30_data=>cv_field_style rollname = 'LVC_T_STYL' ) INTO TABLE ct_fcat.
+    INSERT VALUE #( fieldname = zif_al30_data=>cs_control_fields_alv_data-style rollname = 'LVC_T_STYL' ) INTO TABLE ct_fcat.
 
   ENDMETHOD.
 
 
   METHOD add_fields_texttable.
 
-    IF iv_view IS NOT INITIAL.
+    " De los campos de la tabla de texto obtenemos sus campos para añadirlos al catalogo de campos
+    LOOP AT it_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WHERE field_texttable = abap_true.
+      READ TABLE mt_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_dd03p>)
+                                 WITH KEY tabname = iv_view
+                                          fieldname = <ls_fields>-fieldname.
 
-*      TRY.
-*          NEW zcl_al30_conf( )->read_single_view_ddic(
-*            EXPORTING
-*              iv_name_view = iv_view
-*            IMPORTING
-*              et_dd03p     = DATA(lt_dd03p) ).
-*
-*          IF lt_dd03p IS NOT INITIAL.
-      " De los campos de la tabla de texto obtenemos sus campos para añadirlos al catalogo de campos
-      LOOP AT it_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WHERE field_texttable = abap_true.
-        READ TABLE mt_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_dd03p>)
-                                   WITH KEY tabname = iv_view
-                                            fieldname = <ls_fields>-fieldname.
+      IF sy-subrc = 0.
+        INSERT VALUE #( fieldname = <ls_fields>-fieldname rollname = <ls_dd03p>-rollname ) INTO TABLE ct_fcat.
+      ENDIF.
 
-        IF sy-subrc = 0.
-          INSERT VALUE #( fieldname = <ls_fields>-fieldname rollname = <ls_dd03p>-rollname ) INTO TABLE ct_fcat.
-        ENDIF.
+    ENDLOOP.
 
-      ENDLOOP.
-*    ENDIF.
+  ENDMETHOD.
 
-*        CATCH zcx_al30.
-*      ENDTRY.
-    ENDIF.
+
+  METHOD add_fields_virtual.
+
+    LOOP AT it_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WHERE virtual = abap_true.
+      INSERT VALUE #( fieldname = <ls_fields>-fieldname rollname = <ls_fields>-virtual_dtel ) INTO TABLE ct_fcat.
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -390,7 +532,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
     CLEAR: et_data, es_return.
 
-* Creo la estructura en base a la vista/tabla indicada
+    " Creo la estructura en base a la vista/tabla indicada
     CALL METHOD zcl_ca_dynamic_tables=>create_wa_from_struc
       EXPORTING
         i_struc    = ms_view-tabname
@@ -399,10 +541,14 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
     IF lo_wa_view IS BOUND.
 
-* Se añade los campos de la tabla de textos asociada a la vista.
+      " Se añade los campos de la tabla de textos asociada a la vista.
       add_fields_texttable( EXPORTING iv_view = ms_view-texttable
                                       it_fields = mt_fields
                             CHANGING ct_fcat = lt_fcat ).
+
+      " Se añade los campos virtuales
+      add_fields_virtual( EXPORTING it_fields = mt_fields
+                          CHANGING ct_fcat = lt_fcat ).
 
 * En el modo edición se añaden los campos de control
       IF iv_mode = zif_al30_data=>cv_mode_change.
@@ -466,20 +612,22 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
     CLEAR: et_cols.
 
-    " Primero se rellena el nombre de las campos de la vist
-    et_cols = VALUE #( FOR <ls_fields> IN mt_fields ( <ls_fields>-fieldname ) ).
+    " Primero se rellena el nombre de las campos de la vista, excluyendo los virtuales.
+    et_cols = VALUE #( FOR <ls_fields> IN mt_fields WHERE ( virtual = abap_false ) ( <ls_fields>-fieldname ) ).
 
     " Ahora se monta la SQL de búsqueda.
     ev_sql = 'SELECT'.
 
-    " Se monta los campos de la búsqueda
-    DATA(lv_sql_fields) = REDUCE string( INIT sql TYPE string FOR <ls_fields> IN mt_fields NEXT sql = sql &&
+    " Se monta los campos de la búsqueda. En ambos casos se ignoraran los virtuales porque no existen en ninguna tabla
+    DATA(lv_sql_fields) = REDUCE string( INIT sql TYPE string FOR <ls_fields> IN mt_fields WHERE ( virtual = abap_false )
+                          NEXT sql = sql &&
                           COND #( LET sep = ',' field = COND string( WHEN <ls_fields>-field_texttable = abap_false THEN |{ zif_al30_data=>cs_alias_sql-view }.{ <ls_fields>-fieldname }|
                           ELSE |{ zif_al30_data=>cs_alias_sql-texttable }.{ <ls_fields>-fieldname }| )
                           IN WHEN sql IS NOT INITIAL THEN |{ sep } { field }| ELSE |{ field }| ) ).
 
     " Se monta la ordenación, mismo proceso que para montar los campos pero solo queremos los campos claves
-    DATA(lv_order_fields) = REDUCE string( INIT sql TYPE string FOR <ls_fields> IN mt_fields WHERE ( key_ddic = abap_true ) NEXT sql = sql &&
+    DATA(lv_order_fields) = REDUCE string( INIT sql TYPE string FOR <ls_fields> IN mt_fields WHERE ( key_ddic = abap_true AND virtual = abap_false )
+                          NEXT sql = sql &&
                           COND #( LET sep = ',' field = COND string( WHEN <ls_fields>-field_texttable = abap_false THEN |{ zif_al30_data=>cs_alias_sql-view }.{ <ls_fields>-fieldname }|
                           ELSE |{ zif_al30_data=>cs_alias_sql-texttable }.{ <ls_fields>-fieldname }| )
                           IN WHEN sql IS NOT INITIAL THEN |{ sep } { field }| ELSE |{ field }| ) ).
@@ -512,12 +660,21 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
     CLEAR rv_where.
 
+    " Los filtros se mueven a una variable local para poderlos manipular
+    DATA(ls_filters) = is_filters.
+
     " Primer nivel son las tablas
-    LOOP AT is_filters-fields_ranges ASSIGNING FIELD-SYMBOL(<ls_tables>).
+    LOOP AT ls_filters-fields_ranges ASSIGNING FIELD-SYMBOL(<ls_tables>).
+
       " Según la tabla se monta el alias
       IF <ls_tables>-tablename = ms_view-tabname.
         DATA(lv_alias) = |{ zif_al30_data=>cs_alias_sql-view }.|.
+
+        " Se guarda el nombre de la tabla para saber el tipo del campo para aplicar rutinas conversión
+        DATA(lv_tabname) = ms_view-tabname.
+
       ELSE.
+        lv_tabname = ms_view-texttable.
         lv_alias = |{ zif_al30_data=>cs_alias_sql-texttable }.|.
       ENDIF.
 
@@ -528,9 +685,16 @@ CLASS zcl_al30_view IMPLEMENTATION.
         " Se mira el número de registros por si hay que añadir un OR
         DATA(lv_lines) = lines( <ls_fields>-selopt_t ).
         LOOP AT <ls_fields>-selopt_t ASSIGNING FIELD-SYMBOL(<ls_values>).
+          DATA(lv_tabix) = sy-tabix.
 
           " Primero se monta el campo
           DATA(lv_field) = |{ lv_alias }{ <ls_fields>-fieldname }|.
+
+          " Debido a que los campos con rutinas de conversión no vienen bien formateados por la función de SAP, hay que hacer
+          " el ajuste manualmente para que funcione.
+          field_value_adjust_sql( EXPORTING iv_tabname = lv_tabname
+                                            iv_fieldname = <ls_fields>-fieldname
+                                  CHANGING cv_value = <ls_values>-low ).
 
           " Ahora el operador y valor
           IF <ls_values>-option = 'BT'.
@@ -551,6 +715,9 @@ CLASS zcl_al30_view IMPLEMENTATION.
             lv_operator = |> '{ <ls_values>-low }'|.
           ELSEIF <ls_values>-option = 'EQ'.
             lv_operator = |= '{ <ls_values>-low }'|.
+          ELSEIF <ls_values>-option = 'CP'.
+            lv_operator = |LIKE '{ <ls_values>-low }'|.
+            REPLACE ALL OCCURRENCES OF '*' IN lv_operator WITH '%'.
           ENDIF.
           " Se monta la condición
           DATA(lv_cond) = |{ lv_field } { lv_operator }|.
@@ -559,7 +726,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
           lv_where = COND #( WHEN lv_where IS INITIAL THEN |( { lv_cond }| ELSE |{ lv_where } { lv_cond }| ).
 
           " Si el numero del registro es inferior al numero de líneas hay que añadir un OR
-          IF sy-tabix < lv_lines.
+          IF lv_tabix < lv_lines.
             lv_where = |{ lv_where } OR|.
           ENDIF.
           CLEAR: lv_operator, lv_cond.
@@ -578,6 +745,8 @@ CLASS zcl_al30_view IMPLEMENTATION.
 * En otras versiones de ABAP/SAP en el campo que tenga el elemento de datos LAND1 esta añadiendo un espacio en blanco en países
 * de dos dígitos. Es decir, si se pone ES queda como 'ES ', esto hace que no encuentre datos. Este caso en S/4 HANA no ocurre
 * Y como puede ser que este problema este en más campos y como esto tiene que ser multiversión se monta en SQL a manija.
+* Nota Iván 2: Aquellos campos con rutinas de conversión no se formatea correctamente haciando que no encuentre datos. Por eso
+* también se descarta este código
 **    LOOP AT is_filters-where_clauses ASSIGNING FIELD-SYMBOL(<ls_tables>).
 **
 **      " Primero se construye el alias segun la tabla
@@ -614,6 +783,27 @@ CLASS zcl_al30_view IMPLEMENTATION.
 **      rv_where = COND #( WHEN rv_where IS INITIAL THEN | { lv_where }| ELSE |{ rv_where } { lv_where }| ).
 **
 **    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD exit_after_read_data.
+    DATA ld_metodo TYPE seocpdname.
+
+    IF mo_exit_class IS BOUND.
+
+* Monto el método al cual se llamará de la clase de exit.
+      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_AFTER_READ_DATA' INTO ld_metodo.
+
+      TRY.
+          CALL METHOD mo_exit_class->(ld_metodo)
+            CHANGING
+              ct_data = ct_data.
+
+        CATCH cx_root.
+      ENDTRY.
+
+    ENDIF.
 
   ENDMETHOD.
 
@@ -683,6 +873,17 @@ CLASS zcl_al30_view IMPLEMENTATION.
             CHANGING
               ct_data       = ct_data
               ct_data_del   = ct_data_del.
+
+          " Los mensajes de return que no tengan el message informado se llama al proceso para completarlo
+          LOOP AT et_return REFERENCE INTO DATA(lo_return) WHERE message IS INITIAL.
+            lo_return->message = zcl_al30_util=>fill_return( iv_type = lo_return->type
+                                                             iv_id = lo_return->id
+                                                             iv_number = lo_return->number
+                                                             iv_message_v1 = lo_return->message_v1
+                                                             iv_message_v2 = lo_return->message_v2
+                                                             iv_message_v3 = lo_return->message_v3
+                                                             iv_message_v4 = lo_return->message_v4 )-message.
+          ENDLOOP.
 
         CATCH cx_root.
       ENDTRY.
@@ -763,7 +964,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
   METHOD exit_verify_change_row_data.
     DATA ld_metodo TYPE seocpdname.
 
-    CLEAR: es_return.
+    CLEAR: et_return.
 
     IF mo_exit_class IS BOUND.
 
@@ -772,8 +973,10 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
       TRY.
           CALL METHOD mo_exit_class->(ld_metodo)
+            EXPORTING
+              iv_row      = iv_row
             IMPORTING
-              es_return   = es_return
+              et_return   = et_return
             CHANGING
               cs_row_data = cs_row_data.
 
@@ -878,7 +1081,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
     LOOP AT it_data ASSIGNING FIELD-SYMBOL(<ls_data>).
 
-      ASSIGN COMPONENT zif_al30_data=>cv_field_updkz OF STRUCTURE <ls_data> TO FIELD-SYMBOL(<updkz>). " Este campo debe existir, si no existe que pegue dump
+      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-updkz OF STRUCTURE <ls_data> TO FIELD-SYMBOL(<updkz>). " Este campo debe existir, si no existe que pegue dump
 
       fill_changelog_values( EXPORTING iv_tabname = ms_view-tabname
                                        iv_chngind = CONV #( <updkz> )
@@ -1018,6 +1221,30 @@ CLASS zcl_al30_view IMPLEMENTATION.
         ENDIF.
 
       ENDIF.
+
+      " Se añaden los campos virtual al catalogo
+      DATA(lo_conf) = NEW zcl_al30_conf(  ).
+      LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WHERE virtual = abap_true.
+        TRY.
+            lo_conf->read_single_data_element( EXPORTING iv_rollname = <ls_fields>-virtual_dtel
+                                                         iv_langu    = sy-langu
+                                               IMPORTING es_info     = DATA(ls_info) ).
+
+            " Los campos obtenidos del catalogo del diccionario se pasan a la estructura del catalogo. Practicamente todos
+            " los campos necesarios: textos, elementos datos, rutinas conversión, etc.. son iguales
+            DATA(ls_fcat) = CORRESPONDING lvc_s_fcat( ls_info ).
+            ls_fcat-fieldname = <ls_fields>-fieldname.
+            ls_fcat-col_pos = lv_pos.
+            INSERT ls_fcat INTO TABLE rt_fcat.
+
+            lv_pos = lv_pos + 1.
+
+            CLEAR ls_info.
+
+          CATCH zcx_al30.
+        ENDTRY.
+
+      ENDLOOP.
     ENDIF.
 
   ENDMETHOD.
@@ -1151,7 +1378,12 @@ CLASS zcl_al30_view IMPLEMENTATION.
             IF exit_check_auth_data_read( EXPORTING is_row_data = <ls_datos> ) = abap_true.
 
               " Para saber que el registro viene del diccionario se le informa la posición original que contiene.
-              ASSIGN COMPONENT zif_al30_data=>cv_field_tabix_ddic OF STRUCTURE <ls_datos> TO FIELD-SYMBOL(<field>).
+              ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-is_dict OF STRUCTURE <ls_datos> TO FIELD-SYMBOL(<field>).
+              IF sy-subrc = 0.
+                <field> = abap_true.
+              ENDIF.
+
+              ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-tabix OF STRUCTURE <ls_datos> TO <field>.
               IF sy-subrc = 0.
                 <field> = lv_tabix.
               ENDIF.
@@ -1164,6 +1396,9 @@ CLASS zcl_al30_view IMPLEMENTATION.
             ENDIF.
 
           ENDLOOP.
+
+          " Lectura una vez leídos los datos
+          exit_after_read_data( CHANGING ct_data = <lt_datos> ).
 
         ENDIF.
 
@@ -1190,14 +1425,20 @@ CLASS zcl_al30_view IMPLEMENTATION.
 * el campo de línea en el diccionario
     LOOP AT ct_datos ASSIGNING FIELD-SYMBOL(<ls_wa>).
 
-* Campo de posicion en el dicionario
-      ASSIGN COMPONENT zif_al30_data=>cv_field_tabix_ddic OF STRUCTURE <ls_wa> TO FIELD-SYMBOL(<field>).
+      " Campo de posicion
+      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-tabix OF STRUCTURE <ls_wa> TO FIELD-SYMBOL(<field>).
       IF sy-subrc = 0.
         <field> = sy-tabix.
       ENDIF.
 
+      " El registro ya no existe en el diccionario
+      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-is_dict OF STRUCTURE <ls_wa> TO <field>.
+      IF sy-subrc = 0.
+        <field> = abap_false.
+      ENDIF.
+
 * Campo de actualizacion
-      ASSIGN COMPONENT zif_al30_data=>cv_field_updkz OF STRUCTURE <ls_wa> TO <field>.
+      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-updkz OF STRUCTURE <ls_wa> TO <field>.
       IF sy-subrc = 0.
         <field> = space.
       ENDIF.
@@ -1253,20 +1494,18 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
   METHOD save_data.
     FIELD-SYMBOLS <lt_original_data> TYPE STANDARD TABLE.
-
     FIELD-SYMBOLS <lt_datos> TYPE STANDARD TABLE.
     DATA lo_datos TYPE REF TO data.
 
-    CLEAR: es_return.
 
-
+    CLEAR: et_return.
 
     " Se crea una tabla como la de entrada para pasarla con los datos modificados a las exit
     CREATE DATA lo_datos LIKE ct_datos.
     ASSIGN lo_datos->* TO <lt_datos>.
 
 * Se pasan los datos modificados a la tabla temporal para poderla pasar a las exit.
-    DATA(lv_cond) = |{ zif_al30_data=>cv_field_updkz } IS NOT INITIAL|.
+    DATA(lv_cond) = |{ zif_al30_data=>cs_control_fields_alv_data-updkz } IS NOT INITIAL|.
     LOOP AT ct_datos ASSIGNING FIELD-SYMBOL(<ls_datos>) WHERE (lv_cond).
       INSERT <ls_datos> INTO TABLE <lt_datos>.
     ENDLOOP.
@@ -1274,45 +1513,51 @@ CLASS zcl_al30_view IMPLEMENTATION.
     " Exit antes de grabar los datos
     exit_before_save_data(
       IMPORTING
-        ev_abort_save = mv_abort_save
+        ev_abort_save = DATA(lv_abort_save)
         et_return     = DATA(lt_return)
       CHANGING
         ct_data = <lt_datos>
         ct_data_del = ct_datos_del ).
 
-    show_popup_error_messages( CHANGING ct_return = lt_return ).
+    " Cualquier error hará que no se graben los datos
+    IF ( lv_abort_save EQ abap_true OR
+         ( line_exists( lt_return[ type = zif_al30_data=>cs_msg_type-error ] ) OR
+           line_exists( lt_return[ type = zif_al30_data=>cs_msg_type-dump ] ) ) ).
 
-    IF ( mv_abort_save EQ abap_true OR
-         ( line_exists( lt_return[ type = 'A' ] ) OR
-           line_exists( lt_return[ type = 'X' ] ) OR
-           line_exists( lt_return[ type = 'E' ] ) ) ).
-
-      IF lt_return IS INITIAL.
-
-        "No data changed
-        es_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-success iv_number = '039' ).
+      IF lt_return IS INITIAL. " Si no hay mensaje de error se añade uno por defecto
+        " Save aborted!!
+        INSERT zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-success iv_number = '045' ) INTO TABLE et_return.
+      ELSE.
+        INSERT LINES OF lt_return INTO TABLE et_return.
       ENDIF.
 
     ELSE.
 
+      " Si hay mensajes en la exit se añaden para que se vea todo lo generado
+      INSERT LINES OF lt_return INTO TABLE et_return.
+
       " El proceso de grabación solo se realiza cuando hay datos para grabar.
       IF <lt_datos> IS NOT INITIAL OR ct_datos_del IS NOT INITIAL.
 
-* Si hay datos para borrar se llama al método encarlo de hacerlo
+        " Si hay datos para borrar se llama al método encarlo de hacerlo
         IF ct_datos_del IS NOT INITIAL.
           CALL METHOD save_data_erased
             EXPORTING
               iv_allow_request = iv_allow_request
             IMPORTING
-              es_return        = es_return
+              es_return        = DATA(ls_return)
             CHANGING
               ct_datos_del     = ct_datos_del
               cv_order         = cv_order.
         ENDIF.
 
         " Si no hay errores, por el borrado, se continua el proceso.
-        IF es_return-type NE zif_al30_data=>cs_msg_type-error.
-          CLEAR es_return. " Se limpia posibles mensajes succes del proceso de borrado
+        IF ls_return-type NE zif_al30_data=>cs_msg_type-error.
+          " Si el retorno esta informado se añade al mensaje de retorno
+          IF ls_return IS NOT INITIAL.
+            INSERT ls_return INTO TABLE et_return.
+          ENDIF.
+          CLEAR ls_return.
 
           DATA(lv_save_error) = abap_false.
 
@@ -1321,7 +1566,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
             save_data_inup( EXPORTING it_data = <lt_datos>
                                       iv_save_transport = iv_allow_request
-                            IMPORTING es_return = es_return
+                            IMPORTING es_return = ls_return
 
                             CHANGING cv_order = cv_order
                                      cv_save_error = lv_save_error ).
@@ -1334,7 +1579,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
             COMMIT WORK AND WAIT.
 
             " Se informa que se han grabado los datos
-            es_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-success iv_number = '023' ).
+            INSERT zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-success iv_number = '023' ) INTO TABLE et_return.
 
             " Si la tabla tiene marcada la opción de log de modificación se ejecuta el proceso donde se informará de los cambios
             IF ms_view-change_log = abap_true.
@@ -1346,8 +1591,10 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
           ELSE.
             " Si hay errores pero el es_return esta en blanco le paso un mensaje genérico
-            IF es_return IS INITIAL.
-              es_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error iv_number = '022' ).
+            IF ls_return IS INITIAL.
+              INSERT zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error iv_number = '022' ) INTO TABLE et_return.
+            ELSE.
+              INSERT ls_return INTO TABLE et_return.
             ENDIF.
 
             ROLLBACK WORK. " Se deshace todos los cambios, incluidos lo del borrado
@@ -1374,14 +1621,15 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
           ENDIF.
 
-
+        ELSE.
+          INSERT ls_return INTO TABLE et_return.
         ENDIF.
 
       ELSE. " Si no hay datos y no tampoco borrado se informa un mensaje indicandolo
-        es_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-success iv_number = '039' ).
+        INSERT zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-success iv_number = '039' ) INTO TABLE et_return.
       ENDIF.
-
     ENDIF.
+
 
   ENDMETHOD.
 
@@ -1575,49 +1823,6 @@ CLASS zcl_al30_view IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD show_popup_error_messages.
-
-    IF ct_return IS INITIAL.
-      RETURN.
-    ENDIF.
-
-    TRY.
-        cl_salv_table=>factory( IMPORTING r_salv_table = DATA(lo_salv_table)
-                                CHANGING  t_table      = ct_return ).
-
-        IF lo_salv_table IS BOUND.
-
-          lo_salv_table->get_columns( )->set_optimize( abap_true ).
-
-          lo_salv_table->get_columns( )->get_column(: 'ID' )->set_visible( if_salv_c_bool_sap=>false ),
-                                                      'TYPE' )->set_visible( if_salv_c_bool_sap=>false ),
-                                                      'NUMBER' )->set_visible( if_salv_c_bool_sap=>false ),
-                                                      'LOG_NO' )->set_visible( if_salv_c_bool_sap=>false ),
-                                                      'LOG_MSG_NO' )->set_visible( if_salv_c_bool_sap=>false ),
-                                                      'MESSAGE_V1' )->set_visible( if_salv_c_bool_sap=>false ),
-                                                      'MESSAGE_V2' )->set_visible( if_salv_c_bool_sap=>false ),
-                                                      'MESSAGE_V3' )->set_visible( if_salv_c_bool_sap=>false ),
-                                                      'MESSAGE_V4' )->set_visible( if_salv_c_bool_sap=>false ),
-                                                      'PARAMETER' )->set_visible( if_salv_c_bool_sap=>false ),
-                                                      'FIELD' )->set_visible( if_salv_c_bool_sap=>false ),
-                                                      'SYSTEM' )->set_visible( if_salv_c_bool_sap=>false ).
-
-          lo_salv_table->get_columns( )->set_column_position( columnname = 'ROW'
-                                                              position   = 1 ).
-          lo_salv_table->set_screen_popup( start_column = '5'
-                                           end_column   = '100'
-                                           start_line   = '5'
-                                           end_line     = '10' ).
-          lo_salv_table->display( ).
-        ENDIF.
-
-      CATCH cx_salv_msg ##NO_HANDLER.
-      CATCH cx_salv_not_found ##NO_HANDLER.
-    ENDTRY.
-
-  ENDMETHOD.
-
-
   METHOD transport_entries.
     FIELD-SYMBOLS <lt_view> TYPE STANDARD TABLE.
     FIELD-SYMBOLS <lt_view_texttable> TYPE STANDARD TABLE.
@@ -1685,20 +1890,27 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD verify_change_row_data.
-    CLEAR es_return.
+    CLEAR et_return.
 
-* ----->
-* Codigo mio
-* <-----
+    " Verificación de datos
+    verify_row_data(
+      EXPORTING
+        iv_row      = iv_row
+        is_row_data =  cs_row_data
+      IMPORTING
+        et_return   = et_return ).
 
-* Si no hay error lanzo el cambio y verificacion de datos.
-    IF es_return IS INITIAL.
-      CALL METHOD exit_verify_change_row_data
-        IMPORTING
-          es_return   = es_return
-        CHANGING
-          cs_row_data = cs_row_data.
-    ENDIF.
+* Se lanza la exit de verificación y completado de datos
+    CALL METHOD exit_verify_change_row_data
+      EXPORTING
+        iv_row      = iv_row
+      IMPORTING
+        et_return   = DATA(lt_return)
+      CHANGING
+        cs_row_data = cs_row_data.
+
+    " Se añaden los mensajes obtenidos a los existentes
+    INSERT LINES OF lt_return INTO TABLE et_return.
   ENDMETHOD.
 
 
@@ -1710,11 +1922,6 @@ CLASS zcl_al30_view IMPLEMENTATION.
 * Me posiciono en la configuración del campo pasado. Si no existe, en principio no deberia pasar, configuracion no se hace nada
     READ TABLE mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WITH KEY fieldname = iv_fieldname.
     IF sy-subrc = 0.
-
-* Validación: Campo obligatorio
-      IF <ls_fields>-mandatory = abap_true AND iv_value IS INITIAL.
-        es_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error iv_number = '034' ).
-      ENDIF.
 
 * Si no hay errores entra la verificacion de cliente
       IF es_return IS INITIAL.
@@ -1763,4 +1970,196 @@ CLASS zcl_al30_view IMPLEMENTATION.
                 WHERE a~tabname IN it_r_views.
 
   ENDMETHOD.
+
+  METHOD field_value_adjust_sql.
+    FIELD-SYMBOLS: <field> TYPE any.
+    DATA lo_field TYPE REF TO data.
+
+    " Se recupera la definición del campo
+    DATA(ls_field_ddic) = CAST cl_abap_elemdescr( cl_abap_typedescr=>describe_by_name( |{ iv_tabname }-{ iv_fieldname }| ) )->get_ddic_field( ).
+
+    " Si no hay rutina de conversión el valor no cambiará.
+    IF ls_field_ddic-convexit IS NOT INITIAL.
+
+      " Se monta la concatenación de la tabla y el campo
+      DATA(lv_field) = |{ iv_tabname }-{ iv_fieldname }|.
+
+      " Se crea un tipo igual al del campo informado
+      CREATE DATA lo_field TYPE (lv_field).
+      ASSIGN lo_field->* TO <field>.
+
+      " Se monta la función de la rutina de conversión y se aplica el valor
+      DATA(lv_function) = |CONVERSION_EXIT_{ ls_field_ddic-convexit }_INPUT|.
+      CALL FUNCTION lv_function
+        EXPORTING
+          input  = cv_value
+        IMPORTING
+          output = <field>
+        EXCEPTIONS
+          OTHERS = 99.
+      IF sy-subrc = 0.
+        cv_value = <field>.
+      ENDIF.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD verify_row_data.
+    CLEAR et_return.
+
+    " Verificación interna segun configuración
+    internal_verify_row_data( EXPORTING iv_row = iv_row
+                                         is_row_data = is_row_data
+                              IMPORTING et_return = et_return ) .
+
+
+
+    " Exit para la verificación de la línea
+    exit_verify_row_data( EXPORTING iv_row      = iv_row
+                                    is_row_data = is_row_data
+                                    iv_save_process = iv_save_process
+                          IMPORTING et_return   = DATA(lt_return) ).
+
+    " Todos los mensajes de la exit se obtiene el texto porque según se llame dicho método es encesario.
+    " Ejemplo en el proceso de grabación
+    LOOP AT lt_return ASSIGNING FIELD-SYMBOL(<ls_return>).
+      <ls_return>-message = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error
+                                                                     iv_id = zif_al30_data=>cv_msg_id
+                                                                     iv_number = '034'
+                                                                     iv_field = <ls_return>-field )-message.
+
+      INSERT <ls_return> INTO TABLE et_return. " Se añaden los mensajes de la exit a los generales
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD verify_save_data.
+    FIELD-SYMBOLS: <lt_datos> TYPE STANDARD TABLE.
+    DATA lo_datos TYPE REF TO data.
+    CLEAR et_return.
+
+    " Se crea una tabla como la de entrada para pasarla con los datos modificados a las exit
+    CREATE DATA lo_datos LIKE it_data.
+    ASSIGN lo_datos->* TO <lt_datos>.
+
+    " Se hacen las verificacion internas
+    DATA(lv_cond) = |{ zif_al30_data=>cs_control_fields_alv_data-updkz } IS NOT INITIAL|.
+
+    LOOP AT it_data ASSIGNING FIELD-SYMBOL(<ls_data>) WHERE (lv_cond).
+      DATA(lv_tabix) = sy-tabix.
+
+      INSERT <ls_data> INTO TABLE <lt_datos>.
+
+      internal_verify_row_data( EXPORTING iv_row = lv_tabix
+                                           is_row_data = <ls_data>
+                                IMPORTING et_return = DATA(lt_return) ) .
+
+      INSERT LINES OF lt_return INTO TABLE et_return.
+      CLEAR lt_return.
+    ENDLOOP.
+
+    " Exit para la verificación de los datos a grabar
+    exit_verify_save_data( EXPORTING it_data = <lt_datos>
+                                      it_data_del = it_data_del
+                           IMPORTING et_return = lt_return ).
+    INSERT LINES OF lt_return INTO TABLE et_return.
+
+  ENDMETHOD.
+
+  METHOD exit_verify_row_data.
+    DATA ld_metodo TYPE seocpdname.
+
+    CLEAR: et_return.
+
+    IF mo_exit_class IS BOUND.
+
+* Monto el método al cual se llamará de la clase de exit.
+      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_VERIFY_ROW_DATA' INTO ld_metodo.
+
+      TRY.
+          CALL METHOD mo_exit_class->(ld_metodo)
+            EXPORTING
+              iv_row          = iv_row
+              is_row_data     = is_row_data
+              iv_save_process = iv_save_process
+            IMPORTING
+              et_return       = et_return.
+
+        CATCH cx_root.
+      ENDTRY.
+
+    ENDIF.
+  ENDMETHOD.
+
+
+  METHOD internal_verify_row_data.
+    LOOP AT mt_fields REFERENCE INTO DATA(lo_fields).
+
+      ASSIGN COMPONENT lo_fields->fieldname OF STRUCTURE is_row_data TO FIELD-SYMBOL(<field>).
+      IF sy-subrc = 0.
+        " Validación: Campo obligatorio
+        IF lo_fields->mandatory = abap_true AND <field> IS INITIAL.
+          INSERT zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error
+                                                               iv_id = zif_al30_data=>cv_msg_id
+                                                               iv_number = '034'
+                                                               iv_field = lo_fields->fieldname ) INTO TABLE et_return.
+        ENDIF.
+      ENDIF.
+    ENDLOOP.
+  ENDMETHOD.
+
+
+  METHOD exit_verify_save_data.
+    DATA ld_metodo TYPE seocpdname.
+
+    IF mo_exit_class IS BOUND.
+
+* Monto el método al cual se llamará de la clase de exit.
+      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_VERIFY_SAVE_DATA' INTO ld_metodo.
+
+      TRY.
+          CALL METHOD mo_exit_class->(ld_metodo)
+            EXPORTING
+              it_data     = it_data
+              it_data_del = it_data_del
+            IMPORTING
+              et_return   = et_return.
+
+        CATCH cx_root.
+      ENDTRY.
+
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD set_edit_mode_alv.
+
+    " Se llama a la exit que pueda cambiar el modo de edición
+    exit_set_edit_mode_alv( EXPORTING it_data = it_data
+                            IMPORTING ev_edit_mode = DATA(lv_edit_mode) ).
+
+    " Si se ha determinado un modo nuevo tiene prevalencia sobre el determinado
+    ev_edit_mode = COND #( WHEN lv_edit_mode IS NOT INITIAL THEN lv_edit_mode ELSE ev_edit_mode ).
+  ENDMETHOD.
+
+  METHOD exit_set_edit_mode_alv.
+    DATA ld_metodo TYPE seocpdname.
+
+    IF mo_exit_class IS BOUND.
+
+* Monto el método al cual se llamará de la clase de exit.
+      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_SET_EDIT_MODE_ALV' INTO ld_metodo.
+
+      TRY.
+          CALL METHOD mo_exit_class->(ld_metodo)
+            EXPORTING
+              it_data      = it_data
+            IMPORTING
+              ev_edit_mode = ev_edit_mode.
+
+        CATCH cx_root.
+      ENDTRY.
+
+    ENDIF.
+  ENDMETHOD.
+
 ENDCLASS.

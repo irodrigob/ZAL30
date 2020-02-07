@@ -260,15 +260,6 @@ MODULE alv_text OUTPUT.
         EXPORTING
           i_parent = mo_container_text.
 
-* Activo el evento de validación de datos
-      CREATE OBJECT mo_event_receiver_text.
-      SET HANDLER mo_event_receiver_text->handle_data_changed FOR mo_alv_text.
-
-* La verificación cuando se haga enter
-      CALL METHOD mo_alv_text->register_edit_event
-        EXPORTING
-          i_event_id = cl_gui_alv_grid=>mc_evt_enter. " mc_evt_modified
-
 * Catalogo de campos
       PERFORM alv_fieldcat_text.
 
@@ -286,9 +277,14 @@ MODULE alv_text OUTPUT.
           it_outtab            = mt_fields_text[]
           it_filter            = mt_filter.
 
-* Fuerzo la actualización de los método para despues aplicar el filtro.
-      cl_gui_cfw=>flush( ).
+* Activo el evento de validación de datos
+      CREATE OBJECT mo_event_receiver_text.
+      SET HANDLER mo_event_receiver_text->handle_data_changed FOR mo_alv_text.
 
+* La verificación cuando se haga enter
+      CALL METHOD mo_alv_text->register_edit_event
+        EXPORTING
+          i_event_id = cl_gui_alv_grid=>mc_evt_enter. " mc_evt_modified
 
     ELSE.
 

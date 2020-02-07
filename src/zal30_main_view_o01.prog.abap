@@ -66,7 +66,7 @@ MODULE alv_view OUTPUT.
 * Layout
     ms_layout-col_opt = abap_true.
     ms_layout-cwidth_opt = abap_true.
-    ms_layout-stylefname = zif_al30_data=>cv_field_style.
+    ms_layout-stylefname = zif_al30_data=>cs_control_fields_alv_data-style.
 
 * Activo el evento de validación de datos
     CREATE OBJECT mo_event_receiver_alv.

@@ -21,6 +21,7 @@ CLASS zcl_al30_util DEFINITION
         !iv_message_v3   TYPE any OPTIONAL
         !iv_message_v4   TYPE any OPTIONAL
         !iv_id           TYPE symsgid OPTIONAL
+        !iv_field        TYPE any OPTIONAL
       RETURNING
         VALUE(rs_return) TYPE bapiret2 .
     CLASS-METHODS f4_view
@@ -448,7 +449,7 @@ CLASS zcl_al30_util IMPLEMENTATION.
     rs_return-message_v2 = iv_message_v2.
     rs_return-message_v3 = iv_message_v3.
     rs_return-message_v4 = iv_message_v4.
-
+    rs_return-field = iv_field.
 
     CALL FUNCTION 'BAPI_MESSAGE_GETDETAIL'
       EXPORTING
@@ -470,19 +471,25 @@ CLASS zcl_al30_util IMPLEMENTATION.
 
     DATA ls_fieldcat TYPE LINE OF lvc_t_fcat.
 
-* Operación del registro: 'I' -> Insertar. 'U' -> Actualizar. 'D' -> Borrar.
-    ls_fieldcat-fieldname = zif_al30_data=>cv_field_updkz.
+    " Operación del registro: 'I' -> Insertar. 'U' -> Actualizar. 'D' -> Borrar.
+    ls_fieldcat-fieldname = zif_al30_data=>cs_control_fields_alv_data-updkz.
     ls_fieldcat-rollname = 'CDCHNGIND'.
     ls_fieldcat-tech = 'X'.
     APPEND ls_fieldcat TO rt_fieldcat_control.
     CLEAR ls_fieldcat.
 
-* Línea del registro según la lectura en el diccionario
-* Este campo se usa sobretodo para saber si un registro viene del diccionario, o no.
-    ls_fieldcat-fieldname = zif_al30_data=>cv_field_tabix_ddic.
+    " Línea del registro
+    ls_fieldcat-fieldname = zif_al30_data=>cs_control_fields_alv_data-tabix.
     ls_fieldcat-rollname = 'SYTABIX'.
     ls_fieldcat-ref_table = 'SYST'.
     ls_fieldcat-ref_field = 'TABIX'.
+    ls_fieldcat-tech = 'X'.
+    APPEND ls_fieldcat TO rt_fieldcat_control.
+    CLEAR ls_fieldcat.
+
+    " Registro que proviene del diccionario
+    ls_fieldcat-fieldname = zif_al30_data=>cs_control_fields_alv_data-is_dict.
+    ls_fieldcat-rollname = 'SAP_BOOL'.
     ls_fieldcat-tech = 'X'.
     APPEND ls_fieldcat TO rt_fieldcat_control.
     CLEAR ls_fieldcat.

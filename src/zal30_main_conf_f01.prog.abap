@@ -119,6 +119,10 @@ FORM change_view .
                        WITH ls_return-message_v1 ls_return-message_v2 ls_return-message_v3 ls_return-message_v4.
         ELSE.
           MESSAGE s035.
+
+          " Se ajustan el texto de cabecera del campo
+          PERFORM text_heading_fields.
+
         ENDIF.
       ELSE.
         mv_diff_dict = abap_true.
@@ -400,9 +404,6 @@ FORM read_view  USING    pe_name_view
 
 * Ajuste de campos y textos de los listados
   PERFORM adjust_field_and_text.
-
-  " Ajuste de campos virtuales
-  PERFORM enabled_virtual_fields.
 
 ENDFORM.                    " READ_VIEW
 *&---------------------------------------------------------------------*
@@ -756,7 +757,7 @@ FORM alv_fieldcat_gen .
         ls_fieldcat_gen = <ls_fieldcat>.
         ls_fieldcat_gen-col_opt = abap_true.
 
-      WHEN 'POSITION'. " Posición
+      WHEN 'POS_DDIC'. " Posición
         ls_fieldcat_gen = <ls_fieldcat>.
         ls_fieldcat_gen-edit = abap_true.
         ls_fieldcat_gen-col_pos = 3.
@@ -816,6 +817,7 @@ FORM alv_fieldcat_gen .
         ls_fieldcat_gen = <ls_fieldcat>.
         ls_fieldcat_gen-col_pos = 20.
         ls_fieldcat_gen-checkbox = abap_true.
+        ls_fieldcat_gen-no_out = abap_true.
 
       WHEN 'VIRTUAL_DTEL'. " Elemento de datos
         ls_fieldcat_gen = <ls_fieldcat>.
@@ -1109,40 +1111,24 @@ FORM add_virtual_field .
 
     " Se leen los datos del elementos en todos los idiomas
     TRY.
-        mo_controller->read_data_element_all_lang( EXPORTING iv_dtel = ms_virtual_field-dtel
-                                                    IMPORTING et_info = DATA(lt_info_dtel) ).
 
         " Se busca la última posición usada
-        DATA(lv_position) = REDUCE #( INIT x = 0 FOR <wa> IN mt_fields NEXT x = COND #( WHEN <wa>-position > x THEN <wa>-position ELSE x ) ).
+        DATA(lv_position) = REDUCE #( INIT x = 0 FOR <wa> IN mt_fields NEXT x = COND #( WHEN <wa>-pos_ddic > x THEN <wa>-pos_ddic ELSE x ) ).
         lv_position = lv_position + 1.
-
-        " Se busca el texto del idioma de visualización para informarlo en el campo virtual
-        READ TABLE lt_info_dtel INTO DATA(ls_info_dtel) WITH KEY ddlanguage = mv_lang_vis.
 
         " Se inserta en la tabla de campos
         INSERT VALUE #( tabname = zal30_t_view-tabname
                         fieldname = lv_field
-                        position = lv_position
                         pos_ddic = lv_position
                         source_text = zif_al30_data=>cs_source_text-dictionary
                         virtual = abap_true
-                        virtual_dtel = ms_virtual_field-dtel
-                        reptext = ls_info_dtel-reptext ) INTO TABLE mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>).
+                        virtual_dtel = ms_virtual_field-dtel ) INTO TABLE mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>).
 
         " Se añaden los textos
-        LOOP AT lt_info_dtel ASSIGNING FIELD-SYMBOL(<ls_info_dtel>).
-          DATA(ls_field_text) = CORRESPONDING zif_al30_data=>ts_fields_text_view_alv( <ls_fields> ).
-          ls_field_text = CORRESPONDING #( BASE ( ls_field_text ) <ls_info_dtel> ).
-          ls_field_text-spras = <ls_info_dtel>-ddlanguage.
+        PERFORM add_text_of_dtel USING  ms_virtual_field-dtel
+                                 CHANGING <ls_fields>.
 
-          <ls_fields>-reptext = COND #( WHEN <ls_info_dtel>-ddlanguage = mv_lang_vis THEN ls_field_text-reptext ELSE <ls_fields>-reptext ).
-
-          INSERT ls_field_text INTO TABLE mt_fields_text.
-
-          " Se añade el mismo registro a la tabla de textos original por si cambian textos y los quieren volver a dejar
-          INSERT ls_field_text INTO TABLE mt_fields_text_orig.
-
-        ENDLOOP.
+        CLEAR: ms_virtual_field-dtel, ms_virtual_field-name.
 
         " Se lanza el proceso que ajusta los campos virtuales
         PERFORM enabled_virtual_fields.
@@ -1156,10 +1142,12 @@ FORM add_virtual_field .
         SET SCREEN 0. LEAVE SCREEN.
 
       CATCH zcx_al30.
+        CLEAR: mv_okcode_9004.
         MESSAGE s021 WITH ms_virtual_field-dtel DISPLAY LIKE zif_al30_data=>cs_msg_type-error.
     ENDTRY.
 
   ELSE.
+    CLEAR: mv_okcode_9004.
     MESSAGE s010 WITH ms_virtual_field-name DISPLAY LIKE zif_al30_data=>cs_msg_type-error.
   ENDIF.
 
@@ -1200,4 +1188,53 @@ FORM delete_fields.
       MESSAGE s064.
     ENDIF.
   ENDIF.
+ENDFORM.
+
+FORM update_dtel_virtual_field USING pe_dtel
+                               CHANGING ps_field_line TYPE zif_al30_data=>ts_fields_view_alv.
+
+  TRY.
+
+      ps_field_line-virtual_dtel = pe_dtel. " Se cambia el elemento de datos
+
+      " Se quitan los textos del campo pasado por parámetro
+      DELETE mt_fields_text WHERE fieldname = ps_field_line-fieldname.
+      DELETE mt_fields_text_orig WHERE fieldname = ps_field_line-fieldname.
+
+      " Se añaden los textos a las tablas de textos
+      PERFORM add_text_of_dtel USING pe_dtel
+                               CHANGING ps_field_line.
+
+
+    CATCH zcx_al30.
+
+  ENDTRY.
+ENDFORM.
+
+FORM add_text_of_dtel USING pe_dtel
+                      CHANGING ps_field_line  TYPE zif_al30_data=>ts_fields_view_alv.
+
+  TRY.
+      mo_controller->read_data_element_all_lang( EXPORTING iv_dtel = CONV #( pe_dtel )
+                                                  IMPORTING et_info = DATA(lt_info_dtel) ).
+
+      LOOP AT lt_info_dtel ASSIGNING FIELD-SYMBOL(<ls_info_dtel>).
+        DATA(ls_field_text) = CORRESPONDING zif_al30_data=>ts_fields_text_view_alv( <ls_info_dtel> ).
+        ls_field_text-tabname = ps_field_line-tabname.
+        ls_field_text-fieldname = ps_field_line-fieldname.
+        ls_field_text-pos_ddic = ps_field_line-pos_ddic.
+        ls_field_text-spras = <ls_info_dtel>-langu.
+
+        ps_field_line-reptext = COND #( WHEN <ls_info_dtel>-langu = mv_lang_vis THEN ls_field_text-reptext ELSE ps_field_line-reptext ).
+
+        INSERT ls_field_text INTO TABLE mt_fields_text.
+
+        " Se añade el mismo registro a la tabla de textos original por si cambian textos y los quieren volver a dejar
+        INSERT ls_field_text INTO TABLE mt_fields_text_orig.
+
+      ENDLOOP.
+
+    CATCH zcx_al30.
+
+  ENDTRY.
 ENDFORM.

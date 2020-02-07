@@ -1,13 +1,17 @@
+"! <p class="shorttext synchronized">AL30 - View configuration</p>
 CLASS zcl_al30_conf DEFINITION
   PUBLIC
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+    TYPE-POOLS abap .
+
+    TYPES:
 *"* public components of class ZCL_AL30_CONF
 *"* do not include other source files here!!!
+      tt_info_data TYPE STANDARD TABLE OF dfies WITH EMPTY KEY .
 
-    TYPES: tt_info_data TYPE STANDARD TABLE OF dd04v WITH EMPTY KEY.
-
+    "! <p class="shorttext synchronized">Read view</p>
     METHODS read_view
       IMPORTING
         !iv_name_view    TYPE tabname
@@ -21,12 +25,14 @@ CLASS zcl_al30_conf DEFINITION
         !et_fields       TYPE zif_al30_data=>tt_fields_view
         !et_fields_text  TYPE zif_al30_data=>tt_fields_text_view
         !et_fields_ddic  TYPE dd03ptab .
+    "! <p class="shorttext synchronized">Checks if view is correct in DDIC</p>
     METHODS check_view_ddic
       IMPORTING
         !iv_name_view TYPE tabname
       EXPORTING
         !e_return     TYPE bapiret2
         !e_text_view  TYPE as4text .
+    "! <p class="shorttext synchronized">Create a view</p>
     METHODS insert_view
       IMPORTING
         !iv_name_view          TYPE tabname
@@ -38,11 +44,13 @@ CLASS zcl_al30_conf DEFINITION
         !et_fields_text        TYPE zif_al30_data=>tt_fields_text_view
         !es_view               TYPE zal30_t_view
         !et_fields_ddic        TYPE dd03ptab .
+    "! <p class="shorttext synchronized">Delete a view</p>
     METHODS delete_view
       IMPORTING
         !iv_name_view    TYPE tabname
       RETURNING
         VALUE(rs_return) TYPE bapiret2 .
+    "! <p class="shorttext synchronized">Save view</p>
     METHODS save_view
       IMPORTING
         !is_view         TYPE zal30_t_view
@@ -50,18 +58,21 @@ CLASS zcl_al30_conf DEFINITION
         !it_fields_text  TYPE zif_al30_data=>tt_fields_text_view OPTIONAL
       RETURNING
         VALUE(rs_return) TYPE bapiret2 .
+    "! <p class="shorttext synchronized">Check view for insert</p>
     METHODS check_view_insert
       IMPORTING
         !iv_name_view TYPE tabname
       EXPORTING
         !es_return    TYPE bapiret2
         !ev_text_view TYPE as4text .
+    "! <p class="shorttext synchronized">Check view when is reading</p>
     METHODS check_view_read
       IMPORTING
         !iv_name_view TYPE tabname
       EXPORTING
         !es_return    TYPE bapiret2
         !ev_text_view TYPE as4text .
+    "! <p class="shorttext synchronized">Check if there are changes between the view and the dictiona</p>
     METHODS check_changes_dict
       IMPORTING
         !it_fields      TYPE zif_al30_data=>tt_fields_view OPTIONAL
@@ -71,9 +82,11 @@ CLASS zcl_al30_conf DEFINITION
       EXPORTING
         !ev_diff_fields TYPE sap_bool
         !ev_diff_text   TYPE sap_bool .
+    "! <p class="shorttext synchronized">Adjusts the view with the data dictionary.</p>
     METHODS adjust_view_dictionary
       IMPORTING
         !iv_keep_text        TYPE sap_bool DEFAULT abap_true
+        !iv_langu            TYPE sylangu DEFAULT sy-langu
       EXPORTING
         VALUE(es_return)     TYPE bapiret2
         !ev_text_view        TYPE as4text
@@ -81,17 +94,20 @@ CLASS zcl_al30_conf DEFINITION
         !ct_fields_view      TYPE zif_al30_data=>tt_fields_view
         !ct_fields_text_view TYPE zif_al30_data=>tt_fields_text_view
         !cs_view             TYPE zal30_t_view .
+    "! <p class="shorttext synchronized">Check exit class</p>
     METHODS check_exit_class
       IMPORTING
         !iv_exit_class   TYPE zal30_e_exit_class
       RETURNING
         VALUE(rs_return) TYPE bapiret2 .
+    "! <p class="shorttext synchronized">Get logon languages</p>
     METHODS get_logon_languages
       IMPORTING
         !iv_langu  TYPE sylangu DEFAULT sy-langu
       EXPORTING
         !et_lang   TYPE zif_al30_data=>tt_logon_lang
         !et_r_lang TYPE zif_al30_data=>tt_r_lang .
+    "! <p class="shorttext synchronized">Get fields of data dictionary</p>
     METHODS get_fields_view_ddic
       IMPORTING
         !iv_name_view     TYPE any
@@ -106,6 +122,7 @@ CLASS zcl_al30_conf DEFINITION
         !et_fields_ddic   TYPE dd03ptab
       RAISING
         zcx_al30 .
+    "! <p class="shorttext synchronized">Transport View</p>
     METHODS transport_view
       IMPORTING
         !is_view             TYPE zal30_t_view
@@ -115,6 +132,7 @@ CLASS zcl_al30_conf DEFINITION
         !es_return           TYPE bapiret2
       CHANGING
         !cv_order            TYPE e070-trkorr .
+    "! <p class="shorttext synchronized">Read single view ddic</p>
     METHODS read_single_view_ddic
       IMPORTING
         !iv_name_view TYPE any
@@ -125,31 +143,29 @@ CLASS zcl_al30_conf DEFINITION
         !et_dd05m     TYPE dd05mttyp
       RAISING
         zcx_al30 .
-    "! <p class="shorttext synchronized" lang="en">Read info of a data element</p>
+    "! <p class="shorttext synchronized">Read info of a data element</p>
     "!
-    "! @parameter iv_dtel | <p class="shorttext synchronized" lang="en">Data element</p>
-    "! @parameter es_info | <p class="shorttext synchronized" lang="en">info</p>
+    "! @parameter iv_rollname | <p class="shorttext synchronized">Data element</p>
+    "! @parameter es_info | <p class="shorttext synchronized">info</p>
     METHODS read_single_data_element
       IMPORTING
-        !iv_dtel  TYPE rollname
-        !iv_langu TYPE sylangu DEFAULT sy-langu
+        !iv_rollname TYPE rollname
+        !iv_langu    TYPE sylangu DEFAULT sy-langu
       EXPORTING
-        !es_info  TYPE dd04v
+        !es_info     TYPE dfies
       RAISING
         zcx_al30 .
-
-    "! <p class="shorttext synchronized" lang="en">Read info in all languages</p>
+    "! <p class="shorttext synchronized">Read info in all languages</p>
     "!
-    "! @parameter iv_dtel | <p class="shorttext synchronized" lang="en">Data element</p>
-    "! @parameter et_info | <p class="shorttext synchronized" lang="en">Information in each language</p>
+    "! @parameter iv_rollname | <p class="shorttext synchronized">Data element</p>
+    "! @parameter et_info | <p class="shorttext synchronized">Information in each language</p>
     METHODS read_data_element_all_lang
       IMPORTING
-        !iv_dtel TYPE rollname
+        !iv_rollname TYPE rollname
       EXPORTING
-        !et_info TYPE tt_info_data
+        !et_info     TYPE tt_info_data
       RAISING
         zcx_al30 .
-
   PROTECTED SECTION.
 
 *"* protected components of class ZCL_AL30_CONF
@@ -160,6 +176,7 @@ CLASS zcl_al30_conf DEFINITION
     DATA mt_fields_ddic TYPE dd03ptab .
     DATA ms_view TYPE zal30_t_view .
 
+    "! <p class="shorttext synchronized">Save the data in ddic format</p>
     METHODS save_view_ddic
       IMPORTING
         !is_view        TYPE zal30_t_view
@@ -167,6 +184,7 @@ CLASS zcl_al30_conf DEFINITION
         !it_fields_text TYPE zif_al30_data=>tt_fields_text_view OPTIONAL
       RAISING
         zcx_al30 .
+    "! <p class="shorttext synchronized">Read view in all languages</p>
     METHODS read_view_ddic_all_lang
       IMPORTING
         !iv_name_view TYPE any
@@ -175,6 +193,7 @@ CLASS zcl_al30_conf DEFINITION
         !es_dd02v     TYPE dd02v
         !et_dd03p     TYPE dd03ptab
         !et_dd05m     TYPE dd05mttyp .
+    "! <p class="shorttext synchronized">Read text view</p>
     METHODS read_text_view
       IMPORTING
         !iv_name_view    TYPE tabname
@@ -182,6 +201,7 @@ CLASS zcl_al30_conf DEFINITION
         !iv_langu        TYPE sylangu DEFAULT sy-langu
       EXPORTING
         !et_fields_text  TYPE zif_al30_data=>tt_fields_text_view .
+    "! <p class="shorttext synchronized">Get text table of view</p>
     METHODS get_texttable_view
       IMPORTING
         !iv_name_view    TYPE any
@@ -192,21 +212,27 @@ CLASS zcl_al30_conf DEFINITION
         !et_fields       TYPE zif_al30_data=>tt_fields_view
         !et_fields_text  TYPE zif_al30_data=>tt_fields_text_view
         !et_fields_ddic  TYPE dd03ptab .
+    "! <p class="shorttext synchronized">Adjust fields of view</p>
     METHODS adjust_fields_view
       IMPORTING
-        !it_fields_ddic TYPE dd03ptab
+        !iv_all_language TYPE sap_bool DEFAULT abap_false
+        !iv_langu        TYPE sylangu DEFAULT sy-langu
+        !it_fields_ddic  TYPE dd03ptab
       CHANGING
-        !ct_fields      TYPE zif_al30_data=>tt_fields_view
-        !ct_fields_text TYPE zif_al30_data=>tt_fields_text_view .
+        !ct_fields       TYPE zif_al30_data=>tt_fields_view
+        !ct_fields_text  TYPE zif_al30_data=>tt_fields_text_view .
+    "! <p class="shorttext synchronized">Fill default values of fields</p>
     METHODS fill_default_values_fields
       CHANGING
         !cs_fields TYPE zif_al30_data=>ts_fields_view .
+    "! <p class="shorttext synchronized">Fill default values of view</p>
     METHODS fill_default_values_view
       IMPORTING
         !is_default_values     TYPE zif_al30_data=>ts_default_values_create OPTIONAL
         !iv_use_default_values TYPE sap_bool DEFAULT abap_false
       CHANGING
         !cs_view               TYPE zal30_t_view .
+    "! <p class="shorttext synchronized">Is fields a checkbox?</p>
     METHODS is_field_checkbox
       IMPORTING
         !iv_rollname     TYPE domname
@@ -238,12 +264,39 @@ CLASS zcl_al30_conf IMPLEMENTATION.
           " Si viene del diccionario se añade el texto que proviene del mismo
         WHEN zif_al30_data=>cs_source_text-dictionary.
 
+          " Si el campo es virtual no vendrá del diccionario por lo tanto hay llamar a otros método para recuperar sus textos
+          IF <ls_fields>-virtual = abap_true.
+            TRY.
+                " La búsqueda del texto del elemento de datos también depende si se quiere para todos los idiomas o solo
+                " para el idioma pasado por parámetro. El primero se usa en la configuración de la vista, el segundo cuando se
+                " mantienee los datos.
+                IF iv_all_language = abap_true.
+                  read_data_element_all_lang( EXPORTING iv_rollname = <ls_fields>-virtual_dtel
+                                              IMPORTING et_info     = DATA(lt_info) ).
+                ELSE.
+                  read_single_data_element( EXPORTING iv_rollname = <ls_fields>-virtual_dtel
+                                                      iv_langu = iv_langu
+                                            IMPORTING es_info = DATA(ls_info) ).
+                  INSERT ls_info INTO TABLE lt_info.
+                ENDIF.
+                LOOP AT lt_info ASSIGNING FIELD-SYMBOL(<ls_info>).
+                  ls_fields_text = CORRESPONDING #( <ls_info> ).
+                  ls_fields_text = CORRESPONDING #( BASE ( ls_fields_text ) <ls_fields> ).
+                  ls_fields_text-spras = <ls_info>-langu.
+                  INSERT ls_fields_text INTO TABLE ct_fields_text.
+                  CLEAR ls_fields_text.
+                ENDLOOP.
+                CLEAR lt_info.                     .
+              CATCH zcx_al30.
+            ENDTRY.
+          ENDIF.
+
           LOOP AT it_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WHERE fieldname = <ls_fields>-fieldname.
 
             MOVE-CORRESPONDING <ls_fields_ddic> TO ls_fields_text.
             ls_fields_text-spras = <ls_fields_ddic>-ddlanguage.
             ls_fields_text-pos_ddic = <ls_fields>-pos_ddic.
-            APPEND ls_fields_text TO ct_fields_text.
+            INSERT ls_fields_text INTO TABLE ct_fields_text.
             CLEAR ls_fields_text.
 
           ENDLOOP.
@@ -251,12 +304,12 @@ CLASS zcl_al30_conf IMPLEMENTATION.
     ENDLOOP.
 
     " Obtenemos la última posición usada
-    DATA(lv_position) = REDUCE #( INIT x = 0 FOR <wa> IN ct_fields NEXT x = COND #( WHEN <wa>-position > x THEN <wa>-position ELSE x ) ).
+    DATA(lv_position) = REDUCE #( INIT x = 0 FOR <wa> IN ct_fields NEXT x = COND #( WHEN <wa>-pos_ddic > x THEN <wa>-pos_ddic ELSE x ) ).
     lv_position = lv_position + 1.
 
     " Se ajusta aquellos campos que no tienen posición.
-    LOOP AT ct_fields ASSIGNING <ls_fields> WHERE position IS INITIAL.
-      <ls_fields>-position = lv_position.
+    LOOP AT ct_fields ASSIGNING <ls_fields> WHERE pos_ddic IS INITIAL.
+      <ls_fields>-pos_ddic = lv_position.
       lv_position = lv_position + 1.
     ENDLOOP.
 
@@ -342,6 +395,14 @@ CLASS zcl_al30_conf IMPLEMENTATION.
 
     ENDLOOP.
 
+    " Se añaden los campos virtuales que había en la tabla antigua
+    LOOP AT lt_fields_old ASSIGNING <ls_fields_old> WHERE virtual = abap_true.
+      INSERT <ls_fields_old> INTO TABLE ct_fields_view.
+      LOOP AT lt_fields_text_old ASSIGNING <ls_fields_text_old> WHERE fieldname = <ls_fields_old>-fieldname.
+        INSERT <ls_fields_text_old> INTO TABLE ct_fields_text_view.
+      ENDLOOP.
+    ENDLOOP.
+
 * Finalmente grabo la vista
     es_return = save_view( EXPORTING is_view             = cs_view
                                      it_fields      =  ct_fields_view
@@ -396,8 +457,8 @@ CLASS zcl_al30_conf IMPLEMENTATION.
 
     IF lt_fields_ddic[] IS NOT INITIAL.
 
-* Se mira campo por campo las posibles diferencias.
-      LOOP AT lt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>).
+* Se mira campo por campo las posibles diferencias, los virtuales no se procesan porque nunca existen en el diccionario.
+      LOOP AT lt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WHERE virtual = abap_false.
 
         " Se mira que el campo existe en la tabla que le pertoca. Si un campo esta en la principal y pasa a la de texto, o la inversa,
         " se tiene que detectar porque afectaría a la actualización.
@@ -442,7 +503,8 @@ CLASS zcl_al30_conf IMPLEMENTATION.
       IF ev_diff_fields = abap_false.
         LOOP AT lt_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>).
           READ TABLE lt_fields TRANSPORTING NO FIELDS WITH KEY fieldname = <ls_fields_ddic>-fieldname
-                                                                      field_texttable = <ls_fields_ddic>-field_texttable.
+                                                                      field_texttable = <ls_fields_ddic>-field_texttable
+                                                                      virtual = abap_false.
           IF sy-subrc NE 0.
             " A la primera diferencia salgo, no tiene sentido leer el resto de campos.
             ev_diff_fields = abap_true.
@@ -929,6 +991,65 @@ CLASS zcl_al30_conf IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD read_data_element_all_lang.
+
+    CLEAR et_info.
+
+    get_logon_languages( IMPORTING et_lang = DATA(lt_lang) ).
+
+    LOOP AT lt_lang ASSIGNING FIELD-SYMBOL(<ls_lang>).
+
+      TRY.
+          read_single_data_element( EXPORTING iv_rollname = iv_rollname
+                                              iv_langu = <ls_lang>-lang
+                                    IMPORTING es_info = DATA(ls_info) ).
+
+          INSERT ls_info INTO TABLE et_info.
+
+        CATCH zcx_al30.
+      ENDTRY.
+
+    ENDLOOP.
+
+    " Si al final de la búsqueda no existen datos en ningun idioma se lanza la excepción que el
+    " elemento de datos no existe
+    IF et_info IS INITIAL.
+      RAISE EXCEPTION TYPE zcx_al30
+        EXPORTING
+          textid = zcx_al30=>data_element_not_exist.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD read_single_data_element.
+
+    CLEAR: es_info.
+
+
+    CALL METHOD cl_abap_typedescr=>describe_by_name(
+      EXPORTING
+        p_name         = iv_rollname
+      RECEIVING
+        p_descr_ref    = DATA(lo_ref)
+      EXCEPTIONS
+        type_not_found = 1
+        OTHERS         = 2 ).
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_al30
+        EXPORTING
+          textid = zcx_al30=>data_element_not_exist.
+    ELSE.
+      DATA(lo_rollname) = CAST cl_abap_elemdescr( lo_ref  ).
+
+      es_info = lo_rollname->get_ddic_field( p_langu = iv_langu ).
+      es_info-langu = iv_langu.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD read_single_view_ddic.
     DATA lv_name TYPE ddobjname .
 
@@ -1234,59 +1355,4 @@ CLASS zcl_al30_conf IMPLEMENTATION.
 
     ENDIF.
   ENDMETHOD.
-  METHOD read_single_data_element.
-
-    CLEAR: es_info.
-
-    CALL FUNCTION 'DDIF_DTEL_GET'
-      EXPORTING
-        name          = iv_dtel
-        langu         = iv_langu
-      IMPORTING
-        dd04v_wa      = es_info
-      EXCEPTIONS
-        illegal_input = 1
-        OTHERS        = 2.
-    IF sy-subrc NE 0 OR es_info IS INITIAL.
-      RAISE EXCEPTION TYPE zcx_al30
-        EXPORTING
-          textid = zcx_al30=>data_element_not_exist.
-
-    ELSE.
-      " Se informa el idioma porque no se devuelve
-      es_info-ddlanguage = iv_langu.
-    ENDIF.
-
-  ENDMETHOD.
-
-  METHOD read_data_element_all_lang.
-
-    CLEAR et_info.
-
-    get_logon_languages( IMPORTING et_lang = DATA(lt_lang) ).
-
-    LOOP AT lt_lang ASSIGNING FIELD-SYMBOL(<ls_lang>).
-
-      TRY.
-          read_single_data_element( EXPORTING iv_dtel = iv_dtel
-                                              iv_langu = <ls_lang>-lang
-                                    IMPORTING es_info = DATA(ls_info) ).
-
-          INSERT ls_info INTO TABLE et_info.
-
-        CATCH zcx_al30.
-      ENDTRY.
-
-    ENDLOOP.
-
-    " Si al final de la búsqueda no existen datos en ningun idioma se lanza la excepción que el
-    " elemento de datos no existe
-    IF et_info IS INITIAL.
-      RAISE EXCEPTION TYPE zcx_al30
-        EXPORTING
-          textid = zcx_al30=>data_element_not_exist.
-    ENDIF.
-
-  ENDMETHOD.
-
 ENDCLASS.

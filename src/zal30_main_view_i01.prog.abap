@@ -97,6 +97,7 @@ MODULE read_view INPUT.
     IF sy-subrc = 0.
       SET SCREEN 9002. LEAVE SCREEN.
     ELSE.
+      mv_read_data_view = abap_true. " Se indica que se quieren los datos de la tabla
       SET SCREEN 9001. LEAVE SCREEN.
     ENDIF.
   ENDIF.

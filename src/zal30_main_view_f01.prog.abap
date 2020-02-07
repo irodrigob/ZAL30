@@ -141,6 +141,10 @@ FORM inicializacion_prog .
     mv_lang_vis = sy-langu.
   ENDIF.
 
+* Indico que los refrescos de los ALV no se moverán de filas y columna
+  ms_stable-row = abap_true.
+  ms_stable-col = abap_true.
+
 * Transacción original que se llama
   IF ms_conf_screen-origin_tcode IS INITIAL.
     ms_conf_screen-origin_tcode = cl_dynpro=>get_current_transaction( ).
@@ -325,7 +329,11 @@ ENDFORM.                    " CREATE_DATA_VIEW
 *&---------------------------------------------------------------------*
 *       text
 *----------------------------------------------------------------------*
-FORM data_changed  CHANGING ps_data_changed TYPE REF TO cl_alv_changed_data_protocol.
+FORM data_changed  CHANGING ps_data_changed TYPE REF TO cl_alv_changed_data_protocol
+                             ps_onf4
+                             ps_onf4_before
+                             ps_onf4_after
+                             ps_ucomm.
 
   FIELD-SYMBOLS <ls_rows> TYPE lvc_s_moce.
 
@@ -353,6 +361,12 @@ FORM data_changed  CHANGING ps_data_changed TYPE REF TO cl_alv_changed_data_prot
   PERFORM row_insert_modify CHANGING ps_data_changed
                                      mv_datos_validos.
 
+  " Si hay mensajes de error los datos no serán validos
+  READ TABLE ps_data_changed->mt_protocol TRANSPORTING NO FIELDS WITH KEY msgty = zif_al30_data=>cs_msg_type-error.
+  IF sy-subrc = 0.
+    mv_datos_validos = abap_false.
+  ENDIF.
+
 ENDFORM.                    " DATA_CHANGED
 *&---------------------------------------------------------------------*
 *&      Form  ROW_DELETE
@@ -372,14 +386,14 @@ FORM row_delete  USING pe_rows TYPE lvc_s_moce
   IF sy-subrc = 0.
 
 * Miro si el registro viene del diccionario
-    ASSIGN COMPONENT zif_al30_data=>cv_field_tabix_ddic
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-is_dict
                      OF STRUCTURE <ls_wa> TO <field>.
     IF sy-subrc = 0.
 * Si viene del diccionario paso el registro a otra tabla.
-      IF <field> IS NOT INITIAL.
+      IF <field> = abap_true.
 
 * Pongo el indicador de registro borrado, para tenerlo en cuenta en procesos posteriores.
-        ASSIGN COMPONENT zif_al30_data=>cv_field_updkz
+        ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-updkz
                              OF STRUCTURE <ls_wa> TO <field>.
         IF sy-subrc = 0.
           <field> = zif_al30_data=>cv_mode_delete.
@@ -404,15 +418,29 @@ FORM row_insert USING pe_modif TYPE lvc_s_modi
                 CHANGING ps_data_changed TYPE REF TO cl_alv_changed_data_protocol.
 
   FIELD-SYMBOLS <ls_fieldcat> TYPE lvc_s_fcat.
+  FIELD-SYMBOLS <lt_style> TYPE lvc_t_styl.
 
 * Lo primero que hago es habilitar los campos clave, ya que estos datos no éstán
 * guardados todavía en la base de datos
   LOOP AT mt_fieldcat ASSIGNING <ls_fieldcat> WHERE key = abap_true.
-    CALL METHOD ps_data_changed->modify_style
-      EXPORTING
-        i_row_id    = pe_modif-row_id
-        i_fieldname = <ls_fieldcat>-fieldname
-        i_style     = cl_gui_alv_grid=>mc_style_enabled.
+
+    " Los estilos se modificarán directamente en la tabla porque al final de proceso se aplican los estilos
+    " que hayan podido ser modificados en las exit o procesos estándar
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-style OF STRUCTURE pe_datos_im TO <lt_style>.
+    IF sy-subrc = 0.
+      READ TABLE <lt_style> ASSIGNING FIELD-SYMBOL(<ls_style>) WITH KEY fieldname = <ls_fieldcat>-fieldname.
+      IF sy-subrc = 0.
+        <ls_style>-style = cl_gui_alv_grid=>mc_style_enabled.
+      ELSE.
+        INSERT VALUE #( fieldname = <ls_fieldcat>-fieldname style = cl_gui_alv_grid=>mc_style_enabled ) INTO TABLE <lt_style>.
+      ENDIF.
+      " Se comenta porque si luego se cambia los estilos del mismo campo solo tiene en cuenta el primer registro del campo.
+*    CALL METHOD ps_data_changed->modify_style
+*      EXPORTING
+*        i_row_id    = pe_modif-row_id
+*        i_fieldname = <ls_fieldcat>-fieldname
+*        i_style     = cl_gui_alv_grid=>mc_style_enabled.
+    ENDIF.
 
 * Si el tipo de datos es mandante informo del mismo (necesario para el transporte).
 
@@ -438,7 +466,7 @@ FORM row_insert USING pe_modif TYPE lvc_s_modi
   CALL METHOD ps_data_changed->modify_cell
     EXPORTING
       i_row_id    = pe_modif-row_id
-      i_fieldname = zif_al30_data=>cv_field_updkz
+      i_fieldname = zif_al30_data=>cs_control_fields_alv_data-updkz
       i_value     = zif_al30_data=>cv_mode_insert.
 
 ENDFORM.                    " ROW_INSERT
@@ -520,7 +548,7 @@ FORM row_modify  USING pe_modif TYPE lvc_s_modi
 
 
 * Miro el valor del campo que indica el tipo de actualización
-  ASSIGN COMPONENT zif_al30_data=>cv_field_updkz OF STRUCTURE pe_datos_im TO FIELD-SYMBOL(<field>).
+  ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-updkz OF STRUCTURE pe_datos_im TO FIELD-SYMBOL(<field>).
   IF sy-subrc = 0.
 
 * Si el registro no ha sido insertado previamente pongo el status a modificado.
@@ -530,7 +558,7 @@ FORM row_modify  USING pe_modif TYPE lvc_s_modi
       CALL METHOD ps_data_changed->modify_cell
         EXPORTING
           i_row_id    = pe_modif-row_id
-          i_fieldname = zif_al30_data=>cv_field_updkz
+          i_fieldname = zif_al30_data=>cs_control_fields_alv_data-updkz
           i_value     = zif_al30_data=>cv_mode_change.
 
     ENDIF.
@@ -589,10 +617,10 @@ FORM check_key_duplicate  USING    pe_datos_im TYPE any
 
 * Primero miro si el registro viene del diccionario. En caso afirmativo no compruebo
 * clave duplicada ya que no la pueden modificar
-  ASSIGN COMPONENT zif_al30_data=>cv_field_tabix_ddic OF STRUCTURE pe_datos_im TO FIELD-SYMBOL(<field>).
+  ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-is_dict OF STRUCTURE pe_datos_im TO FIELD-SYMBOL(<field>).
   IF sy-subrc = 0.
 
-    IF <field> IS INITIAL.
+    IF <field> = abap_false.
 * No leo los campos claves que están marcados como técnicos y que además pertenezcan a la tabla de textos(como el idioma), ya que no se van a introducir.
       LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WHERE tech = abap_false
                                                       AND key_ddic = abap_true
@@ -610,7 +638,7 @@ FORM check_key_duplicate  USING    pe_datos_im TYPE any
       IF sy-subrc = 0.
 
 * Añado la condición de no busque los registros previamente borrados
-        lv_cond = COND string( LET sep1 = 'AND' cond = |{ zif_al30_data=>cv_field_updkz } NE '{ zif_al30_data=>cv_mode_delete }'| IN WHEN lv_cond IS INITIAL THEN cond ELSE |{ lv_cond } { sep1 } { cond }| ).
+        lv_cond = COND string( LET sep1 = 'AND' cond = |{ zif_al30_data=>cs_control_fields_alv_data-updkz } NE '{ zif_al30_data=>cv_mode_delete }'| IN WHEN lv_cond IS INITIAL THEN cond ELSE |{ lv_cond } { sep1 } { cond }| ).
 
 * Como los cambios se realizan fuera del evento DATA_CHANGED en la tabla
 * <IT_DATOS> tengo los valores antiguos y por lo que nunca se encontrará "a si mismo" el registro
@@ -635,7 +663,7 @@ FORM check_key_duplicate  USING    pe_datos_im TYPE any
           ps_datos_validos = abap_false.
           CALL METHOD ps_data_changed->add_protocol_entry
             EXPORTING
-              i_msgid     = 'ZAL30'
+              i_msgid     = zif_al30_data=>cv_msg_id
               i_msgno     = '043'
               i_msgty     = zif_al30_data=>cs_msg_type-error
               i_fieldname = <ls_fields>-fieldname " Se escoge el último campo de la clave
@@ -652,12 +680,11 @@ ENDFORM.                    " CHECK_KEY_DUPLICATE
 *       text
 *----------------------------------------------------------------------*
 FORM grabar_datos .
-  DATA ls_return TYPE bapiret2.
 
   " Si se puede pedir orden de transporte se llama al método que validar y/o seleccionará la orden de transporter
   IF mv_pedir_orden = abap_true.
     mo_controller->check_select_transport_order( EXPORTING iv_category = zif_al30_data=>cs_order_category-workbench
-                                               IMPORTING es_return = ls_return
+                                               IMPORTING es_return = DATA(ls_return)
                                                CHANGING cv_order = mv_orden_transporte ).
   ENDIF.
 
@@ -668,26 +695,32 @@ FORM grabar_datos .
       EXPORTING
         iv_allow_request = mv_pedir_orden
       IMPORTING
-        es_return        = ls_return
+        et_return        = DATA(lt_return)
       CHANGING
         ct_datos_del     = <it_datos_del>
         ct_datos         = <it_datos>
         cv_order         = mv_orden_transporte.
 
-    IF ls_return IS NOT INITIAL.
-
-      MESSAGE ID ls_return-id TYPE ls_return-type
-                    NUMBER ls_return-number
-                    WITH ls_return-message_v1 ls_return-message_v2 ls_return-message_v3 ls_return-message_v4.
+    " Si hay mensajes se mira cuantos hay. Si solo hay uno se visualiza como mensaje directamente
+    " en caso contrario se mostrará los mensajes en una ventana
+    IF lt_return IS NOT INITIAL.
+      DESCRIBE TABLE lt_return.
+      IF sy-tfill = 1 .
+        READ TABLE lt_return REFERENCE INTO DATA(lo_return) INDEX 1.
+        " El mensaje se cambia a 'S' y se muestra como el tipo original
+        MESSAGE ID lo_return->id TYPE 'S'
+                    NUMBER lo_return->number
+                    WITH lo_return->message_v1 lo_return->message_v2 lo_return->message_v3 lo_return->message_v4
+                    DISPLAY LIKE lo_return->type.
+      ELSE.
+        PERFORM show_messages USING lt_return.
+      ENDIF.
     ENDIF.
 
-    " Si no hay error se realiza el mismo ajuste en la tabla que cuando se leen los datos.
-    IF ls_return-type NE zif_al30_data=>cs_msg_type-error.
-
+    " Si no hay error se hace los mismos ajustes que se hacen al leer los datos.
+    IF NOT line_exists( lt_return[ type = zif_al30_data=>cs_msg_type-error ] ).
       PERFORM adjust_data_post_read.
-
     ENDIF.
-
 
   ELSE.
     MESSAGE ID ls_return-id TYPE ls_return-type
@@ -797,23 +830,29 @@ ENDFORM.                    " CHECK_AUTORIZATION
 *  <--  p2        text
 *----------------------------------------------------------------------*
 FORM edit_mode_alv .
-
+  DATA lv_mode TYPE int4.
   IF mo_alv IS BOUND.
 
     CASE mv_mode.
       WHEN zif_al30_data=>cv_mode_change.
 
-        CALL METHOD mo_alv->set_ready_for_input
-          EXPORTING
-            i_ready_for_input = 1.
+        lv_mode = 1.
+
+        mo_controller->set_edit_mode_alv_data( EXPORTING it_data = <it_datos>
+                                               IMPORTING ev_edit_mode = DATA(lv_edit_mode) ).
+
+        " Si el modo de edición es visualizar se cambia el modo que se pasará al ALV. En caso contrario se indica el determinado
+        " por defecto
+        lv_mode = COND #( WHEN lv_edit_mode = zif_al30_data=>cv_mode_view THEN 0 ELSE lv_mode ).
 
       WHEN zif_al30_data=>cv_mode_view.
-
-        CALL METHOD mo_alv->set_ready_for_input
-          EXPORTING
-            i_ready_for_input = 0.
+        lv_mode = 0.
 
     ENDCASE.
+
+    CALL METHOD mo_alv->set_ready_for_input
+      EXPORTING
+        i_ready_for_input = lv_mode.
 
   ENDIF.
 
@@ -907,8 +946,6 @@ FORM verify_change_row_data USING  pe_modif TYPE lvc_s_modi
   FIELD-SYMBOLS <field> TYPE any.
   FIELD-SYMBOLS: <styles> TYPE lvc_t_styl.
   DATA lo_wa TYPE REF TO data.
-  DATA ls_return TYPE bapiret2.
-
 
 * Creo una estructura identifica a la vista que se trata. * Creo una estructura identifica a los datos que se están tratando.
   CREATE DATA lo_wa LIKE LINE OF <it_datos>.
@@ -920,28 +957,34 @@ FORM verify_change_row_data USING  pe_modif TYPE lvc_s_modi
     MOVE-CORRESPONDING ps_row_data TO <ls_row_data>.
 
     CALL METHOD mo_controller->verify_change_row_data
+      EXPORTING
+        iv_row      = pe_modif-row_id
       IMPORTING
-        es_return   = ls_return
+        et_return   = DATA(lt_return)
       CHANGING
         cs_row_data = <ls_row_data>.
 
 * Si hay mensaje lo devuelvo a la clase
-    IF ls_return IS NOT INITIAL.
-      CALL METHOD ps_data_changed->add_protocol_entry
-        EXPORTING
-          i_msgid     = ls_return-id
-          i_msgno     = ls_return-number
-          i_msgty     = ls_return-type
-          i_fieldname = pe_modif-fieldname
-          i_row_id    = pe_modif-row_id
-          i_tabix     = pe_modif-row_id.
-    ENDIF.
+    IF lt_return IS NOT INITIAL.
+      LOOP AT lt_return ASSIGNING FIELD-SYMBOL(<ls_return>).
+        CALL METHOD ps_data_changed->add_protocol_entry
+          EXPORTING
+            i_msgid     = <ls_return>-id
+            i_msgno     = <ls_return>-number
+            i_msgty     = <ls_return>-type
+            i_msgv1     = <ls_return>-message_v1
+            i_msgv2     = <ls_return>-message_v2
+            i_msgv3     = <ls_return>-message_v3
+            i_msgv4     = <ls_return>-message_v4
+            i_fieldname = <ls_return>-field
+            i_row_id    = pe_modif-row_id
+            i_tabix     = pe_modif-row_id.
 
-* Si el mensaje es de tipo Error, indico que los datos no son validos.
-    IF ls_return-type = zif_al30_data=>cs_msg_type-error.
-      ps_datos_validos = abap_false.
-    ENDIF.
+        " Si hay algún error se devuelve que los datos no son válidos
+        ps_datos_validos = COND #( WHEN <ls_return>-type = zif_al30_data=>cs_msg_type-error THEN abap_false ELSE ps_datos_validos ).
 
+      ENDLOOP.
+    ENDIF.
 
 * Paso los datos al listado
     LOOP AT mt_fieldcat ASSIGNING <ls_fieldcat>.
@@ -970,7 +1013,7 @@ FORM verify_change_row_data USING  pe_modif TYPE lvc_s_modi
     ENDLOOP.
 
 * Ahora se actualiza los estilos por si se hubiesen modificado en la exit
-    ASSIGN COMPONENT zif_al30_data=>cv_field_style OF STRUCTURE <ls_row_data> TO <styles>.
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-style OF STRUCTURE <ls_row_data> TO <styles>.
     IF sy-subrc = 0.
       LOOP AT <styles> ASSIGNING FIELD-SYMBOL(<style>).
         CALL METHOD ps_data_changed->modify_style
@@ -1061,11 +1104,16 @@ FORM adjust_data_post_read .
 
   LOOP AT <it_datos> ASSIGNING FIELD-SYMBOL(<ls_wa>).
 
-    ASSIGN COMPONENT zif_al30_data=>cv_field_style OF STRUCTURE <ls_wa> TO <lt_celltab>.
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-style OF STRUCTURE <ls_wa> TO <lt_celltab>.
     IF sy-subrc = 0.
-      CLEAR <lt_celltab>.
+      " Los campos claves se marcarán como no editables.
       LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WHERE key_ddic = abap_true.
-        INSERT VALUE #( fieldname = <ls_fields>-fieldname style = cl_gui_alv_grid=>mc_style_disabled )  INTO TABLE <lt_celltab>.
+        READ TABLE <lt_celltab> ASSIGNING FIELD-SYMBOL(<ls_celltab>) WITH TABLE KEY fieldname = <ls_fields>-fieldname.
+        IF sy-subrc NE 0.
+          INSERT VALUE #( fieldname = <ls_fields>-fieldname style = cl_gui_alv_grid=>mc_style_disabled )  INTO TABLE <lt_celltab>.
+        ELSE.
+          <ls_celltab>-style = cl_gui_alv_grid=>mc_style_disabled.
+        ENDIF.
       ENDLOOP.
 
     ENDIF.
@@ -1154,6 +1202,7 @@ FORM selection_screen .
         TABLES
           fields_tab               = <ls_sel_screen>-fields[]
           field_texts              = <ls_sel_screen>-fields_text[]
+          field_desc               = <ls_sel_screen>-fields_desc[]
         EXCEPTIONS
           fields_incomplete        = 01
           fields_no_join           = 02
@@ -1242,4 +1291,46 @@ FORM text_heading_fields .
     ENDIF.
 
   ENDLOOP.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form SHOW_MESSAGES
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+FORM show_messages  USING pe_return TYPE bapiret2_t.
+  TYPES: BEGIN OF ts_message_list,
+           semaphor TYPE c,
+           message  TYPE bapi_msg,
+         END OF ts_message_list.
+  TYPES: tt_message_list TYPE STANDARD TABLE OF ts_message_list WITH EMPTY KEY.
+
+  DATA(lt_message_list) = VALUE tt_message_list( FOR <wa> IN pe_return ( message = <wa>-message
+                                                     semaphor = COND #( WHEN <wa>-type = zif_al30_data=>cs_msg_type-error
+                                                                        THEN zif_al30_data=>cs_semaphor_alv_excep-error
+                                                                        ELSE COND #( WHEN <wa>-type = zif_al30_data=>cs_msg_type-success
+                                                                                     THEN zif_al30_data=>cs_semaphor_alv_excep-ok
+                                                                                     ELSE COND #( WHEN <wa>-type = zif_al30_data=>cs_msg_type-warning
+                                                                                                  THEN zif_al30_data=>cs_semaphor_alv_excep-warning ) ) ) ) ).
+
+  TRY.
+      cl_salv_table=>factory( IMPORTING r_salv_table = DATA(lo_salv_table)
+                              CHANGING  t_table      = lt_message_list ).
+
+      IF lo_salv_table IS BOUND.
+
+        lo_salv_table->get_columns( )->set_optimize( abap_true ).
+
+        lo_salv_table->get_columns( )->set_exception_column( 'SEMAPHOR' ).
+
+        lo_salv_table->set_screen_popup( start_column = '5'
+                                         end_column   = '100'
+                                         start_line   = '5'
+                                         end_line     = '10' ).
+        lo_salv_table->display( ).
+      ENDIF.
+
+    CATCH cx_salv_msg ##NO_HANDLER.
+    CATCH cx_salv_not_found ##NO_HANDLER.
+  ENDTRY.
+
 ENDFORM.

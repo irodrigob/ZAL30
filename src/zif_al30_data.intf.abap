@@ -79,10 +79,17 @@ INTERFACE zif_al30_data
     END OF cs_internal_tables .
   CONSTANTS cv_ddic_fields TYPE tabname VALUE 'ZAL30_S_FIELDS_ALV' ##NO_TEXT.
   CONSTANTS cv_fields_attr_text TYPE tabname VALUE 'ZAL30_S_FIELDS_ATTR_TEXT' ##NO_TEXT.
-  CONSTANTS cv_field_origen_data TYPE fieldname VALUE 'ZAL30_ORIGEN' ##NO_TEXT.
-  CONSTANTS cv_field_style TYPE fieldname VALUE 'ZAL30_STYLE' ##NO_TEXT.
-  CONSTANTS cv_field_tabix_ddic TYPE fieldname VALUE 'ZAL30_TABIX_DDIC' ##NO_TEXT.
-  CONSTANTS cv_field_updkz TYPE fieldname VALUE 'ZAL30_UPDKZ' ##NO_TEXT.
+  CONSTANTS: BEGIN OF cs_control_fields_alv_data,
+               origen_data TYPE fieldname VALUE 'ZAL30_ORIGEN' ##NO_TEXT,
+               style       TYPE fieldname VALUE 'ZAL30_STYLE' ##NO_TEXT,
+               tabix       TYPE fieldname VALUE 'ZAL30_TABIX' ##NO_TEXT,
+               updkz TYPE fieldname VALUE 'ZAL30_UPDKZ' ##NO_TEXT,
+               is_dict     TYPE fieldname VALUE 'ZAL30_IS_DICT',
+             END OF cs_control_fields_alv_data.
+*  CONSTANTS cv_field_origen_data TYPE fieldname VALUE 'ZAL30_ORIGEN' ##NO_TEXT.
+*  CONSTANTS cv_field_style TYPE fieldname VALUE 'ZAL30_STYLE' ##NO_TEXT.
+*  CONSTANTS cv_field_tabix_ddic TYPE fieldname VALUE 'ZAL30_TABIX_DDIC' ##NO_TEXT.
+*  CONSTANTS cv_field_updkz TYPE fieldname VALUE 'ZAL30_UPDKZ' ##NO_TEXT.
   CONSTANTS cv_intf_exit TYPE seoclsname VALUE 'ZIF_AL30_EXIT_CLASS' ##NO_TEXT.
   CONSTANTS cv_mode_change TYPE cdchngind VALUE 'U' ##NO_TEXT.
   CONSTANTS cv_mode_delete TYPE cdchngind VALUE 'D' ##NO_TEXT.
@@ -161,4 +168,9 @@ INTERFACE zif_al30_data
                separator TYPE tb_btype VALUE 3,
                button    TYPE tb_btype VALUE 0,
              END OF cs_alv_toolbar_type.
+  CONSTANTS: BEGIN OF cs_semaphor_alv_excep,
+               ok      TYPE c VALUE 3,
+               warning TYPE c VALUE 2,
+               error   TYPE c VALUE 1,
+             END OF cs_semaphor_alv_excep.
 ENDINTERFACE.

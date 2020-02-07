@@ -32,6 +32,7 @@ TYPES: BEGIN OF ts_sel_screen,
          expressions   TYPE rsds_texpr,
          fields        TYPE rsdsfields_t,
          fields_text   TYPE STANDARD TABLE OF rsdstexts WITH EMPTY KEY,
+         fields_desc   TYPE STANDARD TABLE OF fldconvert WITH EMPTY KEY,
        END OF ts_sel_screen.
 TYPES tt_sel_screen TYPE STANDARD TABLE OF ts_sel_screen WITH EMPTY KEY.
 

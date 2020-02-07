@@ -24,10 +24,12 @@
       <RSFDO>
        <PARAMETER>INPUT</PARAMETER>
        <KIND>P</KIND>
+       <INDEX> 001</INDEX>
       </RSFDO>
       <RSFDO>
        <PARAMETER>OUTPUT</PARAMETER>
        <KIND>P</KIND>
+       <INDEX> 002</INDEX>
       </RSFDO>
      </DOCUMENTATION>
     </item>
@@ -48,10 +50,12 @@
       <RSFDO>
        <PARAMETER>INPUT</PARAMETER>
        <KIND>P</KIND>
+       <INDEX> 001</INDEX>
       </RSFDO>
       <RSFDO>
        <PARAMETER>OUTPUT</PARAMETER>
        <KIND>P</KIND>
+       <INDEX> 002</INDEX>
       </RSFDO>
      </DOCUMENTATION>
     </item>

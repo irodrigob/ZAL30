@@ -8,17 +8,17 @@ CLASS zcl_al30_controller DEFINITION
 *"* public components of class ZCL_AL30_CONTROLLER
 *"* do not include other source files here!!!
     METHODS constructor .
-    "! <p class="shorttext synchronized" lang="en">View List created</p>
+    "! <p class="shorttext synchronized">View List created</p>
     "!
-    "! @parameter iv_langu | <p class="shorttext synchronized" lang="en">language</p>
-    "! @parameter it_r_views | <p class="shorttext synchronized" lang="en">Views to filter</p>
-    "! @parameter et_view_list | <p class="shorttext synchronized" lang="en">View list</p>
+    "! @parameter iv_langu | <p class="shorttext synchronized">language</p>
+    "! @parameter it_r_views | <p class="shorttext synchronized">Views to filter</p>
+    "! @parameter et_view_list | <p class="shorttext synchronized">View list</p>
     METHODS view_list
       IMPORTING
         !iv_langu     TYPE sylangu DEFAULT sy-langu
         !it_r_views   TYPE zif_al30_data=>tt_r_tabname OPTIONAL
       EXPORTING
-        !et_view_list TYPE zcl_al30_view=>tt_view_list.
+        !et_view_list TYPE zcl_al30_view=>tt_view_list .
     METHODS read_view
       IMPORTING
         !iv_name_view        TYPE tabname
@@ -85,11 +85,11 @@ CLASS zcl_al30_controller DEFINITION
         VALUE(rs_return)         TYPE bapiret2 .
     METHODS read_data
       IMPORTING
-        is_filters TYPE zif_al30_data=>ts_filter_read_data
+        !is_filters TYPE zif_al30_data=>ts_filter_read_data
       EXPORTING
-        !es_return TYPE bapiret2
+        !es_return  TYPE bapiret2
       CHANGING
-        !co_data   TYPE REF TO data .
+        !co_data    TYPE REF TO data .
     METHODS get_fieldcat_view
       IMPORTING
         !iv_mode     TYPE char1
@@ -106,7 +106,7 @@ CLASS zcl_al30_controller DEFINITION
       IMPORTING
         !iv_allow_request TYPE sap_bool DEFAULT abap_false
       EXPORTING
-        !es_return        TYPE bapiret2
+        !et_return        TYPE bapiret2_t
       CHANGING
         !ct_datos_del     TYPE STANDARD TABLE
         !ct_datos         TYPE STANDARD TABLE
@@ -116,10 +116,11 @@ CLASS zcl_al30_controller DEFINITION
         !iv_fieldname TYPE any
         !iv_value     TYPE any
       EXPORTING
-        es_return     TYPE bapiret2 .
+        !es_return    TYPE bapiret2 .
     METHODS adjust_view_dictionary
       IMPORTING
         !iv_keep_text            TYPE sap_bool DEFAULT abap_true
+        !iv_langu                TYPE sylangu DEFAULT sy-langu
       EXPORTING
         VALUE(es_return)         TYPE bapiret2
         !ev_text_view            TYPE as4text
@@ -143,18 +144,19 @@ CLASS zcl_al30_controller DEFINITION
         !iv_view_action TYPE any DEFAULT zif_al30_data=>cs_action_auth-update
       RAISING
         zcx_al30 .
-    "! <p class="shorttext synchronized" lang="en">Check the authorization level in view</p>
+    "! <p class="shorttext synchronized">Check the authorization level in view</p>
     "!
-    "! @parameter iv_view_name | <p class="shorttext synchronized" lang="en">View name</p>
-    "! @parameter iv_view_action | <p class="shorttext synchronized" lang="en">'U' Update 'S' Show</p>
-    "! @parameter iv_user | <p class="shorttext synchronized" lang="en">Username</p>
-    "! @parameter rv_level_auth | <p class="shorttext synchronized" lang="en">Level auth</p>
+    "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
+    "! @parameter iv_view_action | <p class="shorttext synchronized">'U' Update 'S' Show</p>
+    "! @parameter iv_user | <p class="shorttext synchronized">Username</p>
+    "! @parameter rv_level_auth | <p class="shorttext synchronized">Level auth</p>
     METHODS check_authorization_view
       IMPORTING
-                !iv_view_name        TYPE tabname
-                !iv_view_action      TYPE any
-                !iv_user             TYPE syuname
-      RETURNING VALUE(rv_level_auth) TYPE zal30_e_level_auth .
+        !iv_view_name        TYPE tabname
+        !iv_view_action      TYPE any
+        !iv_user             TYPE syuname
+      RETURNING
+        VALUE(rv_level_auth) TYPE zal30_e_level_auth .
     METHODS transport_data_entries
       IMPORTING
         !it_data         TYPE STANDARD TABLE
@@ -168,8 +170,10 @@ CLASS zcl_al30_controller DEFINITION
       RETURNING
         VALUE(rs_return) TYPE bapiret2 .
     METHODS verify_change_row_data
+      IMPORTING
+        !iv_row      TYPE bapi_line
       EXPORTING
-        !es_return   TYPE bapiret2
+        !et_return   TYPE bapiret2_t
       CHANGING
         !cs_row_data TYPE any .
     METHODS get_logon_languages
@@ -242,24 +246,22 @@ CLASS zcl_al30_controller DEFINITION
         !it_fields_text_view_alv TYPE zif_al30_data=>tt_fields_text_view_alv
         !it_fields_ddic          TYPE dd03ptab
         !is_view                 TYPE zal30_t_view .
-
-    "! <p class="shorttext synchronized" lang="en">Read info of a data element</p>
+    "! <p class="shorttext synchronized">Read info of a data element</p>
     "!
-    "! @parameter iv_dtel | <p class="shorttext synchronized" lang="en">Data element</p>
-    "! @parameter es_info | <p class="shorttext synchronized" lang="en">info</p>
+    "! @parameter iv_dtel | <p class="shorttext synchronized">Data element</p>
+    "! @parameter es_info | <p class="shorttext synchronized">info</p>
     METHODS read_single_data_element
       IMPORTING
         !iv_dtel  TYPE rollname
         !iv_langu TYPE sylangu DEFAULT sy-langu
       EXPORTING
-        !es_info  TYPE dd04v
+        !es_info  TYPE dfies
       RAISING
         zcx_al30 .
-
-    "! <p class="shorttext synchronized" lang="en">Read info in all languages</p>
+    "! <p class="shorttext synchronized">Read info in all languages</p>
     "!
-    "! @parameter iv_dtel | <p class="shorttext synchronized" lang="en">Data element</p>
-    "! @parameter et_info | <p class="shorttext synchronized" lang="en">Information in each language</p>
+    "! @parameter iv_dtel | <p class="shorttext synchronized">Data element</p>
+    "! @parameter et_info | <p class="shorttext synchronized">Information in each language</p>
     METHODS read_data_element_all_lang
       IMPORTING
         !iv_dtel TYPE rollname
@@ -267,6 +269,15 @@ CLASS zcl_al30_controller DEFINITION
         !et_info TYPE zcl_al30_conf=>tt_info_data
       RAISING
         zcx_al30 .
+    "! <p class="shorttext synchronized">Set editable mode the ALV Data</p>
+    "!
+    "! @parameter it_data | <p class="shorttext synchronized">Data</p>
+    "! @parameter ev_edit_mode | <p class="shorttext synchronized">Edit mode</p>
+    METHODS set_edit_mode_alv_data
+      IMPORTING
+        !it_data      TYPE STANDARD TABLE
+      EXPORTING
+        !ev_edit_mode TYPE cdchngind.
 
   PROTECTED SECTION.
 *"* private components of class ZCL_AL30_CONTROLLER
@@ -312,6 +323,7 @@ CLASS zcl_al30_controller IMPLEMENTATION.
     mo_conf->adjust_view_dictionary(
       EXPORTING
         iv_keep_text        = iv_keep_text
+        iv_langu = iv_langu
       IMPORTING
         es_return           = es_return
         ev_text_view        =  ev_text_view
@@ -639,6 +651,18 @@ CLASS zcl_al30_controller IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD read_data_element_all_lang.
+    mo_conf->read_data_element_all_lang( EXPORTING iv_rollname = iv_dtel
+                                         IMPORTING et_info = et_info ).
+  ENDMETHOD.
+
+
+  METHOD read_single_data_element.
+    mo_conf->read_single_data_element( EXPORTING iv_rollname = iv_dtel
+                                       IMPORTING es_info = es_info ).
+  ENDMETHOD.
+
+
   METHOD read_view.
 
     CLEAR es_return.
@@ -691,16 +715,35 @@ CLASS zcl_al30_controller IMPLEMENTATION.
 
 
   METHOD save_data.
-    CALL METHOD mo_view->save_data
-      EXPORTING
-        iv_allow_request = iv_allow_request
-      IMPORTING
-        es_return        = es_return
-      CHANGING
-        cv_order         = cv_order
-        ct_datos         = ct_datos
-        ct_datos_del     = ct_datos_del.
 
+    mo_view->verify_save_data(
+      EXPORTING
+        it_data   = ct_datos
+        it_data_del = ct_datos_del
+        iv_save_process = abap_true
+      IMPORTING
+        et_return = DATA(lt_return) ).
+
+    " Si hay errores no se continua el proceso
+    IF ( line_exists( lt_return[ type = zif_al30_data=>cs_msg_type-error ] ) OR
+        line_exists( lt_return[ type = zif_al30_data=>cs_msg_type-dump ] ) ).
+      et_return = lt_return.
+    ELSE.
+
+      CALL METHOD mo_view->save_data
+        EXPORTING
+          iv_allow_request = iv_allow_request
+        IMPORTING
+          et_return        = et_return
+        CHANGING
+          cv_order         = cv_order
+          ct_datos         = ct_datos
+          ct_datos_del     = ct_datos_del.
+
+      " Se añaden los posibles mensajes de la validación a los que devuelva el propio método
+      INSERT LINES OF lt_return INTO TABLE et_return.
+
+    ENDIF.
 
   ENDMETHOD.
 
@@ -777,15 +820,11 @@ CLASS zcl_al30_controller IMPLEMENTATION.
 
   METHOD verify_change_row_data.
 
-    CLEAR es_return.
+    CLEAR et_return.
 
-    mo_view->verify_change_row_data(
-      IMPORTING
-        es_return     = es_return
-      CHANGING
-        cs_row_data   = cs_row_data ).
-
-
+    mo_view->verify_change_row_data( EXPORTING iv_row = iv_row
+                                     IMPORTING et_return     = et_return
+                                     CHANGING cs_row_data   = cs_row_data ).
 
   ENDMETHOD.
 
@@ -823,14 +862,9 @@ CLASS zcl_al30_controller IMPLEMENTATION.
                                   it_r_views = it_r_views
                         IMPORTING et_view_list = et_view_list ).
   ENDMETHOD.
-  METHOD read_data_element_all_lang.
-    mo_conf->read_data_element_all_lang( EXPORTING iv_dtel = iv_dtel
-                                         IMPORTING et_info = et_info ).
-  ENDMETHOD.
-
-  METHOD read_single_data_element.
-    mo_conf->read_single_data_element( EXPORTING iv_dtel = iv_dtel
-                                       IMPORTING es_info = es_info ).
+  METHOD set_edit_mode_alv_data.
+    mo_view->set_edit_mode_alv( EXPORTING it_data = it_data
+                                IMPORTING ev_edit_mode = ev_edit_mode ).
   ENDMETHOD.
 
 ENDCLASS.
