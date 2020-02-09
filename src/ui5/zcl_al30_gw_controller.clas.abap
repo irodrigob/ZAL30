@@ -195,11 +195,12 @@ CLASS ZCL_AL30_GW_CONTROLLER IMPLEMENTATION.
     mo_controller->read_view(
       EXPORTING
         iv_name_view        = iv_view_name
-        iv_read_ddic        = abap_false
+        iv_read_ddic        = abap_true
         iv_langu            = iv_langu
       IMPORTING
         et_fields_view      = DATA(lt_fields_view)
-        et_fields_text_view = DATA(lt_fields_text_view) ).
+        et_fields_text_view = DATA(lt_fields_text_view)
+        et_fields_ddic = DATA(lt_fields_ddic) ).
 
     " Para gateway la estructura de campos y textos es la misma y hay que fusionar
     LOOP AT lt_fields_view ASSIGNING FIELD-SYMBOL(<ls_fields_view>).
