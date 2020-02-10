@@ -95,6 +95,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
   METHOD readviewset_get_entityset.
     DATA lv_langu TYPE sylangu.
     DATA lv_viewname TYPE tabname.
+    DATA lv_mode TYPE c LENGTH 1.
 
     CLEAR: et_entityset.
 
@@ -122,11 +123,21 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
       ENDIF.
     ENDIF.
 
+    " Modo de edición
+    READ TABLE it_filter_select_options ASSIGNING <ls_filter> WITH KEY property = 'MODE'.
+    IF sy-subrc = 0.
+      READ TABLE <ls_filter>-select_options ASSIGNING <ls_select_options> INDEX 1.
+      IF sy-subrc = 0.
+        lv_mode = <ls_select_options>-low.
+      ENDIF.
+    ENDIF.
+
     " Lectura de la vista
     mo_controller->read_view(
       EXPORTING
         iv_view_name = lv_viewname
         iv_langu     = lv_langu
+        iv_mode = lv_mode
       IMPORTING
         et_fields    = DATA(lt_fields) ).
 

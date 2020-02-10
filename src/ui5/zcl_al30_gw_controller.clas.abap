@@ -40,6 +40,7 @@ CLASS zcl_al30_gw_controller DEFINITION
     METHODS read_view
       IMPORTING
         !iv_view_name TYPE tabname
+        !iv_mode      TYPE char1 OPTIONAL
         !iv_langu     TYPE sylangu DEFAULT sy-langu
       EXPORTING
         !et_fields    TYPE zif_al30_ui5_data=>tt_view_fields.
@@ -52,7 +53,7 @@ CLASS zcl_al30_gw_controller DEFINITION
       IMPORTING
         !iv_view_name TYPE tabname
         !iv_langu     TYPE sylangu DEFAULT sy-langu
-        !iv_mode      TYPE char1
+        !iv_mode      TYPE char1 OPTIONAL
       EXPORTING
         !ev_data      TYPE string.
 
@@ -87,7 +88,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_AL30_GW_CONTROLLER IMPLEMENTATION.
+CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
 
   METHOD check_authorization_view.
@@ -163,7 +164,7 @@ CLASS ZCL_AL30_GW_CONTROLLER IMPLEMENTATION.
     " Se llama al proceso que creará la tabla interna para poder leer los datos
     create_it_data_view( EXPORTING iv_view_name = iv_view_name
                                    iv_langu = iv_langu
-                                   iv_mode = iv_mode
+                                   iv_mode = lv_mode
                          IMPORTING eo_data = DATA(lo_data)
                                    es_return = DATA(ls_return) ).
 
@@ -191,28 +192,50 @@ CLASS ZCL_AL30_GW_CONTROLLER IMPLEMENTATION.
 
   METHOD read_view.
 
+    " Si el modo pasado no es el esperado se le pone el de visualizar
+    DATA(lv_mode) = COND #( WHEN iv_mode = zif_al30_data=>cv_mode_change OR iv_mode = zif_al30_data=>cv_mode_view THEN iv_mode ELSE zif_al30_data=>cv_mode_view ).
+
     " Se lee los campos de la vista
-    mo_controller->read_view(
-      EXPORTING
-        iv_name_view        = iv_view_name
-        iv_read_ddic        = abap_true
-        iv_langu            = iv_langu
-      IMPORTING
-        et_fields_view      = DATA(lt_fields_view)
-        et_fields_text_view = DATA(lt_fields_text_view)
-        et_fields_ddic = DATA(lt_fields_ddic) ).
+*    mo_controller->read_view(
+*      EXPORTING
+*        iv_name_view        = iv_view_name
+*        iv_read_ddic        = abap_true
+*        iv_langu            = iv_langu
+*      IMPORTING
+*        et_fields_view      = DATA(lt_fields_view)
+*        et_fields_text_view = DATA(lt_fields_text_view)
+*        et_fields_ddic = DATA(lt_fields_ddic) ).
+*
+*    " Para gateway la estructura de campos y textos es la misma y hay que fusionar
+*    LOOP AT lt_fields_view ASSIGNING FIELD-SYMBOL(<ls_fields_view>).
+*      DATA(ls_fields) = CORRESPONDING zif_al30_ui5_data=>ts_view_fields( <ls_fields_view> ).
+*
+*      " Se buscan sus textos y en caso de encontrarlos se informan en la tabla
+*      READ TABLE lt_fields_text_view ASSIGNING FIELD-SYMBOL(<ls_fields_text_view>) WITH KEY fieldname = <ls_fields_view>-fieldname.
+*      IF sy-subrc = 0.
+*        ls_fields = CORRESPONDING #( BASE ( ls_fields ) <ls_fields_text_view> ).
+*      ENDIF.
+*      INSERT ls_fields INTO TABLE et_fields.
+*    ENDLOOP.
 
-    " Para gateway la estructura de campos y textos es la misma y hay que fusionar
-    LOOP AT lt_fields_view ASSIGNING FIELD-SYMBOL(<ls_fields_view>).
-      DATA(ls_fields) = CORRESPONDING zif_al30_ui5_data=>ts_view_fields( <ls_fields_view> ).
+    " Se leen los datos básicos para poder acceder a la clase de datos
+    read_view_conf_for_data( EXPORTING iv_view_name = iv_view_name
+                                       iv_langu = iv_langu
+                             IMPORTING es_return = DATA(ls_return) ).
 
-      " Se buscan sus textos y en caso de encontrarlos se informan en la tabla
-      READ TABLE lt_fields_text_view ASSIGNING FIELD-SYMBOL(<ls_fields_text_view>) WITH KEY fieldname = <ls_fields_view>-fieldname.
-      IF sy-subrc = 0.
-        ls_fields = CORRESPONDING #( BASE ( ls_fields ) <ls_fields_text_view> ).
-      ENDIF.
-      INSERT ls_fields INTO TABLE et_fields.
-    ENDLOOP.
+    IF ls_return IS INITIAL.
+
+      " Se recupera el catalogo de campos
+      CALL METHOD mo_controller->get_fieldcat_view
+        EXPORTING
+          iv_mode     = lv_mode
+        IMPORTING
+          es_return   = ls_return
+          et_fieldcat = DATA(lt_fieldcat).
+
+          " Los campos
+
+    ENDIF.
 
   ENDMETHOD.
 
