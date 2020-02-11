@@ -9,7 +9,11 @@ INTERFACE zif_al30_ui5_data
   TYPES: BEGIN OF ts_view_fields.
       INCLUDE TYPE zif_al30_data=>ts_fields_view.
       INCLUDE TYPE zal30_s_fields_attr_text.
-  TYPES:
+  TYPES: edit      TYPE lvc_edit,
+         type      TYPE inttype,
+         len       TYPE intlen,
+         decimals  TYPE decimals,
+         lowercase TYPE lowercase,
          END OF ts_view_fields.
   TYPES: tt_view_fields TYPE STANDARD TABLE OF ts_view_fields WITH EMPTY KEY.
 

@@ -50,6 +50,11 @@ public section.
      SCRTEXT_L type string,
      REPTEXT type string,
      MODE type C length 1,
+     EDIT type LVC_EDIT,
+     TYPE type INTTYPE,
+     LEN type /IWBEP/SB_ODATA_TY_INT2,
+     DECIMALS type /IWBEP/SB_ODATA_TY_INT2,
+     LOWERCASE type LOWERCASE,
   end of TS_READVIEW .
   types:
     TT_READVIEW type standard table of TS_READVIEW .
@@ -595,6 +600,61 @@ lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
       EXPORTING
         iv_key      = 'unicode'
         iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'EDIT' iv_abap_fieldname = 'EDIT' ). "#EC NOTEXT
+lo_property->set_type_edm_boolean( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'TYPE' iv_abap_fieldname = 'TYPE' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'LEN' iv_abap_fieldname = 'LEN' ). "#EC NOTEXT
+lo_property->set_type_edm_int16( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'DECIMALS' iv_abap_fieldname = 'DECIMALS' ). "#EC NOTEXT
+lo_property->set_type_edm_int16( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'LOWERCASE' iv_abap_fieldname = 'LOWERCASE' ). "#EC NOTEXT
+lo_property->set_type_edm_boolean( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
 
 lo_entity_type->bind_structure( iv_structure_name  = 'ZCL_ZAL30_DATA_MPC=>TS_READVIEW' ). "#EC NOTEXT
 
@@ -626,7 +686,7 @@ lo_entity_set->set_filter_required( abap_false ).
 *&---------------------------------------------------------------------*
 
 
-  CONSTANTS: lc_gen_date_time TYPE timestamp VALUE '20200210210846'.                  "#EC NOTEXT
+  CONSTANTS: lc_gen_date_time TYPE timestamp VALUE '20200211210811'.                  "#EC NOTEXT
   rv_last_modified = super->get_last_modified( ).
   IF rv_last_modified LT lc_gen_date_time.
     rv_last_modified = lc_gen_date_time.

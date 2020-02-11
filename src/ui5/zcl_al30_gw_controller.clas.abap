@@ -195,29 +195,6 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     " Si el modo pasado no es el esperado se le pone el de visualizar
     DATA(lv_mode) = COND #( WHEN iv_mode = zif_al30_data=>cv_mode_change OR iv_mode = zif_al30_data=>cv_mode_view THEN iv_mode ELSE zif_al30_data=>cv_mode_view ).
 
-    " Se lee los campos de la vista
-*    mo_controller->read_view(
-*      EXPORTING
-*        iv_name_view        = iv_view_name
-*        iv_read_ddic        = abap_true
-*        iv_langu            = iv_langu
-*      IMPORTING
-*        et_fields_view      = DATA(lt_fields_view)
-*        et_fields_text_view = DATA(lt_fields_text_view)
-*        et_fields_ddic = DATA(lt_fields_ddic) ).
-*
-*    " Para gateway la estructura de campos y textos es la misma y hay que fusionar
-*    LOOP AT lt_fields_view ASSIGNING FIELD-SYMBOL(<ls_fields_view>).
-*      DATA(ls_fields) = CORRESPONDING zif_al30_ui5_data=>ts_view_fields( <ls_fields_view> ).
-*
-*      " Se buscan sus textos y en caso de encontrarlos se informan en la tabla
-*      READ TABLE lt_fields_text_view ASSIGNING FIELD-SYMBOL(<ls_fields_text_view>) WITH KEY fieldname = <ls_fields_view>-fieldname.
-*      IF sy-subrc = 0.
-*        ls_fields = CORRESPONDING #( BASE ( ls_fields ) <ls_fields_text_view> ).
-*      ENDIF.
-*      INSERT ls_fields INTO TABLE et_fields.
-*    ENDLOOP.
-
     " Se leen los datos básicos para poder acceder a la clase de datos
     read_view_conf_for_data( EXPORTING iv_view_name = iv_view_name
                                        iv_langu = iv_langu
@@ -233,7 +210,12 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
           es_return   = ls_return
           et_fieldcat = DATA(lt_fieldcat).
 
-          " Los campos
+      LOOP AT lt_fieldcat ASSIGNING FIELD-SYMBOL(<ls_fieldcat>).
+        DATA(ls_fields) = CORRESPONDING zif_al30_ui5_data=>ts_view_fields( <ls_fieldcat> ).
+        ls_fields-len = <ls_fieldcat>-intlen.
+        ls_fields-type = <ls_fieldcat>-inttype.
+        INSERT ls_fields INTO TABLE et_fields.
+      ENDLOOP.
 
     ENDIF.
 
