@@ -57,6 +57,16 @@ CLASS zcl_al30_gw_controller DEFINITION
       EXPORTING
         !ev_data      TYPE string.
 
+    "! <p class="shorttext synchronized">Read data from view</p>
+    "!
+    "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
+    "! @parameter ev_locked | <p class="shorttext synchronized">View locked</p>
+    METHODS lock_view
+      IMPORTING
+        !iv_view_name TYPE tabname
+      EXPORTING
+        !ev_locked    TYPE sap_bool.
+
   PROTECTED SECTION.
     DATA mo_controller TYPE REF TO zcl_al30_controller.
 
@@ -257,4 +267,17 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
     ENDIF.
   ENDMETHOD.
+  METHOD lock_view.
+    TRY.
+
+        mo_controller->lock_view( ).
+
+        ev_locked = abap_true.
+
+      CATCH zcx_al30 INTO DATA(lx_excep).
+        ev_locked = abap_false.
+
+    ENDTRY.
+  ENDMETHOD.
+
 ENDCLASS.

@@ -11,6 +11,7 @@ CLASS zcl_zal30_data_dpc_ext DEFINITION
     METHODS checkauthviewset_get_entity REDEFINITION.
     METHODS readviewset_get_entityset REDEFINITION.
     METHODS readdataset_get_entity REDEFINITION.
+    METHODS lockviewset_get_entity REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -188,6 +189,20 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
         iv_mode      = lv_mode
       IMPORTING
         ev_data      = er_entity-data ).
+
+  ENDMETHOD.
+
+  METHOD lockviewset_get_entity.
+    DATA lv_viewname TYPE tabname.
+
+    " Nombre de la vista
+    READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_key_tab>) WITH KEY name = 'VIEWNAME'.
+    IF sy-subrc = 0.
+      lv_viewname = <ls_key_tab>-value.
+    ENDIF.
+
+    mo_controller->lock_view( EXPORTING iv_view_name = lv_viewname
+                              IMPORTING ev_locked = er_entity-already_locked  ).
 
   ENDMETHOD.
 
