@@ -1,32 +1,34 @@
-class ZCX_AL30 definition
-  public
-  inheriting from CX_STATIC_CHECK
-  final
-  create public .
+CLASS zcx_al30 DEFINITION
+  PUBLIC
+  INHERITING FROM cx_static_check
+  FINAL
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
 
-  constants NO_AUTHORIZATION type SOTR_CONC value '62379100861F1ED99EFA079B1E9E012C' ##NO_TEXT.
-  constants INVALID_PARAMS type SOTR_CONC value '62379100861F1ED9A28C4D0084271E2B' ##NO_TEXT.
-  constants NO_VALUES_F4_VIEW type SOTR_CONC value '06789A0505941EDA8FBDCE519D040DD9' ##NO_TEXT.
-  constants ERROR_SAVE_VIEW type SOTR_CONC value '06789A0505941EDA8FBDCE519D044DD9' ##NO_TEXT.
-  constants VIEW_DONT_EXIST type SOTR_CONC value '06789A0505941EDA8FBDCE519D042DD9' ##NO_TEXT.
-  constants VIEW_LOCKED type SOTR_CONC value '62379100861F1ED9A89B0FC57B795F2C' ##NO_TEXT.
-  constants DATA_ELEMENT_NOT_EXIST type SOTR_CONC value '06789A0505941EDA8FBDCDC721200DD9' ##NO_TEXT.
-  data MV_MESSAGE type STRING .
+    CONSTANTS no_authorization TYPE sotr_conc VALUE '62379100861F1ED99EFA079B1E9E012C' ##NO_TEXT.
+    CONSTANTS invalid_params TYPE sotr_conc VALUE '62379100861F1ED9A28C4D0084271E2B' ##NO_TEXT.
+    CONSTANTS no_values_f4_view TYPE sotr_conc VALUE '06789A0505941EDA8FBDCE519D040DD9' ##NO_TEXT.
+    CONSTANTS error_save_view TYPE sotr_conc VALUE '06789A0505941EDA8FBDCE519D044DD9' ##NO_TEXT.
+    CONSTANTS view_dont_exist TYPE sotr_conc VALUE '06789A0505941EDA8FBDCE519D042DD9' ##NO_TEXT.
+    CONSTANTS view_locked TYPE sotr_conc VALUE '62379100861F1ED9A89B0FC57B795F2C' ##NO_TEXT.
+    CONSTANTS data_element_not_exist TYPE sotr_conc VALUE '06789A0505941EDA8FBDCDC721200DD9' ##NO_TEXT.
+    DATA mv_msgv1 TYPE string .
+    DATA mv_message TYPE string .
 
-  methods CONSTRUCTOR
-    importing
-      !TEXTID like TEXTID optional
-      !PREVIOUS like PREVIOUS optional
-      !MV_MESSAGE type STRING optional .
+    METHODS constructor
+      IMPORTING
+        !textid     LIKE textid OPTIONAL
+        !previous   LIKE previous OPTIONAL
+        !mv_message TYPE string OPTIONAL
+        !mv_msgv1   TYPE string OPTIONAL.
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS ZCX_AL30 IMPLEMENTATION.
+CLASS zcx_al30 IMPLEMENTATION.
 
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
@@ -36,6 +38,9 @@ CLASS ZCX_AL30 IMPLEMENTATION.
         previous = previous.
     IF mv_message IS SUPPLIED.
       me->mv_message = mv_message .
+    ENDIF.
+    IF mv_msgv1 IS SUPPLIED.
+      me->mv_msgv1 = mv_msgv1 .
     ENDIF.
   ENDMETHOD.
 ENDCLASS.

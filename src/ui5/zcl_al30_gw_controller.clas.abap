@@ -61,11 +61,13 @@ CLASS zcl_al30_gw_controller DEFINITION
     "!
     "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
     "! @parameter ev_locked | <p class="shorttext synchronized">View locked</p>
+    "! @parameter ev_lock_by_user | <p class="shorttext synchronized">Lock by user</p>
     METHODS lock_view
       IMPORTING
-        !iv_view_name TYPE tabname
+        !iv_view_name    TYPE tabname
       EXPORTING
-        !ev_locked    TYPE sap_bool.
+        !ev_locked       TYPE sap_bool
+        !ev_lock_by_user TYPE string.
 
   PROTECTED SECTION.
     DATA mo_controller TYPE REF TO zcl_al30_controller.
@@ -270,12 +272,24 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
   METHOD lock_view.
     TRY.
 
-        mo_controller->lock_view( ).
+        " Se leen los datos de la vista para determinar si hay tabla de texto para poderla bloquear
+        CALL METHOD mo_controller->read_view
+          EXPORTING
+            iv_name_view    = iv_view_name
+            iv_all_language = abap_false
+            iv_read_ddic    = abap_false
+          IMPORTING
+            es_view         = DATA(ls_view).
 
-        ev_locked = abap_true.
+        mo_controller->lock_view( EXPORTING iv_view_name = iv_view_name
+                                            iv_view_text = ls_view-texttable ).
+
+        ev_locked = abap_false.
+        ev_lock_by_user = space.
 
       CATCH zcx_al30 INTO DATA(lx_excep).
-        ev_locked = abap_false.
+        ev_locked = abap_true.
+        ev_lock_by_user = lx_excep->mv_msgv1.
 
     ENDTRY.
   ENDMETHOD.

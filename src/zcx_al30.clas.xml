@@ -160,6 +160,12 @@
      <LANGU>E</LANGU>
      <DESCRIPT>Customer message</DESCRIPT>
     </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCX_AL30</CLSNAME>
+     <CMPNAME>MV_MSGV1</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Variable message v1</DESCRIPT>
+    </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>
  </asx:abap>

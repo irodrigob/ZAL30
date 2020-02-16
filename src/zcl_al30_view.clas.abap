@@ -146,6 +146,9 @@ CLASS zcl_al30_view DEFINITION
         VALUE(rv_have) TYPE sap_bool .
     "! <p class="shorttext synchronized">Lock the view and the text table</p>
     METHODS lock_view
+      IMPORTING
+        !iv_view_name TYPE tabname OPTIONAL
+        !iv_view_text TYPE tabname OPTIONAL
       RAISING
         zcx_al30 .
     "! <p class="shorttext synchronized">Instance the exit class</p>
@@ -1296,7 +1299,8 @@ CLASS zcl_al30_view IMPLEMENTATION.
       RAISE EXCEPTION TYPE zcx_al30
         EXPORTING
           textid     = zcx_al30=>view_locked
-          mv_message = lv_message.
+          mv_message = lv_message
+          mv_msgv1   = CONV #( sy-msgv1(12) ).
     ENDIF.
   ENDMETHOD.
 
@@ -1305,15 +1309,19 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
 
     TRY.
+        DATA(lv_tabname) = COND #( WHEN iv_view_name IS INITIAL THEN ms_view-tabname ELSE iv_view_name  ).
+        DATA(lv_texttable) = COND #( WHEN iv_view_text IS INITIAL THEN ms_view-texttable ELSE iv_view_text  ).
+
+
         " Se bloquea la tabla principal
-        lock_table( iv_table = ms_view-tabname ).
+        lock_table( iv_table = lv_tabname ).
 
         " Si falla el bloqueo de la tabla de texto hay que desbloquear la principal para no dejarla bloqueada
         DATA(lv_main_lock) = abap_true.
 
         " Si hay tabla de textos se bloquea también
-        IF ms_view-texttable IS NOT INITIAL.
-          lock_table( iv_table = ms_view-texttable ).
+        IF lv_texttable IS NOT INITIAL.
+          lock_table( iv_table = lv_texttable ).
         ENDIF.
 
 
@@ -1321,7 +1329,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
         " Si se produce una excepción y la tabla principal se ha bloqueado habrá que desbloquearla
         IF lv_main_lock = abap_true.
-          unlock_table( iv_table = ms_view-tabname ).
+          unlock_table( iv_table = lv_tabname ).
         ENDIF.
 
         DATA(lv_excep) = abap_true.

@@ -202,7 +202,8 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
     ENDIF.
 
     mo_controller->lock_view( EXPORTING iv_view_name = lv_viewname
-                              IMPORTING ev_locked = er_entity-already_locked  ).
+                              IMPORTING ev_locked = er_entity-already_locked
+                                        ev_lock_by_user = er_entity-lockbyuser ).
 
   ENDMETHOD.
 

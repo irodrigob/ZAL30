@@ -232,9 +232,14 @@ CLASS zcl_al30_controller DEFINITION
         !et_fields_view_alv      TYPE zif_al30_data=>tt_fields_view_alv
         !et_fields_text_view_alv TYPE zif_al30_data=>tt_fields_text_view_alv
         !es_view                 TYPE zal30_t_view .
+    "! <p class="shorttext synchronized">Lock view</p>
     METHODS lock_view
+      IMPORTING
+        !iv_view_name TYPE tabname OPTIONAL
+        !iv_view_text TYPE tabname OPTIONAL
       RAISING
         zcx_al30 .
+    "! <p class="shorttext synchronized">Instace exit class</p>
     METHODS instance_exit_class
       IMPORTING
         !iv_exit_class   TYPE zal30_e_exit_class
@@ -635,7 +640,8 @@ CLASS zcl_al30_controller IMPLEMENTATION.
 
   METHOD lock_view.
 
-    mo_view->lock_view( ).
+    mo_view->lock_view( EXPORTING iv_view_name = iv_view_name
+                                  iv_view_text = iv_view_text ).
 
   ENDMETHOD.
 
