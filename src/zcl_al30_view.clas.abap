@@ -1341,7 +1341,8 @@ CLASS zcl_al30_view IMPLEMENTATION.
       RAISE EXCEPTION TYPE zcx_al30
         EXPORTING
           textid     = zcx_al30=>view_locked
-          mv_message = lx_excep->mv_message.
+          mv_message = lx_excep->mv_message
+          mv_msgv1 = lx_excep->mv_msgv1.
 
     ENDIF.
 

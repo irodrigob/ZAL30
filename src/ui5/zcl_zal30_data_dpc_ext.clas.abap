@@ -17,7 +17,28 @@ ENDCLASS.
 
 
 
-CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
+CLASS ZCL_ZAL30_DATA_DPC_EXT IMPLEMENTATION.
+
+
+  METHOD checkauthviewset_get_entity.
+
+    " Se recupera la vista pasada
+    READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_key_tab>) WITH KEY name = 'VIEWNAME'.
+    IF sy-subrc = 0.
+      er_entity-level_auth = mo_controller->check_authorization_view( iv_view_name   = CONV #( <ls_key_tab>-value ) ).
+      er_entity-view_name = <ls_key_tab>-value.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD constructor.
+    super->constructor(  ).
+
+    mo_controller = NEW zcl_al30_gw_controller(  ). " Se instancia el controlador para GW
+  ENDMETHOD.
+
+
   METHOD getviewsset_get_entityset.
     DATA lv_langu TYPE sylangu.
     DATA lv_user TYPE string.
@@ -76,22 +97,70 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
 
 
   ENDMETHOD.
-  METHOD constructor.
-    super->constructor(  ).
 
-    mo_controller = NEW zcl_al30_gw_controller(  ). " Se instancia el controlador para GW
-  ENDMETHOD.
 
-  METHOD checkauthviewset_get_entity.
+  METHOD lockviewset_get_entity.
+    DATA lv_viewname TYPE tabname.
 
-    " Se recupera la vista pasada
+    " Nombre de la vista
     READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_key_tab>) WITH KEY name = 'VIEWNAME'.
     IF sy-subrc = 0.
-      er_entity-level_auth = mo_controller->check_authorization_view( iv_view_name   = CONV #( <ls_key_tab>-value ) ).
-      er_entity-view_name = <ls_key_tab>-value.
+      lv_viewname = <ls_key_tab>-value.
     ENDIF.
 
+    mo_controller->lock_view( EXPORTING iv_view_name = lv_viewname
+                              IMPORTING ev_locked = er_entity-already_locked
+                                        ev_lock_by_user = er_entity-lockbyuser ).
+
+    " Para que no de error el servicio hay que devolver valor en al menos un campo.
+    er_entity-tabname = lv_viewname.
+
   ENDMETHOD.
+
+
+  METHOD readdataset_get_entity.
+    DATA lv_langu TYPE sylangu.
+    DATA lv_viewname TYPE tabname.
+    DATA lv_mode TYPE c LENGTH 1.
+
+    CLEAR: er_entity.
+
+    " Se recupera el diioma
+    READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_key_tab>) WITH KEY name = 'LANGU'.
+    IF sy-subrc = 0.
+      CALL FUNCTION 'CONVERSION_EXIT_ISOLA_INPUT'
+        EXPORTING
+          input            = <ls_key_tab>-value
+        IMPORTING
+          output           = lv_langu
+        EXCEPTIONS
+          unknown_language = 1
+          OTHERS           = 2.
+    ENDIF.
+
+    " Nombre de la vista
+    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'VIEWNAME'.
+    IF sy-subrc = 0.
+      lv_viewname = <ls_key_tab>-value.
+    ENDIF.
+
+    " Modo de edición
+    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'MODE'.
+    IF sy-subrc = 0.
+      lv_mode = <ls_key_tab>-value.
+    ENDIF.
+
+    " Se llama al controlador para leer los datos
+    mo_controller->read_data(
+      EXPORTING
+        iv_view_name = lv_viewname
+        iv_langu     = lv_langu
+        iv_mode      = lv_mode
+      IMPORTING
+        ev_data      = er_entity-data ).
+
+  ENDMETHOD.
+
 
   METHOD readviewset_get_entityset.
     DATA lv_langu TYPE sylangu.
@@ -148,63 +217,4 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
     ENDLOOP.
 
   ENDMETHOD.
-
-  METHOD readdataset_get_entity.
-    DATA lv_langu TYPE sylangu.
-    DATA lv_viewname TYPE tabname.
-    DATA lv_mode TYPE c LENGTH 1.
-
-    CLEAR: er_entity.
-
-    " Se recupera el diioma
-    READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_key_tab>) WITH KEY name = 'LANGU'.
-    IF sy-subrc = 0.
-      CALL FUNCTION 'CONVERSION_EXIT_ISOLA_INPUT'
-        EXPORTING
-          input            = <ls_key_tab>-value
-        IMPORTING
-          output           = lv_langu
-        EXCEPTIONS
-          unknown_language = 1
-          OTHERS           = 2.
-    ENDIF.
-
-    " Nombre de la vista
-    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'VIEWNAME'.
-    IF sy-subrc = 0.
-      lv_viewname = <ls_key_tab>-value.
-    ENDIF.
-
-    " Modo de edición
-    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'MODE'.
-    IF sy-subrc = 0.
-      lv_mode = <ls_key_tab>-value.
-    ENDIF.
-
-    " Se llama al controlador para leer los datos
-    mo_controller->read_data(
-      EXPORTING
-        iv_view_name = lv_viewname
-        iv_langu     = lv_langu
-        iv_mode      = lv_mode
-      IMPORTING
-        ev_data      = er_entity-data ).
-
-  ENDMETHOD.
-
-  METHOD lockviewset_get_entity.
-    DATA lv_viewname TYPE tabname.
-
-    " Nombre de la vista
-    READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_key_tab>) WITH KEY name = 'VIEWNAME'.
-    IF sy-subrc = 0.
-      lv_viewname = <ls_key_tab>-value.
-    ENDIF.
-
-    mo_controller->lock_view( EXPORTING iv_view_name = lv_viewname
-                              IMPORTING ev_locked = er_entity-already_locked
-                                        ev_lock_by_user = er_entity-lockbyuser ).
-
-  ENDMETHOD.
-
 ENDCLASS.
