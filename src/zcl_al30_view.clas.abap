@@ -1135,7 +1135,6 @@ CLASS zcl_al30_view IMPLEMENTATION.
           <ls_fieldcat>-col_pos = <ls_fields>-pos_ddic.
           <ls_fieldcat>-col_opt = abap_true.
           <ls_fieldcat>-checkbox = <ls_fields>-checkbox.
-*          <ls_fieldcat>-key = <ls_fields>-key_ddic.
 
           " El campo de idioma de la tabla de texto se pone como técnico porque se autoinformará
           IF <ls_fields>-lang_texttable = abap_true.

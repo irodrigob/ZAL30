@@ -92,9 +92,13 @@ CLASS zcl_al30_gw_controller DEFINITION
     "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
     METHODS read_view_conf_for_data
       IMPORTING
-                iv_view_name TYPE tabname
-                iv_langu     TYPE sylangu
-      EXPORTING es_return    TYPE bapiret2.
+                iv_view_name             TYPE tabname
+                iv_langu                 TYPE sylangu
+      EXPORTING es_return                TYPE bapiret2
+                !es_view                 TYPE zal30_t_view
+                !et_fields_view_alv      TYPE zif_al30_data=>tt_fields_view_alv
+                !et_fields_text_view_alv TYPE zif_al30_data=>tt_fields_text_view_alv
+                !et_fields_ddic          TYPE dd03ptab .
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -210,7 +214,8 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     " Se leen los datos básicos para poder acceder a la clase de datos
     read_view_conf_for_data( EXPORTING iv_view_name = iv_view_name
                                        iv_langu = iv_langu
-                             IMPORTING es_return = DATA(ls_return) ).
+                             IMPORTING es_return = DATA(ls_return)
+                                       et_fields_view_alv = DATA(lt_fields) ).
 
     IF ls_return IS INITIAL.
 
@@ -226,6 +231,13 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
         DATA(ls_fields) = CORRESPONDING zif_al30_ui5_data=>ts_view_fields( <ls_fieldcat> ).
         ls_fields-len = <ls_fieldcat>-intlen.
         ls_fields-type = <ls_fieldcat>-inttype.
+
+        " Se buscan en los campos de la vista para obtener si es campos clave
+        READ TABLE lt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WITH KEY fieldname = <ls_fieldcat>-fieldname.
+        IF sy-subrc = 0.
+          ls_fields-key_ddic = <ls_fields>-key_ddic.
+        ENDIF.
+
         INSERT ls_fields INTO TABLE et_fields.
       ENDLOOP.
 
@@ -236,7 +248,7 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
   METHOD read_view_conf_for_data.
 
-    CLEAR es_return.
+    CLEAR: es_return, es_view, et_fields_ddic, et_fields_text_view_alv, et_fields_view_alv.
 
     " La lectura de datos se hace en varios pasos.
     " 1) Se leen los datos de la vista en formato ALV. Esto es necesario para reaprovechar el resto de método
@@ -246,26 +258,26 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
         iv_all_language         = abap_false
         iv_langu                = iv_langu
       IMPORTING
-        es_view                 = DATA(ls_view)
-        et_fields_view_alv      = DATA(lt_fields)
-        et_fields_text_view_alv = DATA(lt_fields_text)
-        et_fields_ddic          = DATA(lt_fields_ddic)
+        es_view                 = es_view
+        et_fields_view_alv      = et_fields_view_alv
+        et_fields_text_view_alv = et_fields_text_view_alv
+        et_fields_ddic          = et_fields_ddic
         es_return               = es_return.
 
     IF es_return IS INITIAL. " Si no hay errores se continua el proceso
 
       " Si la vista tiene configurada exit se llama al proceso que la instancia
-      IF ls_view-exit_class IS NOT INITIAL.
-        mo_controller->instance_exit_class( ls_view-exit_class ).
+      IF es_view-exit_class IS NOT INITIAL.
+        mo_controller->instance_exit_class( es_view-exit_class ).
       ENDIF.
 
       " 2) Se pasan los datos leídos de la configuración a la clase de obtención de valores
       mo_controller->set_data_conf_view(
     EXPORTING
-      it_fields_view_alv      = lt_fields
-      it_fields_text_view_alv =  lt_fields_text
-      is_view                 = ls_view
-      it_fields_ddic = lt_fields_ddic  ).
+      it_fields_view_alv      = et_fields_view_alv
+      it_fields_text_view_alv =  et_fields_text_view_alv
+      is_view                 = es_view
+      it_fields_ddic = et_fields_ddic  ).
 
     ENDIF.
   ENDMETHOD.
