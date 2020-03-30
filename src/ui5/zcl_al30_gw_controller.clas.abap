@@ -49,13 +49,15 @@ CLASS zcl_al30_gw_controller DEFINITION
     "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
     "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
     "! @parameter ev_data | <p class="shorttext synchronized">Data in JSON format</p>
+    "! @parameter ev_data_template | <p class="shorttext synchronized">Data template in JSON format</p>
     METHODS read_data
       IMPORTING
-        !iv_view_name TYPE tabname
-        !iv_langu     TYPE sylangu DEFAULT sy-langu
-        !iv_mode      TYPE char1 OPTIONAL
+        !iv_view_name     TYPE tabname
+        !iv_langu         TYPE sylangu DEFAULT sy-langu
+        !iv_mode          TYPE char1 OPTIONAL
       EXPORTING
-        !ev_data      TYPE string.
+        !ev_data          TYPE string
+        !ev_data_template TYPE string.
 
     "! <p class="shorttext synchronized">Read data from view</p>
     "!
@@ -198,6 +200,17 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
         ASSIGN lo_data->* TO <data>.
         ev_data = zcl_al30_ui5_json=>zserialize( data = <data> pretty_name = /ui2/cl_json=>pretty_mode-none ).
+
+        " Se crea un registro para los datos template. Este servirá para añadir nuevos registros desde el frontend.
+        UNASSIGN <data>.
+        create_it_data_view( EXPORTING iv_view_name = iv_view_name
+                                       iv_langu = iv_langu
+                                       iv_mode = lv_mode
+                             IMPORTING eo_data = DATA(lo_data_template) ).
+        ASSIGN lo_data_template->* TO <data>.
+        APPEND INITIAL LINE TO <data>.
+
+        ev_data_template = zcl_al30_ui5_json=>zserialize( data = <data> pretty_name = /ui2/cl_json=>pretty_mode-none ).
 
       ENDIF.
     ENDIF.

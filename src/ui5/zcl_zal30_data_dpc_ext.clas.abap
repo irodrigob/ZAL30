@@ -157,7 +157,8 @@ CLASS ZCL_ZAL30_DATA_DPC_EXT IMPLEMENTATION.
         iv_langu     = lv_langu
         iv_mode      = lv_mode
       IMPORTING
-        ev_data      = er_entity-data ).
+        ev_data      = er_entity-data
+        ev_data_template = er_entity-data_template ).
 
   ENDMETHOD.
 
