@@ -494,6 +494,19 @@ CLASS zcl_al30_util IMPLEMENTATION.
     APPEND ls_fieldcat TO rt_fieldcat_control.
     CLEAR ls_fieldcat.
 
+    " Status de la línea
+    ls_fieldcat-fieldname = zif_al30_data=>cs_control_fields_alv_data-row_status.
+    ls_fieldcat-rollname = 'BSSTRING'.
+    ls_fieldcat-tech = 'X'.
+    APPEND ls_fieldcat TO rt_fieldcat_control.
+    CLEAR ls_fieldcat.
+    " Mensajes del status de la línea
+    ls_fieldcat-fieldname = zif_al30_data=>cs_control_fields_alv_data-row_status_msg.
+    ls_fieldcat-rollname = 'ZAL30_I_ROW_STATUS_MSG'.
+    ls_fieldcat-tech = 'X'.
+    APPEND ls_fieldcat TO rt_fieldcat_control.
+    CLEAR ls_fieldcat.
+
   ENDMETHOD.
 
 

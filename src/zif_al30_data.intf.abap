@@ -28,8 +28,8 @@ INTERFACE zif_al30_data
       fieldname TYPE fieldname.
       INCLUDE TYPE zal30_s_fields_attr_general.
       INCLUDE TYPE zal30_s_fields_info_ddic.
-    TYPES:
-    END OF ts_fields_view .
+  TYPES:
+  END OF ts_fields_view .
   TYPES:
     tt_fields_view TYPE STANDARD TABLE OF ts_fields_view .
   TYPES:
@@ -39,32 +39,32 @@ INTERFACE zif_al30_data
       pos_ddic  TYPE tabfdpos,
       spras     TYPE spras.
       INCLUDE TYPE zal30_s_fields_attr_text.
-    TYPES:
-    END OF ts_fields_text_view .
+  TYPES:
+  END OF ts_fields_text_view .
   TYPES:
     tt_fields_text_view TYPE STANDARD TABLE OF ts_fields_text_view .
   TYPES:
     BEGIN OF ts_fields_view_alv.
       INCLUDE TYPE ts_fields_view.
-    TYPES:
-      reptext TYPE reptext,
-      celltab TYPE lvc_t_styl,
+  TYPES:
+    reptext TYPE reptext,
+    celltab TYPE lvc_t_styl,
     END OF ts_fields_view_alv .
   TYPES:
     tt_fields_view_alv TYPE STANDARD TABLE OF ts_fields_view_alv .
   TYPES:
     BEGIN OF ts_fields_text_view_alv.
       INCLUDE TYPE ts_fields_text_view.
-    TYPES:
-      celltab TYPE lvc_t_styl,
+  TYPES:
+    celltab TYPE lvc_t_styl,
     END OF ts_fields_text_view_alv .
   TYPES:
     tt_fields_text_view_alv TYPE STANDARD TABLE OF ts_fields_text_view_alv .
   TYPES:
     BEGIN OF ts_default_values_create.
       INCLUDE TYPE zal30_t_view.
-    TYPES:
-    END OF ts_default_values_create .
+  TYPES:
+  END OF ts_default_values_create .
   TYPES:
     BEGIN OF ts_filter_read_data,
       fields_ranges TYPE rsds_trange,
@@ -72,6 +72,11 @@ INTERFACE zif_al30_data
       expressions   TYPE rsds_texpr,
     END OF ts_filter_read_data .
   TYPES: tt_strings TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+  TYPES: BEGIN OF ts_row_status_msg,
+           type    TYPE bapi_mtype,
+           message TYPE string,
+         END OF ts_row_status_msg.
+  TYPES: tt_row_status_msg TYPE STANDARD TABLE OF ts_row_status_msg WITH EMPTY KEY.
 
   CONSTANTS:
     BEGIN OF cs_internal_tables,
@@ -80,16 +85,15 @@ INTERFACE zif_al30_data
   CONSTANTS cv_ddic_fields TYPE tabname VALUE 'ZAL30_S_FIELDS_ALV' ##NO_TEXT.
   CONSTANTS cv_fields_attr_text TYPE tabname VALUE 'ZAL30_S_FIELDS_ATTR_TEXT' ##NO_TEXT.
   CONSTANTS: BEGIN OF cs_control_fields_alv_data,
-               origen_data TYPE fieldname VALUE 'ZAL30_ORIGEN' ##NO_TEXT,
-               style       TYPE fieldname VALUE 'ZAL30_STYLE' ##NO_TEXT,
-               tabix       TYPE fieldname VALUE 'ZAL30_TABIX' ##NO_TEXT,
-               updkz TYPE fieldname VALUE 'ZAL30_UPDKZ' ##NO_TEXT,
-               is_dict     TYPE fieldname VALUE 'ZAL30_IS_DICT',
+               origen_data    TYPE fieldname VALUE 'ZAL30_ORIGEN' ##NO_TEXT,
+               style          TYPE fieldname VALUE 'ZAL30_STYLE' ##NO_TEXT,
+               tabix          TYPE fieldname VALUE 'ZAL30_TABIX' ##NO_TEXT,
+               updkz          TYPE fieldname VALUE 'ZAL30_UPDKZ' ##NO_TEXT,
+               is_dict        TYPE fieldname VALUE 'ZAL30_IS_DICT',
+               row_status     TYPE fieldname VALUE 'ZAL30_ROW_STATUS',
+               row_status_msg TYPE fieldname VALUE 'ZAL30_ROW_STATUS_MSG',
              END OF cs_control_fields_alv_data.
-*  CONSTANTS cv_field_origen_data TYPE fieldname VALUE 'ZAL30_ORIGEN' ##NO_TEXT.
-*  CONSTANTS cv_field_style TYPE fieldname VALUE 'ZAL30_STYLE' ##NO_TEXT.
-*  CONSTANTS cv_field_tabix_ddic TYPE fieldname VALUE 'ZAL30_TABIX_DDIC' ##NO_TEXT.
-*  CONSTANTS cv_field_updkz TYPE fieldname VALUE 'ZAL30_UPDKZ' ##NO_TEXT.
+
   CONSTANTS cv_intf_exit TYPE seoclsname VALUE 'ZIF_AL30_EXIT_CLASS' ##NO_TEXT.
   CONSTANTS cv_mode_change TYPE cdchngind VALUE 'U' ##NO_TEXT.
   CONSTANTS cv_mode_delete TYPE cdchngind VALUE 'D' ##NO_TEXT.
@@ -173,4 +177,8 @@ INTERFACE zif_al30_data
                warning TYPE c VALUE 2,
                error   TYPE c VALUE 1,
              END OF cs_semaphor_alv_excep.
+  CONSTANTS: BEGIN OF cs_row_status,
+               error TYPE string VALUE 'ERROR',
+               valid TYPE string VALUE 'VALID',
+             END OF cs_row_status.
 ENDINTERFACE.
