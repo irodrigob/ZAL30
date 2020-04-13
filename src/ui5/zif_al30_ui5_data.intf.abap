@@ -14,6 +14,7 @@ INTERFACE zif_al30_ui5_data
          len       TYPE intlen,
          decimals  TYPE decimals,
          lowercase TYPE lowercase,
+         datatype  TYPE datatype_d,
          END OF ts_view_fields.
   TYPES: tt_view_fields TYPE STANDARD TABLE OF ts_view_fields WITH EMPTY KEY.
 
