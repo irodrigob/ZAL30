@@ -7,11 +7,11 @@ INTERFACE zif_al30_exit_class
   METHODS exit_after_read_data
     CHANGING
       !ct_data TYPE STANDARD TABLE .
-  "! <p class="shorttext synchronized" >Exit before read data</p>
+  "! <p class="shorttext synchronized">Exit before read data</p>
   METHODS exit_before_read_data
     CHANGING
       !ct_data TYPE STANDARD TABLE .
-  "! <p class="shorttext synchronized" >Exit after save data</p>
+  "! <p class="shorttext synchronized">Exit after save data</p>
   METHODS exit_after_save_data
     IMPORTING
       !it_data       TYPE STANDARD TABLE
@@ -31,12 +31,12 @@ INTERFACE zif_al30_exit_class
       !is_row_data TYPE any
     EXCEPTIONS
       no_authorization .
-  "! <p class="shorttext synchronized" >Exit in process for data read</p>
+  "! <p class="shorttext synchronized">Exit in process for data read</p>
   METHODS exit_in_process_data_read
     CHANGING
       !cs_row_data TYPE any .
 
-  "! <p class="shorttext synchronized" >Exit verify and change row data</p>
+  "! <p class="shorttext synchronized">Exit verify and change row data</p>
   "!
   "! @parameter et_return | <p class="shorttext synchronized" >Return table</p>
   METHODS exit_verify_change_row_data
@@ -46,12 +46,12 @@ INTERFACE zif_al30_exit_class
       !et_return   TYPE bapiret2_t
     CHANGING
       !cs_row_data TYPE any .
-  "! <p class="shorttext synchronized" >Exit verify row data</p>
+  "! <p class="shorttext synchronized">Exit verify row data</p>
   "! This exit enters both when modifying / inserting fields, and when recording data
-  "! @parameter iv_row | <p class="shorttext synchronized" >Row number</p>
-  "! @parameter iv_save_process | <p class="shorttext synchronized" >Enter in save process</p>
-  "! @parameter is_row_data | <p class="shorttext synchronized" >Row data</p>
-  "! @parameter et_return | <p class="shorttext synchronized" >Return table</p>
+  "! @parameter iv_row | <p class="shorttext synchronized">Row number</p>
+  "! @parameter iv_save_process | <p class="shorttext synchronized">Enter in save process</p>
+  "! @parameter is_row_data | <p class="shorttext synchronized">Row data</p>
+  "! @parameter et_return | <p class="shorttext synchronized">Return table</p>
   METHODS exit_verify_row_data
     IMPORTING
       !iv_row          TYPE bapi_line OPTIONAL
@@ -59,14 +59,14 @@ INTERFACE zif_al30_exit_class
       !iv_save_process TYPE sap_bool DEFAULT abap_false
     EXPORTING
       !et_return       TYPE bapiret2_t.
-  "! <p class="shorttext synchronized" >Exit verify field data</p>
+  "! <p class="shorttext synchronized">Exit verify field data</p>
   METHODS exit_verify_field_data
     IMPORTING
       !iv_fieldname TYPE any
       !iv_value     TYPE any
     EXPORTING
       !es_return    TYPE bapiret2 .
-  "! <p class="shorttext synchronized" >Exit process for fieldcatalog</p>
+  "! <p class="shorttext synchronized">Exit process for fieldcatalog</p>
   METHODS exit_process_catalog_of_field
     CHANGING
       !cs_fieldcat TYPE lvc_s_fcat .

@@ -43,12 +43,15 @@ CLASS zcl_al30_view DEFINITION
         !es_return   TYPE bapiret2
         !et_fieldcat TYPE lvc_t_fcat .
     "! <p class="shorttext synchronized">Create the internal table for display data of the view</p>
+    "! @parameter iv_mode | <p class="shorttext synchronized">Edit mode:Edit or View</p>
+    "! @parameter et_data | <p class="shorttext synchronized">Internal table for the values</p>
+    "! @parameter es_return | <p class="shorttext synchronized">Result of the process</p>
     METHODS create_it_data_view
       IMPORTING
-        !iv_mode   TYPE char1
+        !iv_mode            TYPE char1
       EXPORTING
-        !et_data   TYPE REF TO data
-        !es_return TYPE bapiret2 .
+        !et_data            TYPE REF TO data
+        !es_return          TYPE bapiret2 .
     "! <p class="shorttext synchronized">Save the data in the view.</p>
     METHODS save_data
       IMPORTING
@@ -267,9 +270,10 @@ CLASS zcl_al30_view DEFINITION
       CHANGING
         !ct_fcat   TYPE lvc_t_fcat .
     "! <p class="shorttext synchronized">Add edit fiels to the internal table</p>
+    "! @parameter ct_fcat | <p class="shorttext synchronized">Field catalogo</p>
     METHODS add_edit_fields
       CHANGING
-        !ct_fcat TYPE lvc_t_fcat .
+        !ct_fcat            TYPE lvc_t_fcat .
     "! <p class="shorttext synchronized">Get fieldcatalog of table and text view</p>
     METHODS get_lvc_fieldcat
       IMPORTING
@@ -420,7 +424,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_al30_view IMPLEMENTATION.
+CLASS ZCL_AL30_VIEW IMPLEMENTATION.
 
 
   METHOD add_edit_fields.
@@ -964,6 +968,28 @@ CLASS zcl_al30_view IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD exit_set_edit_mode_alv.
+    DATA ld_metodo TYPE seocpdname.
+
+    IF mo_exit_class IS BOUND.
+
+* Monto el método al cual se llamará de la clase de exit.
+      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_SET_EDIT_MODE_ALV' INTO ld_metodo.
+
+      TRY.
+          CALL METHOD mo_exit_class->(ld_metodo)
+            EXPORTING
+              it_data      = it_data
+            IMPORTING
+              ev_edit_mode = ev_edit_mode.
+
+        CATCH cx_root.
+      ENDTRY.
+
+    ENDIF.
+  ENDMETHOD.
+
+
   METHOD exit_verify_change_row_data.
     DATA ld_metodo TYPE seocpdname.
 
@@ -1010,6 +1036,90 @@ CLASS zcl_al30_view IMPLEMENTATION.
               es_return    = es_return.
         CATCH cx_root.
       ENDTRY.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD exit_verify_row_data.
+    DATA ld_metodo TYPE seocpdname.
+
+    CLEAR: et_return.
+
+    IF mo_exit_class IS BOUND.
+
+* Monto el método al cual se llamará de la clase de exit.
+      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_VERIFY_ROW_DATA' INTO ld_metodo.
+
+      TRY.
+          CALL METHOD mo_exit_class->(ld_metodo)
+            EXPORTING
+              iv_row          = iv_row
+              is_row_data     = is_row_data
+              iv_save_process = iv_save_process
+            IMPORTING
+              et_return       = et_return.
+
+        CATCH cx_root.
+      ENDTRY.
+
+    ENDIF.
+  ENDMETHOD.
+
+
+  METHOD exit_verify_save_data.
+    DATA ld_metodo TYPE seocpdname.
+
+    IF mo_exit_class IS BOUND.
+
+* Monto el método al cual se llamará de la clase de exit.
+      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_VERIFY_SAVE_DATA' INTO ld_metodo.
+
+      TRY.
+          CALL METHOD mo_exit_class->(ld_metodo)
+            EXPORTING
+              it_data     = it_data
+              it_data_del = it_data_del
+            IMPORTING
+              et_return   = et_return.
+
+        CATCH cx_root.
+      ENDTRY.
+
+    ENDIF.
+  ENDMETHOD.
+
+
+  METHOD field_value_adjust_sql.
+    FIELD-SYMBOLS: <field> TYPE any.
+    DATA lo_field TYPE REF TO data.
+
+    " Se recupera la definición del campo
+    DATA(ls_field_ddic) = CAST cl_abap_elemdescr( cl_abap_typedescr=>describe_by_name( |{ iv_tabname }-{ iv_fieldname }| ) )->get_ddic_field( ).
+
+    " Si no hay rutina de conversión el valor no cambiará.
+    IF ls_field_ddic-convexit IS NOT INITIAL.
+
+      " Se monta la concatenación de la tabla y el campo
+      DATA(lv_field) = |{ iv_tabname }-{ iv_fieldname }|.
+
+      " Se crea un tipo igual al del campo informado
+      CREATE DATA lo_field TYPE (lv_field).
+      ASSIGN lo_field->* TO <field>.
+
+      " Se monta la función de la rutina de conversión y se aplica el valor
+      DATA(lv_function) = |CONVERSION_EXIT_{ ls_field_ddic-convexit }_INPUT|.
+      CALL FUNCTION lv_function
+        EXPORTING
+          input  = cv_value
+        IMPORTING
+          output = <field>
+        EXCEPTIONS
+          OTHERS = 99.
+      IF sy-subrc = 0.
+        cv_value = <field>.
+      ENDIF.
 
     ENDIF.
 
@@ -1266,6 +1376,23 @@ CLASS zcl_al30_view IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD internal_verify_row_data.
+    LOOP AT mt_fields REFERENCE INTO DATA(lo_fields).
+
+      ASSIGN COMPONENT lo_fields->fieldname OF STRUCTURE is_row_data TO FIELD-SYMBOL(<field>).
+      IF sy-subrc = 0.
+        " Validación: Campo obligatorio
+        IF lo_fields->mandatory = abap_true AND <field> IS INITIAL.
+          INSERT zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error
+                                                               iv_id = zif_al30_data=>cv_msg_id
+                                                               iv_number = '034'
+                                                               iv_field = lo_fields->fieldname ) INTO TABLE et_return.
+        ENDIF.
+      ENDIF.
+    ENDLOOP.
+  ENDMETHOD.
+
+
   METHOD lock_table.
     CALL FUNCTION 'VIEW_ENQUEUE'
       EXPORTING
@@ -1341,7 +1468,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
         EXPORTING
           textid     = zcx_al30=>view_locked
           mv_message = lx_excep->mv_message
-          mv_msgv1 = lx_excep->mv_msgv1.
+          mv_msgv1   = lx_excep->mv_msgv1.
 
     ENDIF.
 
@@ -1831,6 +1958,17 @@ CLASS zcl_al30_view IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD set_edit_mode_alv.
+
+    " Se llama a la exit que pueda cambiar el modo de edición
+    exit_set_edit_mode_alv( EXPORTING it_data = it_data
+                            IMPORTING ev_edit_mode = DATA(lv_edit_mode) ).
+
+    " Si se ha determinado un modo nuevo tiene prevalencia sobre el determinado
+    ev_edit_mode = COND #( WHEN lv_edit_mode IS NOT INITIAL THEN lv_edit_mode ELSE ev_edit_mode ).
+  ENDMETHOD.
+
+
   METHOD transport_entries.
     FIELD-SYMBOLS <lt_view> TYPE STANDARD TABLE.
     FIELD-SYMBOLS <lt_view_texttable> TYPE STANDARD TABLE.
@@ -1943,6 +2081,69 @@ CLASS zcl_al30_view IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD verify_row_data.
+    CLEAR et_return.
+
+    " Verificación interna segun configuración
+    internal_verify_row_data( EXPORTING iv_row = iv_row
+                                         is_row_data = is_row_data
+                              IMPORTING et_return = et_return ) .
+
+
+
+    " Exit para la verificación de la línea
+    exit_verify_row_data( EXPORTING iv_row      = iv_row
+                                    is_row_data = is_row_data
+                                    iv_save_process = iv_save_process
+                          IMPORTING et_return   = DATA(lt_return) ).
+
+    " Todos los mensajes de la exit se obtiene el texto porque según se llame dicho método es encesario.
+    " Ejemplo en el proceso de grabación
+    LOOP AT lt_return ASSIGNING FIELD-SYMBOL(<ls_return>).
+      <ls_return>-message = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error
+                                                                     iv_id = zif_al30_data=>cv_msg_id
+                                                                     iv_number = '034'
+                                                                     iv_field = <ls_return>-field )-message.
+
+      INSERT <ls_return> INTO TABLE et_return. " Se añaden los mensajes de la exit a los generales
+    ENDLOOP.
+  ENDMETHOD.
+
+
+  METHOD verify_save_data.
+    FIELD-SYMBOLS: <lt_datos> TYPE STANDARD TABLE.
+    DATA lo_datos TYPE REF TO data.
+    CLEAR et_return.
+
+    " Se crea una tabla como la de entrada para pasarla con los datos modificados a las exit
+    CREATE DATA lo_datos LIKE it_data.
+    ASSIGN lo_datos->* TO <lt_datos>.
+
+    " Se hacen las verificacion internas
+    DATA(lv_cond) = |{ zif_al30_data=>cs_control_fields_alv_data-updkz } IS NOT INITIAL|.
+
+    LOOP AT it_data ASSIGNING FIELD-SYMBOL(<ls_data>) WHERE (lv_cond).
+      DATA(lv_tabix) = sy-tabix.
+
+      INSERT <ls_data> INTO TABLE <lt_datos>.
+
+      internal_verify_row_data( EXPORTING iv_row = lv_tabix
+                                           is_row_data = <ls_data>
+                                IMPORTING et_return = DATA(lt_return) ) .
+
+      INSERT LINES OF lt_return INTO TABLE et_return.
+      CLEAR lt_return.
+    ENDLOOP.
+
+    " Exit para la verificación de los datos a grabar
+    exit_verify_save_data( EXPORTING it_data = <lt_datos>
+                                      it_data_del = it_data_del
+                           IMPORTING et_return = lt_return ).
+    INSERT LINES OF lt_return INTO TABLE et_return.
+
+  ENDMETHOD.
+
+
   METHOD view_have_auto_adjust.
     rv_have = abap_false.
 
@@ -1978,196 +2179,4 @@ CLASS zcl_al30_view IMPLEMENTATION.
                 WHERE a~tabname IN it_r_views.
 
   ENDMETHOD.
-
-  METHOD field_value_adjust_sql.
-    FIELD-SYMBOLS: <field> TYPE any.
-    DATA lo_field TYPE REF TO data.
-
-    " Se recupera la definición del campo
-    DATA(ls_field_ddic) = CAST cl_abap_elemdescr( cl_abap_typedescr=>describe_by_name( |{ iv_tabname }-{ iv_fieldname }| ) )->get_ddic_field( ).
-
-    " Si no hay rutina de conversión el valor no cambiará.
-    IF ls_field_ddic-convexit IS NOT INITIAL.
-
-      " Se monta la concatenación de la tabla y el campo
-      DATA(lv_field) = |{ iv_tabname }-{ iv_fieldname }|.
-
-      " Se crea un tipo igual al del campo informado
-      CREATE DATA lo_field TYPE (lv_field).
-      ASSIGN lo_field->* TO <field>.
-
-      " Se monta la función de la rutina de conversión y se aplica el valor
-      DATA(lv_function) = |CONVERSION_EXIT_{ ls_field_ddic-convexit }_INPUT|.
-      CALL FUNCTION lv_function
-        EXPORTING
-          input  = cv_value
-        IMPORTING
-          output = <field>
-        EXCEPTIONS
-          OTHERS = 99.
-      IF sy-subrc = 0.
-        cv_value = <field>.
-      ENDIF.
-
-    ENDIF.
-
-  ENDMETHOD.
-
-  METHOD verify_row_data.
-    CLEAR et_return.
-
-    " Verificación interna segun configuración
-    internal_verify_row_data( EXPORTING iv_row = iv_row
-                                         is_row_data = is_row_data
-                              IMPORTING et_return = et_return ) .
-
-
-
-    " Exit para la verificación de la línea
-    exit_verify_row_data( EXPORTING iv_row      = iv_row
-                                    is_row_data = is_row_data
-                                    iv_save_process = iv_save_process
-                          IMPORTING et_return   = DATA(lt_return) ).
-
-    " Todos los mensajes de la exit se obtiene el texto porque según se llame dicho método es encesario.
-    " Ejemplo en el proceso de grabación
-    LOOP AT lt_return ASSIGNING FIELD-SYMBOL(<ls_return>).
-      <ls_return>-message = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error
-                                                                     iv_id = zif_al30_data=>cv_msg_id
-                                                                     iv_number = '034'
-                                                                     iv_field = <ls_return>-field )-message.
-
-      INSERT <ls_return> INTO TABLE et_return. " Se añaden los mensajes de la exit a los generales
-    ENDLOOP.
-  ENDMETHOD.
-
-  METHOD verify_save_data.
-    FIELD-SYMBOLS: <lt_datos> TYPE STANDARD TABLE.
-    DATA lo_datos TYPE REF TO data.
-    CLEAR et_return.
-
-    " Se crea una tabla como la de entrada para pasarla con los datos modificados a las exit
-    CREATE DATA lo_datos LIKE it_data.
-    ASSIGN lo_datos->* TO <lt_datos>.
-
-    " Se hacen las verificacion internas
-    DATA(lv_cond) = |{ zif_al30_data=>cs_control_fields_alv_data-updkz } IS NOT INITIAL|.
-
-    LOOP AT it_data ASSIGNING FIELD-SYMBOL(<ls_data>) WHERE (lv_cond).
-      DATA(lv_tabix) = sy-tabix.
-
-      INSERT <ls_data> INTO TABLE <lt_datos>.
-
-      internal_verify_row_data( EXPORTING iv_row = lv_tabix
-                                           is_row_data = <ls_data>
-                                IMPORTING et_return = DATA(lt_return) ) .
-
-      INSERT LINES OF lt_return INTO TABLE et_return.
-      CLEAR lt_return.
-    ENDLOOP.
-
-    " Exit para la verificación de los datos a grabar
-    exit_verify_save_data( EXPORTING it_data = <lt_datos>
-                                      it_data_del = it_data_del
-                           IMPORTING et_return = lt_return ).
-    INSERT LINES OF lt_return INTO TABLE et_return.
-
-  ENDMETHOD.
-
-  METHOD exit_verify_row_data.
-    DATA ld_metodo TYPE seocpdname.
-
-    CLEAR: et_return.
-
-    IF mo_exit_class IS BOUND.
-
-* Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_VERIFY_ROW_DATA' INTO ld_metodo.
-
-      TRY.
-          CALL METHOD mo_exit_class->(ld_metodo)
-            EXPORTING
-              iv_row          = iv_row
-              is_row_data     = is_row_data
-              iv_save_process = iv_save_process
-            IMPORTING
-              et_return       = et_return.
-
-        CATCH cx_root.
-      ENDTRY.
-
-    ENDIF.
-  ENDMETHOD.
-
-
-  METHOD internal_verify_row_data.
-    LOOP AT mt_fields REFERENCE INTO DATA(lo_fields).
-
-      ASSIGN COMPONENT lo_fields->fieldname OF STRUCTURE is_row_data TO FIELD-SYMBOL(<field>).
-      IF sy-subrc = 0.
-        " Validación: Campo obligatorio
-        IF lo_fields->mandatory = abap_true AND <field> IS INITIAL.
-          INSERT zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error
-                                                               iv_id = zif_al30_data=>cv_msg_id
-                                                               iv_number = '034'
-                                                               iv_field = lo_fields->fieldname ) INTO TABLE et_return.
-        ENDIF.
-      ENDIF.
-    ENDLOOP.
-  ENDMETHOD.
-
-
-  METHOD exit_verify_save_data.
-    DATA ld_metodo TYPE seocpdname.
-
-    IF mo_exit_class IS BOUND.
-
-* Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_VERIFY_SAVE_DATA' INTO ld_metodo.
-
-      TRY.
-          CALL METHOD mo_exit_class->(ld_metodo)
-            EXPORTING
-              it_data     = it_data
-              it_data_del = it_data_del
-            IMPORTING
-              et_return   = et_return.
-
-        CATCH cx_root.
-      ENDTRY.
-
-    ENDIF.
-  ENDMETHOD.
-
-  METHOD set_edit_mode_alv.
-
-    " Se llama a la exit que pueda cambiar el modo de edición
-    exit_set_edit_mode_alv( EXPORTING it_data = it_data
-                            IMPORTING ev_edit_mode = DATA(lv_edit_mode) ).
-
-    " Si se ha determinado un modo nuevo tiene prevalencia sobre el determinado
-    ev_edit_mode = COND #( WHEN lv_edit_mode IS NOT INITIAL THEN lv_edit_mode ELSE ev_edit_mode ).
-  ENDMETHOD.
-
-  METHOD exit_set_edit_mode_alv.
-    DATA ld_metodo TYPE seocpdname.
-
-    IF mo_exit_class IS BOUND.
-
-* Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_SET_EDIT_MODE_ALV' INTO ld_metodo.
-
-      TRY.
-          CALL METHOD mo_exit_class->(ld_metodo)
-            EXPORTING
-              it_data      = it_data
-            IMPORTING
-              ev_edit_mode = ev_edit_mode.
-
-        CATCH cx_root.
-      ENDTRY.
-
-    ENDIF.
-  ENDMETHOD.
-
 ENDCLASS.
