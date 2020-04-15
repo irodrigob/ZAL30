@@ -73,6 +73,9 @@ CLASS zcl_al30_gw_controller DEFINITION
 
   PROTECTED SECTION.
     DATA mo_controller TYPE REF TO zcl_al30_controller.
+    DATA mo_conf TYPE REF TO zcl_al30_conf.
+    DATA mo_view TYPE REF TO zcl_al30_view_ui5.
+
 
     "! <p class="shorttext synchronized">Create internal table for view data</p>
     "!
@@ -81,50 +84,50 @@ CLASS zcl_al30_gw_controller DEFINITION
     "! @parameter iv_mode | <p class="shorttext synchronized">Mode:'U' Update - 'V' View</p>
     "! @parameter eo_data | <p class="shorttext synchronized">Data</p>
     "! @parameter es_return | <p class="shorttext synchronized">Return</p>
-    "! @parameter et_fields_view_alv | <p class="shorttext synchronized">Fields of table</p>
-    "! @parameter et_fields_text_view_alv | <p class="shorttext synchronized">Texts of fields of table</p>
+    "! @parameter et_fields_view | <p class="shorttext synchronized">Fields of table</p>
+    "! @parameter et_fields_text_view | <p class="shorttext synchronized">Texts of fields of table</p>
     "! @parameter et_fields_ddic | <p class="shorttext synchronized">Fields of data from data dictioary</p>
     METHODS create_it_data_view
       IMPORTING
-        !iv_view_name            TYPE tabname
-        !iv_langu                TYPE sylangu
-        !iv_mode                 TYPE char1
+        !iv_view_name        TYPE tabname
+        !iv_langu            TYPE sylangu
+        !iv_mode             TYPE char1
       EXPORTING
-        !eo_data                 TYPE REF TO data
-        !es_return               TYPE bapiret2
-        !et_fields_view_alv      TYPE zif_al30_data=>tt_fields_view_alv
-        !et_fields_text_view_alv TYPE zif_al30_data=>tt_fields_text_view_alv
-        !et_fields_ddic          TYPE dd03ptab .
+        !eo_data             TYPE REF TO data
+        !es_return           TYPE bapiret2
+        !et_fields_view      TYPE zif_al30_data=>tt_fields_view
+        !et_fields_text_view TYPE zif_al30_data=>tt_fields_text_view
+        !et_fields_ddic      TYPE dd03ptab .
 
     "! <p class="shorttext synchronized">Reading the view configuration to be used in the view data class</p>
     "!
     "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
     "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
     "! @parameter es_return | <p class="shorttext synchronized">Return</p>
-    "! @parameter et_fields_view_alv | <p class="shorttext synchronized">Fields of table</p>
-    "! @parameter et_fields_text_view_alv | <p class="shorttext synchronized">Texts of fields of table</p>
+    "! @parameter et_fields_view | <p class="shorttext synchronized">Fields of table</p>
+    "! @parameter et_fields_text_view | <p class="shorttext synchronized">Texts of fields of table</p>
     "! @parameter et_fields_ddic | <p class="shorttext synchronized">Fields of data from data dictioary</p>
     METHODS read_view_conf_for_data
       IMPORTING
-                iv_view_name            TYPE tabname
-                iv_langu                TYPE sylangu
-      EXPORTING es_return               TYPE bapiret2
-                es_view                 TYPE zal30_t_view
-                et_fields_view_alv      TYPE zif_al30_data=>tt_fields_view_alv
-                et_fields_text_view_alv TYPE zif_al30_data=>tt_fields_text_view_alv
-                et_fields_ddic          TYPE dd03ptab .
+                iv_view_name        TYPE tabname
+                iv_langu            TYPE sylangu
+      EXPORTING es_return           TYPE bapiret2
+                es_view             TYPE zal30_t_view
+                et_fields_view      TYPE zif_al30_data=>tt_fields_view
+                et_fields_text_view TYPE zif_al30_data=>tt_fields_text_view
+                et_fields_ddic      TYPE dd03ptab .
     "! <p class="shorttext synchronized">Complete data for template data</p>
     "! @parameter it_fields_ddic | <p class="shorttext synchronized">Fields of data from data dictioary</p>
     "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
-    "! @parameter it_fields_text_view_alv | <p class="shorttext synchronized">Texts of fields of table</p>
+    "! @parameter it_fields_text_view | <p class="shorttext synchronized">Texts of fields of table</p>
     "! @parameter cs_data | <p class="shorttext synchronized">Data</p>
     METHODS complete_data_template
       IMPORTING
-        it_fields_ddic     TYPE dd03ptab
-        it_fields_view_alv TYPE zif_al30_data=>tt_fields_view_alv
-        iv_langu           TYPE sylangu
+        it_fields_ddic TYPE dd03ptab
+        it_fields_view TYPE zif_al30_data=>tt_fields_view
+        iv_langu       TYPE sylangu
       CHANGING
-        cs_data            TYPE any.
+        cs_data        TYPE any.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -146,28 +149,34 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
   METHOD constructor.
     mo_controller = NEW zcl_al30_controller(  ).
+
+    " Se instancias las clases encargadas de gestionar la configuración y la vista
+    mo_conf = NEW zcl_al30_conf( ).
+    mo_view = NEW zcl_al30_view_ui5( ).
+
   ENDMETHOD.
 
 
   METHOD create_it_data_view.
 
-    CLEAR: es_return, et_fields_ddic, et_fields_text_view_alv, et_fields_view_alv.
+    CLEAR: es_return, et_fields_ddic, et_fields_text_view, et_fields_view.
 
     " Se leen los datos de la vista y se pasan dichos valores a la clase encargada de gestionar los datos
     read_view_conf_for_data( EXPORTING iv_langu = iv_langu
                                        iv_view_name = iv_view_name
                              IMPORTING es_return = es_return
                                        et_fields_ddic = et_fields_ddic
-                                       et_fields_text_view_alv = et_fields_text_view_alv
-                                       et_fields_view_alv = et_fields_view_alv ).
+                                       et_fields_text_view = et_fields_text_view
+                                       et_fields_view = et_fields_view ).
 
     IF es_return IS INITIAL.
-      mo_controller->create_it_data_view(
+
+      CALL METHOD mo_view->create_it_data_view
         EXPORTING
           iv_mode   = iv_mode
         IMPORTING
-          et_data   = eo_data
-          es_return = es_return ).
+          es_return = es_return
+          et_data   = eo_data.
 
     ENDIF.
 
@@ -176,12 +185,9 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
   METHOD get_views.
 
-    mo_controller->view_list(
-      EXPORTING
-        iv_langu     = iv_langu
-        it_r_views = it_r_views
-      IMPORTING
-        et_view_list = DATA(lt_views) ).
+    mo_view->view_list( EXPORTING iv_langu = iv_langu
+                                  it_r_views = it_r_views
+                        IMPORTING et_view_list = DATA(lt_views) ).
 
     " Se recorre los datos y se mira si te tiene autorización
     LOOP AT lt_views REFERENCE INTO DATA(lo_views).
@@ -213,16 +219,13 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
                          IMPORTING eo_data = DATA(lo_data)
                                    es_return = DATA(ls_return)
                                    et_fields_ddic = DATA(lt_fields_ddic)
-                                   et_fields_view_alv = DATA(lt_fields_view) ).
+                                   et_fields_view = DATA(lt_fields_view) ).
 
     IF ls_return IS INITIAL.
-      mo_controller->read_data(
-        EXPORTING
-          is_filters = VALUE zif_al30_data=>ts_filter_read_data(  )
-        IMPORTING
-          es_return  = ls_return
-        CHANGING
-          co_data    = lo_data ).
+
+      mo_view->read_data( EXPORTING is_filters = VALUE zif_al30_data=>ts_filter_read_data(  )
+                          IMPORTING es_return = ls_return
+                          CHANGING co_data = lo_data ).
 
       " El último paso es convertir los datos en un string JSON
       IF lo_data IS BOUND.
@@ -240,7 +243,7 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
         APPEND INITIAL LINE TO <data> ASSIGNING FIELD-SYMBOL(<wa_template_data>).
         " Se completan datos en los datos del template que solo es más sencillo que lo complete  el backend
         complete_data_template( EXPORTING it_fields_ddic = lt_fields_ddic
-                                          it_fields_view_alv = lt_fields_view
+                                          it_fields_view = lt_fields_view
                                           iv_langu = iv_langu
                                 CHANGING cs_data = <wa_template_data> ) .
 
@@ -263,17 +266,17 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     read_view_conf_for_data( EXPORTING iv_view_name = iv_view_name
                                        iv_langu = iv_langu
                              IMPORTING es_return = DATA(ls_return)
-                                       et_fields_view_alv = DATA(lt_fields) ).
+                                       et_fields_view = DATA(lt_fields) ).
 
     IF ls_return IS INITIAL.
 
       " Se recupera el catalogo de campos
-      CALL METHOD mo_controller->get_fieldcat_view
+      mo_view->get_fieldcat_view(
         EXPORTING
-          iv_mode     = lv_mode
+          iv_mode = iv_mode
         IMPORTING
-          es_return   = ls_return
-          et_fieldcat = DATA(lt_fieldcat).
+          es_return       = ls_return
+          et_fieldcat     = DATA(lt_fieldcat) ).
 
       LOOP AT lt_fieldcat ASSIGNING FIELD-SYMBOL(<ls_fieldcat>).
         DATA(ls_fields) = CORRESPONDING zif_al30_ui5_data=>ts_view_fields( <ls_fieldcat> ).
@@ -296,21 +299,23 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
   METHOD read_view_conf_for_data.
 
-    CLEAR: es_return, es_view, et_fields_ddic, et_fields_text_view_alv, et_fields_view_alv.
+    CLEAR: es_return, es_view, et_fields_ddic, et_fields_text_view, et_fields_view.
 
     " La lectura de datos se hace en varios pasos.
     " 1) Se leen los datos de la vista en formato ALV. Esto es necesario para reaprovechar el resto de método
-    CALL METHOD mo_controller->read_view_alv
+* Leo los datos de la vista
+    CALL METHOD mo_conf->read_view
       EXPORTING
-        iv_name_view            = iv_view_name
-        iv_all_language         = abap_false
-        iv_langu                = iv_langu
+        iv_name_view    = iv_view_name
+        iv_langu        = iv_langu
+        iv_all_language = abap_false
       IMPORTING
-        es_view                 = es_view
-        et_fields_view_alv      = et_fields_view_alv
-        et_fields_text_view_alv = et_fields_text_view_alv
-        et_fields_ddic          = et_fields_ddic
-        es_return               = es_return.
+        es_return       = es_return
+        es_view         = es_view
+        et_fields       = et_fields_view
+        et_fields_text  = et_fields_text_view
+        et_fields_ddic  = et_fields_ddic.
+
 
     IF es_return IS INITIAL. " Si no hay errores se continua el proceso
 
@@ -320,12 +325,10 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
       ENDIF.
 
       " 2) Se pasan los datos leídos de la configuración a la clase de obtención de valores
-      mo_controller->set_data_conf_view(
-    EXPORTING
-      it_fields_view_alv      = et_fields_view_alv
-      it_fields_text_view_alv =  et_fields_text_view_alv
-      is_view                 = es_view
-      it_fields_ddic = et_fields_ddic  ).
+      mo_view->set_data_conf_view( is_view = es_view
+                             it_fields_view = et_fields_view
+                             it_fields_text_view = et_fields_text_view
+                             it_fields_ddic = et_fields_ddic ).
 
     ENDIF.
   ENDMETHOD.
@@ -333,16 +336,16 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     TRY.
 
         " Se leen los datos de la vista para determinar si hay tabla de texto para poderla bloquear
-        CALL METHOD mo_controller->read_view
+        CALL METHOD mo_conf->read_view
           EXPORTING
             iv_name_view    = iv_view_name
-            iv_all_language = abap_false
             iv_read_ddic    = abap_false
+            iv_all_language = abap_false
           IMPORTING
             es_view         = DATA(ls_view).
 
-        mo_controller->lock_view( EXPORTING iv_view_name = iv_view_name
-                                            iv_view_text = ls_view-texttable ).
+        mo_view->lock_view( EXPORTING iv_view_name = iv_view_name
+                                      iv_view_text = ls_view-texttable ).
 
         ev_locked = abap_false.
         ev_lock_by_user = space.
@@ -367,7 +370,7 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     ENDIF.
 
     " Campo de idioma de la tabla de texto
-    READ TABLE it_fields_view_alv ASSIGNING FIELD-SYMBOL(<ls_fields_view>) WITH KEY field_texttable = abap_true
+    READ TABLE it_fields_view ASSIGNING FIELD-SYMBOL(<ls_fields_view>) WITH KEY field_texttable = abap_true
                                                                                     lang_texttable = abap_true.
     IF sy-subrc = 0.
       ASSIGN COMPONENT <ls_fields_ddic>-fieldname OF STRUCTURE cs_data TO <field>.
