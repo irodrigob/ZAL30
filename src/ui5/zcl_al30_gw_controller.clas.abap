@@ -117,7 +117,7 @@ CLASS zcl_al30_gw_controller DEFINITION
                 et_fields_text_view TYPE zif_al30_data=>tt_fields_text_view
                 et_fields_ddic      TYPE dd03ptab .
     "! <p class="shorttext synchronized">Complete data for template data</p>
-    "! @parameter it_fields_ddic | <p class="shorttext synchronized">Fields of data from data dictioary</p>
+    "! @parameter it_fields_ddic | <p class="shorttext synchronized">Fields of data from data dictionary</p>
     "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
     "! @parameter it_fields_text_view | <p class="shorttext synchronized">Texts of fields of table</p>
     "! @parameter cs_data | <p class="shorttext synchronized">Data</p>
@@ -128,6 +128,11 @@ CLASS zcl_al30_gw_controller DEFINITION
         iv_langu       TYPE sylangu
       CHANGING
         cs_data        TYPE any.
+    "! <p class="shorttext synchronized">Adapt ALV style to UI5</p>
+    "! @parameter co_data | <p class="shorttext synchronized">Values</p>
+    METHODS adapt_alv_field_style_2_ui5
+      CHANGING
+        co_data TYPE REF TO data.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -212,23 +217,32 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     " Si el modo pasado no es el esperado se le pone el de visualizar
     DATA(lv_mode) = COND #( WHEN iv_mode = zif_al30_data=>cv_mode_change OR iv_mode = zif_al30_data=>cv_mode_view THEN iv_mode ELSE zif_al30_data=>cv_mode_view ).
 
-    " Se llama al proceso que creará la tabla interna para poder leer los datos
-    create_it_data_view( EXPORTING iv_view_name = iv_view_name
-                                   iv_langu = iv_langu
-                                   iv_mode = lv_mode
-                         IMPORTING eo_data = DATA(lo_data)
-                                   es_return = DATA(ls_return)
-                                   et_fields_ddic = DATA(lt_fields_ddic)
-                                   et_fields_view = DATA(lt_fields_view) ).
+    " Se llama al método que lee la vista, pasa a la clase que gestiona los datos e instancia la exit que tenga asociada la vista. Estos pasos son necesarios para poder
+    " que todo como si se llamará desde SAP.
+    read_view_conf_for_data( EXPORTING iv_view_name = iv_view_name
+                                       iv_langu = iv_langu
+                             IMPORTING es_return = DATA(ls_return) ).
 
     IF ls_return IS INITIAL.
 
-      mo_view->read_data( EXPORTING is_filters = VALUE zif_al30_data=>ts_filter_read_data(  )
-                          IMPORTING es_return = ls_return
-                          CHANGING co_data = lo_data ).
+      " Se llama al proceso que creará la tabla interna para poder leer los datos
+      create_it_data_view( EXPORTING iv_view_name = iv_view_name
+                                     iv_langu = iv_langu
+                                     iv_mode = lv_mode
+                           IMPORTING eo_data = DATA(lo_data)
+                                     es_return = ls_return
+                                     et_fields_ddic = DATA(lt_fields_ddic)
+                                     et_fields_view = DATA(lt_fields_view) ).
 
-      " El último paso es convertir los datos en un string JSON
-      IF lo_data IS BOUND.
+      IF ls_return IS INITIAL AND lo_data IS BOUND.
+
+        mo_view->read_data( EXPORTING is_filters = VALUE zif_al30_data=>ts_filter_read_data(  )
+                            IMPORTING es_return = ls_return
+                            CHANGING co_data = lo_data ).
+
+        " Se adapta lo estilos de SAP a los de UI5
+        adapt_alv_field_style_2_ui5( CHANGING co_data = lo_data ).
+
 
         ASSIGN lo_data->* TO <data>.
         ev_data = zcl_al30_ui5_json=>zserialize( data = <data> pretty_name = /ui2/cl_json=>pretty_mode-none ).
@@ -251,8 +265,8 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
         ev_data_template = zcl_al30_ui5_json=>zserialize( data = <data> pretty_name = /ui2/cl_json=>pretty_mode-none ).
 
       ENDIF.
-    ENDIF.
 
+    ENDIF.
 
   ENDMETHOD.
 
@@ -321,7 +335,7 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
       " Si la vista tiene configurada exit se llama al proceso que la instancia
       IF es_view-exit_class IS NOT INITIAL.
-        mo_controller->instance_exit_class( es_view-exit_class ).
+        mo_view->instance_exit_class( es_view-exit_class ).
       ENDIF.
 
       " 2) Se pasan los datos leídos de la configuración a la clase de obtención de valores
@@ -378,6 +392,48 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
         <field> = iv_langu.
       ENDIF.
     ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD adapt_alv_field_style_2_ui5.
+    FIELD-SYMBOLS <data> TYPE STANDARD TABLE.
+    FIELD-SYMBOLS <lt_alv_style> TYPE lvc_t_styl.
+    FIELD-SYMBOLS <lt_ui5_style> TYPE zal30_i_ui5_fields_styles.
+
+    ASSIGN co_data->* TO <data>.
+
+    LOOP AT <data> ASSIGNING FIELD-SYMBOL(<wa>).
+      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-style OF STRUCTURE <wa> TO <lt_alv_style>.
+      IF sy-subrc = 0.
+        IF <lt_alv_style> IS NOT INITIAL.
+          ASSIGN COMPONENT zif_al30_ui5_data=>cs_control_fields_ui5_data-style OF STRUCTURE <wa> TO <lt_ui5_style>.
+          IF sy-subrc = 0.
+            LOOP AT <lt_alv_style> ASSIGNING FIELD-SYMBOL(<ls_alv_style>).
+              " Como puede ser que el estilo lo hayan metido en el estilo de ui5, lo  verifico antes de insertarlo
+              IF <ls_alv_style>-style = cl_gui_alv_grid=>mc_style_disabled.
+                READ TABLE <lt_ui5_style> TRANSPORTING NO FIELDS WITH KEY fieldname = <ls_alv_style>-fieldname
+                                                                          editable = zif_al30_ui5_data=>cs_javascript_boolean-false.
+                IF sy-subrc NE 0.
+                  INSERT VALUE #( fieldname = <ls_alv_style>-fieldname editable = zif_al30_ui5_data=>cs_javascript_boolean-false ) INTO TABLE <lt_ui5_style>.
+                ENDIF.
+              ENDIF.
+              IF <ls_alv_style>-style = cl_gui_alv_grid=>mc_style_enabled.
+                READ TABLE <lt_ui5_style> TRANSPORTING NO FIELDS WITH KEY fieldname = <ls_alv_style>-fieldname
+                                                                          editable = zif_al30_ui5_data=>cs_javascript_boolean-true.
+                IF sy-subrc NE 0.
+                  INSERT VALUE #( fieldname = <ls_alv_style>-fieldname editable = zif_al30_ui5_data=>cs_javascript_boolean-true ) INTO TABLE <lt_ui5_style>.
+                ENDIF.
+              ENDIF.
+            ENDLOOP.
+          ENDIF.
+
+          " Se limpia la tabla de estilos de ALV porque no es necesario que viaje y asi se reduce el tamaño de datos a enviar
+          CLEAR <lt_alv_style>.
+        ENDIF.
+      ENDIF.
+
+    ENDLOOP.
 
   ENDMETHOD.
 

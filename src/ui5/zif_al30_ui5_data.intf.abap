@@ -18,4 +18,11 @@ INTERFACE zif_al30_ui5_data
          END OF ts_view_fields.
   TYPES: tt_view_fields TYPE STANDARD TABLE OF ts_view_fields WITH EMPTY KEY.
 
+  CONSTANTS: BEGIN OF cs_control_fields_ui5_data,
+               style TYPE fieldname VALUE 'ZAL30_UI5_STYLE' ##NO_TEXT,
+             END OF cs_control_fields_ui5_data.
+  CONSTANTS: BEGIN OF cs_javascript_boolean,
+               true  TYPE zal30_e_ui5_js_boolean VALUE 'true' ##NO_TEXT,
+               false TYPE zal30_e_ui5_js_boolean VALUE 'false' ##NO_TEXT,
+             END OF cs_javascript_boolean.
 ENDINTERFACE.
