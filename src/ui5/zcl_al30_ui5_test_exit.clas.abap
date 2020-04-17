@@ -25,7 +25,7 @@ CLASS zcl_al30_ui5_test_exit IMPLEMENTATION.
         IF <field> < '20200101'.
           ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-style OF STRUCTURE <ls_data> TO <lt_style>.
           IF sy-subrc = 0.
-            INSERT VALUE #( fieldname = zif_al30_data=>cs_control_fields_alv_data-style style = cl_gui_alv_grid=>mc_style_disabled )  INTO TABLE <lt_style>.
+            INSERT VALUE #( fieldname = 'FIELDDATE' style = cl_gui_alv_grid=>mc_style_disabled )  INTO TABLE <lt_style>.
           ENDIF.
         ENDIF.
       ENDIF.
