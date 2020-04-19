@@ -1,17 +1,27 @@
-CLASS zcl_zal30_data_dpc_ext DEFINITION
-  PUBLIC
-  INHERITING FROM zcl_zal30_data_dpc
-  CREATE PUBLIC .
+class ZCL_ZAL30_DATA_DPC_EXT definition
+  public
+  inheriting from ZCL_ZAL30_DATA_DPC
+  create public .
 
-  PUBLIC SECTION.
-    METHODS constructor.
-  PROTECTED SECTION.
-    DATA mo_controller TYPE REF TO zcl_al30_gw_controller.
-    METHODS getviewsset_get_entityset REDEFINITION.
-    METHODS checkauthviewset_get_entity REDEFINITION.
-    METHODS readviewset_get_entityset REDEFINITION.
-    METHODS readdataset_get_entity REDEFINITION.
-    METHODS lockviewset_get_entity REDEFINITION.
+public section.
+
+  methods CONSTRUCTOR .
+protected section.
+
+  data MO_CONTROLLER type ref to ZCL_AL30_GW_CONTROLLER .
+
+  methods CHECKAUTHVIEWSET_GET_ENTITY
+    redefinition .
+  methods GETVIEWSSET_GET_ENTITYSET
+    redefinition .
+  methods LOCKVIEWSET_GET_ENTITY
+    redefinition .
+  methods READDATASET_GET_ENTITY
+    redefinition .
+  methods READVIEWSET_GET_ENTITYSET
+    redefinition .
+  methods ROWVALIDATIONDET_CREATE_ENTITY
+    redefinition .
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -216,6 +226,36 @@ CLASS ZCL_ZAL30_DATA_DPC_EXT IMPLEMENTATION.
       DATA(ls_entityset) = CORRESPONDING  zcl_zal30_data_mpc=>ts_readview( <ls_fields> ).
       INSERT ls_entityset INTO TABLE et_entityset.
     ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD rowvalidationdet_create_entity.
+    DATA lv_langu TYPE sy-langu.
+    DATA lv_viewname TYPE zal30_t_view-tabname.
+    data ls_data type zcl_zal30_data_mpc=>ts_rowvalidationdetermination.
+
+    io_data_provider->read_entry_data( importing es_data = ls_data ).
+
+*    READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_key_tab>) WITH KEY name = 'VIEWNAME'.
+*    IF sy-subrc = 0.
+*      lv_viewname = <ls_key_tab>-value.
+*    ENDIF.
+*    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'LANGU'.
+*    IF sy-subrc = 0.
+*      CALL FUNCTION 'CCONVERSION_EXIT_ISOLA_INPUT'
+*        EXPORTING
+*          input            = <ls_key_tab>-value
+*        IMPORTING
+*          output           = lv_langu
+*        EXCEPTIONS
+*          unknown_language = 1
+*          OTHERS           = 2.
+*      IF sy-subrc <> 0.
+*        lv_langu = sy-langu.
+*      ENDIF.
+*
+*    ENDIF.
 
   ENDMETHOD.
 ENDCLASS.
