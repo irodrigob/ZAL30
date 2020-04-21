@@ -1,33 +1,34 @@
-class ZCL_ZAL30_DATA_DPC_EXT definition
-  public
-  inheriting from ZCL_ZAL30_DATA_DPC
-  create public .
+CLASS zcl_zal30_data_dpc_ext DEFINITION
+  PUBLIC
+  INHERITING FROM zcl_zal30_data_dpc
+  CREATE PUBLIC .
 
-public section.
+  PUBLIC SECTION.
 
-  methods CONSTRUCTOR .
-protected section.
+    METHODS constructor .
+  PROTECTED SECTION.
 
-  data MO_CONTROLLER type ref to ZCL_AL30_GW_CONTROLLER .
+    DATA mo_controller TYPE REF TO zcl_al30_gw_controller .
 
-  methods CHECKAUTHVIEWSET_GET_ENTITY
-    redefinition .
-  methods GETVIEWSSET_GET_ENTITYSET
-    redefinition .
-  methods LOCKVIEWSET_GET_ENTITY
-    redefinition .
-  methods READDATASET_GET_ENTITY
-    redefinition .
-  methods READVIEWSET_GET_ENTITYSET
-    redefinition .
-  methods ROWVALIDATIONDET_CREATE_ENTITY
-    redefinition .
+    METHODS checkauthviewset_get_entity
+        REDEFINITION .
+    METHODS getviewsset_get_entityset
+        REDEFINITION .
+    METHODS lockviewset_get_entity
+        REDEFINITION .
+    METHODS readdataset_get_entity
+        REDEFINITION .
+    METHODS readviewset_get_entityset
+        REDEFINITION .
+    METHODS rowvalidationdet_create_entity
+        REDEFINITION .
+    METHODS rowvalidationdet_get_entity REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS ZCL_ZAL30_DATA_DPC_EXT IMPLEMENTATION.
+CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
 
 
   METHOD checkauthviewset_get_entity.
@@ -233,29 +234,28 @@ CLASS ZCL_ZAL30_DATA_DPC_EXT IMPLEMENTATION.
   METHOD rowvalidationdet_create_entity.
     DATA lv_langu TYPE sy-langu.
     DATA lv_viewname TYPE zal30_t_view-tabname.
-    data ls_data type zcl_zal30_data_mpc=>ts_rowvalidationdetermination.
+    DATA ls_data TYPE zcl_zal30_data_mpc=>ts_rowvalidationdetermination.
 
-    io_data_provider->read_entry_data( importing es_data = ls_data ).
+    " Lectura de los datos provenientes del body de la llamada
+    io_data_provider->read_entry_data( IMPORTING es_data = ls_data ).
 
-*    READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_key_tab>) WITH KEY name = 'VIEWNAME'.
-*    IF sy-subrc = 0.
-*      lv_viewname = <ls_key_tab>-value.
-*    ENDIF.
-*    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'LANGU'.
-*    IF sy-subrc = 0.
-*      CALL FUNCTION 'CCONVERSION_EXIT_ISOLA_INPUT'
-*        EXPORTING
-*          input            = <ls_key_tab>-value
-*        IMPORTING
-*          output           = lv_langu
-*        EXCEPTIONS
-*          unknown_language = 1
-*          OTHERS           = 2.
-*      IF sy-subrc <> 0.
-*        lv_langu = sy-langu.
-*      ENDIF.
-*
-*    ENDIF.
+    " Si iguala los datos de salida a los de entrada.
+    er_entity = ls_data.
+
+    mo_controller->row_validation_determination(
+      EXPORTING
+        iv_view_name =  ls_data-tabname
+        iv_langu     = ls_data-langu
+        iv_row       = ls_data-row
+      IMPORTING
+        ev_row       = er_entity-row ).
+
 
   ENDMETHOD.
+  METHOD rowvalidationdet_get_entity.
+    er_entity-row = 'hola'.
+    er_entity-langu = sy-langu.
+    er_entity-tabname = 'ZAL30_T_UI5_TEST'.
+  ENDMETHOD.
+
 ENDCLASS.

@@ -72,6 +72,12 @@
      <LANGU>E</LANGU>
      <DESCRIPT>Reading the view configuration to be used in the view data c</DESCRIPT>
     </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_GW_CONTROLLER</CLSNAME>
+     <CMPNAME>ROW_VALIDATION_DETERMINATION</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>validation and determination of values of a row</DESCRIPT>
+    </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>
  </asx:abap>

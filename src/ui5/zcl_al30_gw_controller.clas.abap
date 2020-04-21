@@ -70,7 +70,19 @@ CLASS zcl_al30_gw_controller DEFINITION
       EXPORTING
         !ev_locked       TYPE sap_bool
         !ev_lock_by_user TYPE string.
-
+    "! <p class="shorttext synchronized">validation and determination of values of a row</p>
+    "!
+    "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
+    "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    "! @parameter ev_data | <p class="shorttext synchronized">Data in JSON format</p>
+    "! @parameter ev_data_template | <p class="shorttext synchronized">Data template in JSON format</p>
+    METHODS row_validation_determination
+      IMPORTING
+        !iv_view_name TYPE tabname
+        !iv_langu     TYPE sylangu DEFAULT sy-langu
+        !iv_row       TYPE string
+      EXPORTING
+        !ev_row       TYPE string.
   PROTECTED SECTION.
     DATA mo_controller TYPE REF TO zcl_al30_controller.
     DATA mo_conf TYPE REF TO zcl_al30_conf.
@@ -434,6 +446,14 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
       ENDIF.
 
     ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD row_validation_determination.
+
+    " El mismo valor que entra es el que sale. En el proceso ya se irán cambiando valores
+    ev_row = iv_row.
+
 
   ENDMETHOD.
 
