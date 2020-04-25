@@ -246,6 +246,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
       EXPORTING
         iv_view_name =  ls_data-tabname
         iv_langu     = ls_data-langu
+        iv_fieldname = ls_data-fieldname
         iv_row       = ls_data-row
       IMPORTING
         ev_row       = er_entity-row ).

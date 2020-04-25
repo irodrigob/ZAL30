@@ -59,7 +59,7 @@ CLASS zcl_al30_gw_controller DEFINITION
         !ev_data          TYPE string
         !ev_data_template TYPE string.
 
-    "! <p class="shorttext synchronized">Read data from view</p>
+    "! <p class="shorttext synchronized">Lock the view</p>
     "!
     "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
     "! @parameter ev_locked | <p class="shorttext synchronized">View locked</p>
@@ -74,11 +74,13 @@ CLASS zcl_al30_gw_controller DEFINITION
     "!
     "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
     "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    "! @parameter iv_fieldname | <p class="shorttext synchronized">Fieldname modified</p>
     "! @parameter ev_data | <p class="shorttext synchronized">Data in JSON format</p>
     "! @parameter ev_data_template | <p class="shorttext synchronized">Data template in JSON format</p>
     METHODS row_validation_determination
       IMPORTING
         !iv_view_name TYPE tabname
+        !iv_fieldname TYPE fieldname
         !iv_langu     TYPE sylangu DEFAULT sy-langu
         !iv_row       TYPE string
       EXPORTING
@@ -143,6 +145,11 @@ CLASS zcl_al30_gw_controller DEFINITION
     "! <p class="shorttext synchronized">Adapt ALV style to UI5</p>
     "! @parameter co_data | <p class="shorttext synchronized">Values</p>
     METHODS adapt_alv_field_style_2_ui5
+      CHANGING
+        co_data TYPE REF TO data.
+    "! <p class="shorttext synchronized">Adapt UI5 style to ALV</p>
+    "! @parameter co_data | <p class="shorttext synchronized">Values</p>
+    METHODS adapt_ui5_field_style_2_alv
       CHANGING
         co_data TYPE REF TO data.
   PRIVATE SECTION.
@@ -229,54 +236,45 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     " Si el modo pasado no es el esperado se le pone el de visualizar
     DATA(lv_mode) = COND #( WHEN iv_mode = zif_al30_data=>cv_mode_change OR iv_mode = zif_al30_data=>cv_mode_view THEN iv_mode ELSE zif_al30_data=>cv_mode_view ).
 
-    " Se llama al método que lee la vista, pasa a la clase que gestiona los datos e instancia la exit que tenga asociada la vista. Estos pasos son necesarios para poder
-    " que todo como si se llamará desde SAP.
-    read_view_conf_for_data( EXPORTING iv_view_name = iv_view_name
-                                       iv_langu = iv_langu
-                             IMPORTING es_return = DATA(ls_return) ).
 
-    IF ls_return IS INITIAL.
+    " Se llama al proceso que creará la tabla interna para poder leer los datos
+    create_it_data_view( EXPORTING iv_view_name = iv_view_name
+                                   iv_langu = iv_langu
+                                   iv_mode = lv_mode
+                         IMPORTING eo_data = DATA(lo_data)
+                                   es_return = DATA(ls_return)
+                                   et_fields_ddic = DATA(lt_fields_ddic)
+                                   et_fields_view = DATA(lt_fields_view) ).
 
-      " Se llama al proceso que creará la tabla interna para poder leer los datos
+    IF ls_return IS INITIAL AND lo_data IS BOUND.
+
+      mo_view->read_data( EXPORTING is_filters = VALUE zif_al30_data=>ts_filter_read_data(  )
+                          IMPORTING es_return = ls_return
+                          CHANGING co_data = lo_data ).
+
+      " Se adapta lo estilos de SAP a los de UI5
+      adapt_alv_field_style_2_ui5( CHANGING co_data = lo_data ).
+
+
+      ASSIGN lo_data->* TO <data>.
+      ev_data = zcl_al30_ui5_json=>zserialize( data = <data> pretty_name = /ui2/cl_json=>pretty_mode-none ).
+
+      " Se crea un registro para los datos template. Este servirá para añadir nuevos registros desde el frontend.
+      UNASSIGN <data>.
       create_it_data_view( EXPORTING iv_view_name = iv_view_name
                                      iv_langu = iv_langu
                                      iv_mode = lv_mode
-                           IMPORTING eo_data = DATA(lo_data)
-                                     es_return = ls_return
-                                     et_fields_ddic = DATA(lt_fields_ddic)
-                                     et_fields_view = DATA(lt_fields_view) ).
-
-      IF ls_return IS INITIAL AND lo_data IS BOUND.
-
-        mo_view->read_data( EXPORTING is_filters = VALUE zif_al30_data=>ts_filter_read_data(  )
-                            IMPORTING es_return = ls_return
-                            CHANGING co_data = lo_data ).
-
-        " Se adapta lo estilos de SAP a los de UI5
-        adapt_alv_field_style_2_ui5( CHANGING co_data = lo_data ).
+                           IMPORTING eo_data = DATA(lo_data_template) ).
+      ASSIGN lo_data_template->* TO <data>.
+      APPEND INITIAL LINE TO <data> ASSIGNING FIELD-SYMBOL(<wa_template_data>).
+      " Se completan datos en los datos del template que solo es más sencillo que lo complete  el backend
+      complete_data_template( EXPORTING it_fields_ddic = lt_fields_ddic
+                                        it_fields_view = lt_fields_view
+                                        iv_langu = iv_langu
+                              CHANGING cs_data = <wa_template_data> ) .
 
 
-        ASSIGN lo_data->* TO <data>.
-        ev_data = zcl_al30_ui5_json=>zserialize( data = <data> pretty_name = /ui2/cl_json=>pretty_mode-none ).
-
-        " Se crea un registro para los datos template. Este servirá para añadir nuevos registros desde el frontend.
-        UNASSIGN <data>.
-        create_it_data_view( EXPORTING iv_view_name = iv_view_name
-                                       iv_langu = iv_langu
-                                       iv_mode = lv_mode
-                             IMPORTING eo_data = DATA(lo_data_template) ).
-        ASSIGN lo_data_template->* TO <data>.
-        APPEND INITIAL LINE TO <data> ASSIGNING FIELD-SYMBOL(<wa_template_data>).
-        " Se completan datos en los datos del template que solo es más sencillo que lo complete  el backend
-        complete_data_template( EXPORTING it_fields_ddic = lt_fields_ddic
-                                          it_fields_view = lt_fields_view
-                                          iv_langu = iv_langu
-                                CHANGING cs_data = <wa_template_data> ) .
-
-
-        ev_data_template = zcl_al30_ui5_json=>zserialize( data = <data> pretty_name = /ui2/cl_json=>pretty_mode-none ).
-
-      ENDIF.
+      ev_data_template = zcl_al30_ui5_json=>zserialize( data = <data> pretty_name = /ui2/cl_json=>pretty_mode-none ).
 
     ENDIF.
 
@@ -450,10 +448,65 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD row_validation_determination.
-
+    FIELD-SYMBOLS <data> TYPE STANDARD TABLE.
     " El mismo valor que entra es el que sale. En el proceso ya se irán cambiando valores
     ev_row = iv_row.
 
+    "Para procesar el registro hay que crear una tabla interna del mismo tipo que la viene para guarda el valor pasado por parámetros
+
+    " Se llama al proceso que creará la tabla interna para poder leer los datos
+    create_it_data_view( EXPORTING iv_view_name = iv_view_name
+                                   iv_langu = iv_langu
+                                   iv_mode = zif_al30_data=>cv_mode_change
+                         IMPORTING eo_data = DATA(lo_data)
+                                   es_return = DATA(ls_return)
+                                   et_fields_ddic = DATA(lt_fields_ddic)
+                                   et_fields_view = DATA(lt_fields_view) ).
+
+    IF ls_return IS INITIAL AND lo_data IS BOUND.
+      " Se añade un registro en blanco para poder hace el mapeo
+      ASSIGN lo_data->* TO <data>.
+      INSERT INITIAL LINE INTO TABLE <data> ASSIGNING FIELD-SYMBOL(<wa>).
+
+      " Se transforma el JSON al registro de la tabla
+      zcl_al30_ui5_json=>deserialize( EXPORTING json = iv_row
+                                                pretty_name = /ui2/cl_json=>pretty_mode-none
+                                      CHANGING data = <wa> ).
+
+      " Se adaptan los estilos de UI5 al del ALV por si se modifican en las exit
+      adapt_ui5_field_style_2_alv( CHANGING co_data = lo_data ).
+
+    ENDIF.
+
+
+  ENDMETHOD.
+
+  METHOD adapt_ui5_field_style_2_alv.
+    FIELD-SYMBOLS <data> TYPE STANDARD TABLE.
+    FIELD-SYMBOLS <lt_alv_style> TYPE lvc_t_styl.
+    FIELD-SYMBOLS <lt_ui5_style> TYPE zal30_i_ui5_fields_styles.
+
+    ASSIGN co_data->* TO <data>.
+
+    LOOP AT <data> ASSIGNING FIELD-SYMBOL(<wa>).
+      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-style OF STRUCTURE <wa> TO <lt_alv_style>.
+      IF sy-subrc = 0.
+        IF <lt_alv_style> IS NOT INITIAL.
+          ASSIGN COMPONENT zif_al30_ui5_data=>cs_control_fields_ui5_data-style OF STRUCTURE <wa> TO <lt_ui5_style>.
+          IF sy-subrc = 0.
+            " Los estilos del ALV se borran cuando se envian a UI5 para reducir los datos que viajan. Por lo tanto, ahora hay que leer e insertar
+            LOOP AT <lt_ui5_style> ASSIGNING FIELD-SYMBOL(<ls_ui5_style>).
+              INSERT VALUE #( fieldname = <ls_ui5_style>-fieldname
+                              style = COND #( WHEN <ls_ui5_style>-editable = abap_true THEN cl_gui_alv_grid=>mc_style_disabled ELSE cl_gui_alv_grid=>mc_style_enabled ) )
+                     INTO TABLE <lt_alv_style>.
+            ENDLOOP.
+          ENDIF.
+          " Se limpia la tabla de estilos de UI5
+          CLEAR <lt_ui5_style>.
+        ENDIF.
+      ENDIF.
+
+    ENDLOOP.
 
   ENDMETHOD.
 

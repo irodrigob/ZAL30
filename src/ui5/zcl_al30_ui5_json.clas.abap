@@ -143,6 +143,7 @@ METHOD zdump_int.
       IF lo_typedesc->kind EQ cl_abap_typedescr=>kind_struct.
         lo_structdesc ?= lo_typedesc.
         " INIMOD IRB
+        " Se cambia la sentencia para poder hacer que funciona con tipos de datos generados dinámicamente
         CREATE DATA lo_data_ref TYPE HANDLE lo_structdesc.
         "CREATE DATA lo_data_ref TYPE (lo_structdesc->absolute_name).
         " ENDMOD IRB
