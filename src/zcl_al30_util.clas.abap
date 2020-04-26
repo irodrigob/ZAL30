@@ -22,6 +22,7 @@ CLASS zcl_al30_util DEFINITION
         !iv_message_v4   TYPE any OPTIONAL
         !iv_id           TYPE symsgid OPTIONAL
         !iv_field        TYPE any OPTIONAL
+        !iv_langu type sylangu DEFAULT sy-langu
       RETURNING
         VALUE(rs_return) TYPE bapiret2 .
     CLASS-METHODS f4_view
@@ -455,7 +456,7 @@ CLASS zcl_al30_util IMPLEMENTATION.
       EXPORTING
         id         = rs_return-id
         number     = rs_return-number
-        language   = sy-langu
+        language   = iv_langu
         textformat = 'ASC'
         message_v1 = rs_return-message_v1
         message_v2 = rs_return-message_v2

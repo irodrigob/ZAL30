@@ -37,4 +37,13 @@ CLASS zcl_al30_ui5_test_exit IMPLEMENTATION.
       ENDIF.
     ENDLOOP.
   ENDMETHOD.
+  METHOD zif_al30_exit_class~exit_verify_field_data.
+    IF iv_fieldname = 'FIELDDATE'.
+      DATA(lv_date) = CONV sydatum( iv_value ).
+      IF lv_date < '20000101'.
+        es_return-type = 'E'.
+        es_return-message = 'The date cannot be less than the year 2000'.
+      ENDIF.
+    ENDIF.
+  ENDMETHOD.
 ENDCLASS.

@@ -84,6 +84,12 @@
      <LANGU>E</LANGU>
      <DESCRIPT>validation and determination of values of a row</DESCRIPT>
     </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_GW_CONTROLLER</CLSNAME>
+     <CMPNAME>VERIFY_FIELD_DATA</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Verify field data</DESCRIPT>
+    </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>
  </asx:abap>

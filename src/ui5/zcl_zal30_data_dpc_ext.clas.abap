@@ -23,6 +23,7 @@ CLASS zcl_zal30_data_dpc_ext DEFINITION
     METHODS rowvalidationdet_create_entity
         REDEFINITION .
     METHODS rowvalidationdet_get_entity REDEFINITION.
+    METHODS verifyfielddatas_get_entity REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -257,6 +258,55 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
     er_entity-row = 'hola'.
     er_entity-langu = sy-langu.
     er_entity-tabname = 'ZAL30_T_UI5_TEST'.
+  ENDMETHOD.
+
+  METHOD verifyfielddatas_get_entity.
+    DATA lv_langu TYPE sy-langu.
+
+
+    READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_key_tab>) WITH KEY name = 'LANGU'.
+    IF sy-subrc = 0.
+      CALL FUNCTION 'CONVERSION_EXIT_ISOLA_INPUT'
+        EXPORTING
+          input            = <ls_key_tab>-value
+        IMPORTING
+          output           = lv_langu
+        EXCEPTIONS
+          unknown_language = 1
+          OTHERS           = 2.
+
+    ENDIF.
+
+    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'COLUMN'.
+    IF sy-subrc = 0.
+      DATA(lv_fieldname) = CONV fieldname( <ls_key_tab>-value ).
+    ENDIF.
+
+    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'VIEWNAME'.
+    IF sy-subrc = 0.
+      DATA(lv_viewname) = CONV tabname( <ls_key_tab>-value ).
+    ENDIF.
+
+    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'VALUE'.
+    IF sy-subrc = 0.
+      DATA(lv_value) = <ls_key_tab>-value.
+    ENDIF.
+
+    er_entity-fieldname = lv_fieldname.
+    er_entity-tabname = lv_viewname.
+    er_entity-value = lv_value.
+    er_entity-langu = lv_langu.
+
+    mo_controller->verify_field_data(
+      EXPORTING
+        iv_langu        = lv_langu
+        iv_view_name    = lv_viewname
+        iv_fieldname    = lv_fieldname
+        iv_value        = lv_value
+      IMPORTING
+        ev_message_type = er_entity-message_type
+        ev_message      = er_entity-message ).
+
   ENDMETHOD.
 
 ENDCLASS.
