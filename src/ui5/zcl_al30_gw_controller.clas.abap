@@ -74,13 +74,11 @@ CLASS zcl_al30_gw_controller DEFINITION
     "!
     "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
     "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
-    "! @parameter iv_fieldname | <p class="shorttext synchronized">Fieldname modified</p>
     "! @parameter ev_data | <p class="shorttext synchronized">Data in JSON format</p>
     "! @parameter ev_data_template | <p class="shorttext synchronized">Data template in JSON format</p>
     METHODS row_validation_determination
       IMPORTING
         !iv_view_name TYPE tabname
-        !iv_fieldname TYPE fieldname
         !iv_langu     TYPE sylangu DEFAULT sy-langu
         !iv_row       TYPE string
       EXPORTING
