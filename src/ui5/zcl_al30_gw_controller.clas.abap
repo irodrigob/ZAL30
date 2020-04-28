@@ -525,6 +525,22 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
       " Se adaptan los estilos de UI5 al del ALV por si se modifican en las exit
       adapt_ui5_field_style_2_alv( CHANGING co_data = lo_data ).
 
+      " Al método de verificación y validación se le tiene que pasar la fila del ALV en que se modifica el registro. Ese dato viene en el campo
+      " fijo ZAL30_TABIX que lo recupero para pasarlo
+      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-tabix OF STRUCTURE <wa> TO FIELD-SYMBOL(<tabix>).
+
+      mo_view->verify_change_row_data(
+        EXPORTING
+          iv_row      = <tabix>
+        CHANGING
+          cs_row_data = <wa> ).
+
+      " Se adapta lo estilos de SAP a los de UI5
+      adapt_alv_field_style_2_ui5( CHANGING co_data = lo_data ).
+
+      " Se convierte de los datos de sap a JSON
+      ev_row = zcl_al30_ui5_json=>zserialize( data = <wa> pretty_name = /ui2/cl_json=>pretty_mode-none ).
+
     ENDIF.
 
 

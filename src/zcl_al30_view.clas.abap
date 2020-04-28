@@ -48,10 +48,10 @@ CLASS zcl_al30_view DEFINITION
     "! @parameter es_return | <p class="shorttext synchronized">Result of the process</p>
     METHODS create_it_data_view
       IMPORTING
-        !iv_mode            TYPE char1
+        !iv_mode   TYPE char1
       EXPORTING
-        !et_data            TYPE REF TO data
-        !es_return          TYPE bapiret2 .
+        !et_data   TYPE REF TO data
+        !es_return TYPE bapiret2 .
     "! <p class="shorttext synchronized">Save the data in the view.</p>
     METHODS save_data
       IMPORTING
@@ -273,7 +273,7 @@ CLASS zcl_al30_view DEFINITION
     "! @parameter ct_fcat | <p class="shorttext synchronized">Field catalogo</p>
     METHODS add_edit_fields
       CHANGING
-        !ct_fcat            TYPE lvc_t_fcat .
+        !ct_fcat TYPE lvc_t_fcat .
     "! <p class="shorttext synchronized">Get fieldcatalog of table and text view</p>
     METHODS get_lvc_fieldcat
       IMPORTING
@@ -413,9 +413,28 @@ CLASS zcl_al30_view DEFINITION
     "! @parameter ev_edit_mode | <p class="shorttext synchronized">Edit mode</p>
     METHODS exit_set_edit_mode_alv
       IMPORTING
-        !it_data      TYPE STANDARD TABLE
+        it_data      TYPE STANDARD TABLE
       EXPORTING
-        !ev_edit_mode TYPE cdchngind.
+        ev_edit_mode TYPE cdchngind.
+    "! <p class="shorttext synchronized">Convert bapi return to row status message</p>
+    "!
+    "! @parameter it_return | <p class="shorttext synchronized">Bapi return</p>
+    "! @parameter iv_clear_row_msg | <p class="shorttext synchronized">Clear previously values of row msg</p>
+    "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    "! @parameter cs_row_data | <p class="shorttext synchronized">Row data</p>
+    METHODS conv_return_2_row_msg
+      IMPORTING
+        !it_return        TYPE bapiret2_t
+        !iv_langu         TYPE sylangu DEFAULT sy-langu
+        !iv_clear_row_msg TYPE sap_bool DEFAULT abap_true
+      CHANGING
+        cs_row_data       TYPE any.
+    "! <p class="shorttext synchronized">Determine row status from row data</p>
+    "!
+    "! @parameter cs_row_data | <p class="shorttext synchronized">Row data</p>
+    METHODS determine_row_status_from_row
+      CHANGING
+        cs_row_data TYPE any.
   PRIVATE SECTION.
 
 *"* private components of class ZCL_AL30_VIEW
@@ -424,7 +443,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_AL30_VIEW IMPLEMENTATION.
+CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD add_edit_fields.
@@ -2057,6 +2076,14 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
 
     " Se añaden los mensajes obtenidos a los existentes
     INSERT LINES OF lt_return INTO TABLE et_return.
+
+    " 28/04/2020 - Una de la mejoras es mover los mensajes a una estructura que guardará los mensajes en un campo específico de
+    " del registro
+    conv_return_2_row_msg( EXPORTING it_return = lt_return
+                                      CHANGING cs_row_data = cs_row_data ).
+
+    " Además se determina el valor del campo ROW_STATUS según los mensajes a nivel de fila
+    determine_row_status_from_row( CHANGING cs_row_data = cs_row_data ).
   ENDMETHOD.
 
 
@@ -2179,4 +2206,54 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
                 WHERE a~tabname IN it_r_views.
 
   ENDMETHOD.
+
+  METHOD conv_return_2_row_msg.
+    FIELD-SYMBOLS <lt_row_msg> TYPE zal30_i_row_status_msg.
+
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status_msg OF STRUCTURE cs_row_data TO <lt_row_msg>.
+    IF sy-subrc = 0.
+
+      IF iv_clear_row_msg = abap_true. " Borrado de registros previos en el campo
+        CLEAR <lt_row_msg>.
+      ENDIF.
+
+      LOOP AT it_return ASSIGNING FIELD-SYMBOL(<ls_return>).
+        INSERT VALUE #( type = <ls_return>-type  ) INTO TABLE <lt_row_msg> ASSIGNING FIELD-SYMBOL(<ls_row_msg>).
+        IF <ls_return>-message IS INITIAL. " Si no hay texto se genera
+          <ls_row_msg>-message = zcl_al30_util=>fill_return( EXPORTING iv_type = <ls_return>-type
+                                                                       iv_number = <ls_return>-number
+                                                                       iv_message_v1 = <ls_return>-message_v1
+                                                                       iv_message_v2 = <ls_return>-message_v2
+                                                                       iv_message_v3 = <ls_return>-message_v3
+                                                                       iv_message_v4 = <ls_return>-message_v4
+                                                                       iv_langu = iv_langu )-message.
+        ENDIF.
+      ENDLOOP.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD determine_row_status_from_row.
+    FIELD-SYMBOLS <lt_row_msg> TYPE zal30_i_row_status_msg.
+
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status OF STRUCTURE cs_row_data TO FIELD-SYMBOL(<row_status>).
+    IF sy-subrc = 0.
+      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status_msg OF STRUCTURE cs_row_data TO <lt_row_msg>.
+      IF sy-subrc = 0.
+
+        " Solo se pone el row status si hay error. Si no lo hay se deja en blanco.
+        READ TABLE <lt_row_msg> TRANSPORTING NO FIELDS WITH KEY type = zif_al30_data=>cs_msg_type-error.
+        IF sy-subrc = 0.
+          <row_status> = zif_al30_data=>cs_msg_type-error.
+        ELSE.
+          CLEAR <row_status>.
+        ENDIF.
+
+      ENDIF.
+    ENDIF.
+
+
+  ENDMETHOD.
+
 ENDCLASS.

@@ -52,6 +52,12 @@
     </SEOCOMPOTX>
     <SEOCOMPOTX>
      <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>CONV_RETURN_2_ROW_MSG</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Convert bapi return to row status message</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
      <CMPNAME>CREATE_IT_DATA_VIEW</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Create the internal table for display data of the view</DESCRIPT>
@@ -73,6 +79,12 @@
      <CMPNAME>CREATE_WHERE_SQL</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Create where to the sql</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>DETERMINE_ROW_STATUS_FROM_ROW</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Determine row status from row data</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
      <CLSNAME>ZCL_AL30_VIEW</CLSNAME>

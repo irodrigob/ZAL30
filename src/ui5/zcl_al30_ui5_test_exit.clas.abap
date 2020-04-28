@@ -46,4 +46,56 @@ CLASS zcl_al30_ui5_test_exit IMPLEMENTATION.
       ENDIF.
     ENDIF.
   ENDMETHOD.
+  METHOD zif_al30_exit_class~exit_after_read_data.
+
+  ENDMETHOD.
+
+  METHOD zif_al30_exit_class~exit_after_save_data.
+
+  ENDMETHOD.
+
+  METHOD zif_al30_exit_class~exit_before_save_data.
+
+  ENDMETHOD.
+
+  METHOD zif_al30_exit_class~exit_check_auth_data_read.
+
+  ENDMETHOD.
+
+  METHOD zif_al30_exit_class~exit_in_process_data_read.
+
+  ENDMETHOD.
+
+  METHOD zif_al30_exit_class~exit_process_catalog_of_field.
+
+  ENDMETHOD.
+
+  METHOD zif_al30_exit_class~exit_set_edit_mode_alv.
+
+  ENDMETHOD.
+
+  METHOD zif_al30_exit_class~exit_verify_change_row_data.
+
+    CLEAR et_return.
+
+    ASSIGN COMPONENT 'FIELDWAERS' OF STRUCTURE cs_row_data TO FIELD-SYMBOL(<waers>).
+    IF sy-subrc = 0.
+      SELECT SINGLE waers INTO @DATA(lv_waers) FROM tcurc WHERE waers =  @<waers>.
+      IF sy-subrc NE 0.
+        INSERT VALUE #( type = zif_al30_data=>cs_msg_type-error
+                        id = '5A'
+                        number = '139' ) INTO TABLE et_return.
+      ENDIF.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD zif_al30_exit_class~exit_verify_row_data.
+
+  ENDMETHOD.
+
+  METHOD zif_al30_exit_class~exit_verify_save_data.
+
+  ENDMETHOD.
+
 ENDCLASS.
