@@ -82,17 +82,18 @@ CLASS zcl_al30_view DEFINITION
     "! <p class="shorttext synchronized">Verify row data</p>
     "! This method enters both when modifying / inserting fields, and when recording data
     "! @parameter iv_row | <p class="shorttext synchronized">Row number</p>
-    "! @parameter is_row_data | <p class="shorttext synchronized">Row data</p>
+    "! @parameter cs_row_data | <p class="shorttext synchronized">Row data</p>
     "! @parameter iv_save_process | <p class="shorttext synchronized" >Enter in save process</p>
     "! @parameter et_return | <p class="shorttext synchronized">Return table</p>
     METHODS verify_row_data
       IMPORTING
         !iv_row          TYPE bapi_line
-        !is_row_data     TYPE any
         !iv_save_process TYPE sap_bool DEFAULT abap_false
-        !no_exit         TYPE sap_bool DEFAULT abap_false
+        "  !no_exit         TYPE sap_bool DEFAULT abap_false
       EXPORTING
-        VALUE(et_return) TYPE bapiret2_t.
+        VALUE(et_return) TYPE bapiret2_t
+      CHANGING
+        !cs_row_data     TYPE any  .
     "! <p class="shorttext synchronized">Verify data to be save</p>
     "! This exit is called when recording data
     "! @parameter it_data | <p class="shorttext synchronized">Data</p>
@@ -176,6 +177,10 @@ CLASS zcl_al30_view DEFINITION
         !it_data      TYPE STANDARD TABLE
       EXPORTING
         !ev_edit_mode TYPE cdchngind.
+    "! <p class="shorttext synchronized">CONSTRUCTOR</p>
+    METHODS constructor
+      IMPORTING
+        iv_langu TYPE sylangu DEFAULT sy-langu.
 
   PROTECTED SECTION.
 
@@ -199,6 +204,7 @@ CLASS zcl_al30_view DEFINITION
     DATA mt_fields_ddic TYPE dd03ptab .
     DATA ms_view TYPE zal30_t_view .
     DATA mo_original_data TYPE REF TO data .
+    DATA mv_langu TYPE sylangu.
 
     "! <p class="shorttext synchronized">Exit after save data</p>
     METHODS exit_after_save_data
@@ -255,11 +261,11 @@ CLASS zcl_al30_view DEFINITION
     "! <p class="shorttext synchronized">Exit for verify row data</p>
     METHODS exit_verify_row_data
       IMPORTING
-        !iv_row          TYPE bapi_line OPTIONAL
-        !is_row_data     TYPE any
-        !iv_save_process TYPE sap_bool DEFAULT abap_false
+                !iv_row          TYPE bapi_line OPTIONAL
+                !iv_save_process TYPE sap_bool DEFAULT abap_false
       EXPORTING
-        VALUE(et_return) TYPE bapiret2_t.
+                VALUE(et_return) TYPE bapiret2_t
+      CHANGING  !cs_row_data     TYPE any  .
 
 
     "! <p class="shorttext synchronized">Add fields of text table</p>
@@ -388,14 +394,15 @@ CLASS zcl_al30_view DEFINITION
     "! <p class="shorttext synchronized">Internal verification row data</p>
     "! This method enters both when modifying / inserting fields, and when recording data
     "! @parameter iv_row | <p class="shorttext synchronized">Row number</p>
-    "! @parameter is_row_data | <p class="shorttext synchronized">Row data</p>
+    "! @parameter cs_row_data | <p class="shorttext synchronized">Row data</p>
     "! @parameter et_return | <p class="shorttext synchronized">Return table</p>
     METHODS internal_verify_row_data
       IMPORTING
-        iv_row      TYPE bapi_line
-        is_row_data TYPE any
+        !iv_row     TYPE bapi_line
       EXPORTING
-        et_return   TYPE bapiret2_t.
+        et_return   TYPE bapiret2_t
+      CHANGING
+        cs_row_data TYPE any  .
     "! <p class="shorttext synchronized">Exit for verify the data to be save</p>
     "! It allows the data to be recorded or deleted before performing the recording process
     "! @parameter it_data | <p class="shorttext synchronized">Data to be update or insert</p>
@@ -426,7 +433,7 @@ CLASS zcl_al30_view DEFINITION
       IMPORTING
         !it_return        TYPE bapiret2_t
         !iv_langu         TYPE sylangu DEFAULT sy-langu
-        !iv_clear_row_msg TYPE sap_bool DEFAULT abap_true
+        !iv_clear_row_msg TYPE sap_bool DEFAULT abap_false
       CHANGING
         cs_row_data       TYPE any.
     "! <p class="shorttext synchronized">Determine row status from row data</p>
@@ -443,7 +450,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_al30_view IMPLEMENTATION.
+CLASS ZCL_AL30_VIEW IMPLEMENTATION.
 
 
   METHOD add_edit_fields.
@@ -513,6 +520,11 @@ CLASS zcl_al30_view IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD constructor.
+    mv_langu = sy-langu.
+  ENDMETHOD.
+
+
   METHOD conv_data_2_changelog_key.
     DATA lv_max_len TYPE int4.
     DATA lv_start TYPE int4.
@@ -544,6 +556,34 @@ CLASS zcl_al30_view IMPLEMENTATION.
       ENDIF.
 
     ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD conv_return_2_row_msg.
+    FIELD-SYMBOLS <lt_row_msg> TYPE zal30_i_row_status_msg.
+
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status_msg OF STRUCTURE cs_row_data TO <lt_row_msg>.
+    IF sy-subrc = 0.
+
+      IF iv_clear_row_msg = abap_true. " Borrado de registros previos en el campo
+        CLEAR <lt_row_msg>.
+      ENDIF.
+
+      LOOP AT it_return ASSIGNING FIELD-SYMBOL(<ls_return>).
+        INSERT VALUE #( type = <ls_return>-type fieldname = <ls_return>-field  ) INTO TABLE <lt_row_msg> ASSIGNING FIELD-SYMBOL(<ls_row_msg>).
+        IF <ls_return>-message IS INITIAL. " Si no hay texto se genera
+          <ls_row_msg>-message = zcl_al30_util=>fill_return( EXPORTING iv_type = <ls_return>-type
+                                                                       iv_number = <ls_return>-number
+                                                                       iv_id = <ls_return>-id
+                                                                       iv_message_v1 = <ls_return>-message_v1
+                                                                       iv_message_v2 = <ls_return>-message_v2
+                                                                       iv_message_v3 = <ls_return>-message_v3
+                                                                       iv_message_v4 = <ls_return>-message_v4
+                                                                       iv_langu = iv_langu )-message.
+        ENDIF.
+      ENDLOOP.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -624,6 +664,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
           lv_condition = |{ lv_condition } AND { zif_al30_data=>cs_alias_sql-texttable }.{ <ls_fields>-fieldname } = '{ sy-langu }'|.
         ENDIF.
 
+
         " Se construye la consulta completa
         rv_result = |LEFT OUTER JOIN { ms_view-texttable } { zif_al30_data=>cs_alias_sql-texttable } ON { lv_condition }|.
 
@@ -667,6 +708,13 @@ CLASS zcl_al30_view IMPLEMENTATION.
     " Si los filtros están informados se genera la parte del where
     IF is_filters-where_clauses IS NOT INITIAL.
       DATA(lv_where) = create_where_sql( is_filters = is_filters ).
+    ENDIF.
+
+    "Incluímos el mandante en el filtro de búsqueda, siempre y cuando la tabla lo tenga
+    READ TABLE mt_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WITH KEY datatype = zif_al30_data=>cs_datatype-mandt.
+    IF sy-subrc = 0.
+      lv_where = COND #( WHEN lv_where IS INITIAL THEN |( { zif_al30_data=>cs_alias_sql-view }.{ <ls_fields_ddic>-fieldname } = '{ sy-mandt }' )|
+                         ELSE lv_where && | AND ( { zif_al30_data=>cs_alias_sql-view }.{ <ls_fields_ddic>-fieldname } = '{ sy-mandt }' )| ).
     ENDIF.
 
     " Se monta la SQL
@@ -809,6 +857,29 @@ CLASS zcl_al30_view IMPLEMENTATION.
 **      rv_where = COND #( WHEN rv_where IS INITIAL THEN | { lv_where }| ELSE |{ rv_where } { lv_where }| ).
 **
 **    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD determine_row_status_from_row.
+    FIELD-SYMBOLS <lt_row_msg> TYPE zal30_i_row_status_msg.
+
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status OF STRUCTURE cs_row_data TO FIELD-SYMBOL(<row_status>).
+    IF sy-subrc = 0.
+      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status_msg OF STRUCTURE cs_row_data TO <lt_row_msg>.
+      IF sy-subrc = 0.
+
+        " Solo se pone el row status si hay error. Si no lo hay se deja en blanco.
+        READ TABLE <lt_row_msg> TRANSPORTING NO FIELDS WITH KEY type = zif_al30_data=>cs_msg_type-error.
+        IF sy-subrc = 0.
+          <row_status> = zif_al30_data=>cs_msg_type-error.
+        ELSE.
+          CLEAR <row_status>.
+        ENDIF.
+
+      ENDIF.
+    ENDIF.
+
 
   ENDMETHOD.
 
@@ -1031,6 +1102,25 @@ CLASS zcl_al30_view IMPLEMENTATION.
         CATCH cx_root.
       ENDTRY.
 
+      " Se pasan los posibles mensajes al campo row_msg
+      IF et_return IS NOT INITIAL.
+        conv_return_2_row_msg( EXPORTING it_return        = et_return
+                                         iv_langu = mv_langu
+                           CHANGING cs_row_data      = cs_row_data ).
+
+        " Aquellos mensajes que no tengan texto se les informa
+        LOOP AT et_return ASSIGNING FIELD-SYMBOL(<ls_return>) WHERE message IS INITIAL.
+          <ls_return>-message = zcl_al30_util=>fill_return( iv_type = <ls_return>-type
+                                                                         iv_id = <ls_return>-id
+                                                                         iv_number = <ls_return>-number
+                                                                         iv_message_v1  = <ls_return>-message_v1
+                                                                         iv_message_v2  = <ls_return>-message_v2
+                                                                         iv_message_v3  = <ls_return>-message_v3
+                                                                         iv_message_v4  = <ls_return>-message_v4 )-message.
+        ENDLOOP.
+
+      ENDIF.
+
     ENDIF.
 
   ENDMETHOD.
@@ -1075,13 +1165,31 @@ CLASS zcl_al30_view IMPLEMENTATION.
           CALL METHOD mo_exit_class->(ld_metodo)
             EXPORTING
               iv_row          = iv_row
-              is_row_data     = is_row_data
+              is_row_data     = cs_row_data
               iv_save_process = iv_save_process
             IMPORTING
               et_return       = et_return.
 
         CATCH cx_root.
       ENDTRY.
+
+    ENDIF.
+    " Se pasan los posibles mensajes al campo que guarda los mensajes en esa fila
+    IF et_return IS NOT INITIAL.
+      conv_return_2_row_msg( EXPORTING it_return        = et_return
+                                       iv_langu = mv_langu
+                         CHANGING cs_row_data      = cs_row_data ).
+
+      " Aquellos mensajes que no tengan texto se les informa
+      LOOP AT et_return ASSIGNING FIELD-SYMBOL(<ls_return>) WHERE message IS INITIAL.
+        <ls_return>-message = zcl_al30_util=>fill_return( iv_type = <ls_return>-type
+                                                                       iv_id = <ls_return>-id
+                                                                       iv_number = <ls_return>-number
+                                                                       iv_message_v1  = <ls_return>-message_v1
+                                                                       iv_message_v2  = <ls_return>-message_v2
+                                                                       iv_message_v3  = <ls_return>-message_v3
+                                                                       iv_message_v4  = <ls_return>-message_v4 )-message.
+      ENDLOOP.
 
     ENDIF.
   ENDMETHOD.
@@ -1396,19 +1504,35 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD internal_verify_row_data.
+
+    FIELD-SYMBOLS <lt_row_msg> TYPE zal30_i_row_status_msg.
+
+    CLEAR et_return.
+
     LOOP AT mt_fields REFERENCE INTO DATA(lo_fields).
 
-      ASSIGN COMPONENT lo_fields->fieldname OF STRUCTURE is_row_data TO FIELD-SYMBOL(<field>).
+      ASSIGN COMPONENT lo_fields->fieldname OF STRUCTURE cs_row_data TO FIELD-SYMBOL(<field>).
       IF sy-subrc = 0.
         " Validación: Campo obligatorio
         IF lo_fields->mandatory = abap_true AND <field> IS INITIAL.
           INSERT zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error
                                                                iv_id = zif_al30_data=>cv_msg_id
                                                                iv_number = '034'
-                                                               iv_field = lo_fields->fieldname ) INTO TABLE et_return.
+                                                               iv_field = lo_fields->fieldname
+                                                               iv_langu = mv_langu ) INTO TABLE et_return.
+
         ENDIF.
       ENDIF.
     ENDLOOP.
+
+    IF et_return IS NOT INITIAL.
+
+      " Se pasan los mensajes al campo que va acumulando los mensajes
+      conv_return_2_row_msg( EXPORTING it_return        = et_return
+                                       iv_langu = mv_langu
+                             CHANGING cs_row_data      = cs_row_data ).
+
+    ENDIF.
   ENDMETHOD.
 
 
@@ -2055,15 +2179,24 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD verify_change_row_data.
+    FIELD-SYMBOLS <lt_row_msg> TYPE zal30_i_row_status_msg.
+
+    " Al inicio del proceso de verificación se limpian los mensajes existentes en la fila.
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status_msg OF STRUCTURE cs_row_data TO <lt_row_msg>.
+    IF sy-subrc = 0.
+      CLEAR <lt_row_msg>.
+    ENDIF.
+
+
     CLEAR et_return.
 
     " Verificación de datos
     verify_row_data(
       EXPORTING
         iv_row      = iv_row
-        is_row_data =  cs_row_data
       IMPORTING
-        et_return   = et_return ).
+        et_return   = et_return
+      CHANGING cs_row_data =  cs_row_data   ).
 
 * Se lanza la exit de verificación y completado de datos
     CALL METHOD exit_verify_change_row_data
@@ -2077,13 +2210,11 @@ CLASS zcl_al30_view IMPLEMENTATION.
     " Se añaden los mensajes obtenidos a los existentes
     INSERT LINES OF lt_return INTO TABLE et_return.
 
-    " 28/04/2020 - Una de la mejoras es mover los mensajes a una estructura que guardará los mensajes en un campo específico de
-    " del registro
-    conv_return_2_row_msg( EXPORTING it_return = lt_return
-                                      CHANGING cs_row_data = cs_row_data ).
-
-    " Además se determina el valor del campo ROW_STATUS según los mensajes a nivel de fila
+    " Una de la mejoras es mover los mensajes a una estructura que guardará los mensajes en un campo específico de
+    " del registro. De esta manera se podrá mejorar como se gestionan los errores a nivel de fila. Como estos registros
+    " se alimentan en cada exit, el paso final es en base a los mensajes informados sacar el mensaje más crítico
     determine_row_status_from_row( CHANGING cs_row_data = cs_row_data ).
+
   ENDMETHOD.
 
 
@@ -2109,31 +2240,36 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD verify_row_data.
+    FIELD-SYMBOLS <lt_row_msg> TYPE zal30_i_row_status_msg.
+
+    " Al inicio del proceso de verificación se limpian los mensajes existentes en la fila.
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status_msg OF STRUCTURE cs_row_data TO <lt_row_msg>.
+    IF sy-subrc = 0.
+      CLEAR <lt_row_msg>.
+    ENDIF.
+
     CLEAR et_return.
 
     " Verificación interna segun configuración
     internal_verify_row_data( EXPORTING iv_row = iv_row
-                                         is_row_data = is_row_data
-                              IMPORTING et_return = et_return ) .
+                              IMPORTING et_return = DATA(lt_return)
+                              CHANGING cs_row_data = cs_row_data ) .
 
-
+    INSERT LINES OF lt_return INTO TABLE et_return.
 
     " Exit para la verificación de la línea
     exit_verify_row_data( EXPORTING iv_row      = iv_row
-                                    is_row_data = is_row_data
                                     iv_save_process = iv_save_process
-                          IMPORTING et_return   = DATA(lt_return) ).
+                          IMPORTING et_return   = lt_return
+                          CHANGING cs_row_data = cs_row_data ).
 
-    " Todos los mensajes de la exit se obtiene el texto porque según se llame dicho método es encesario.
-    " Ejemplo en el proceso de grabación
-    LOOP AT lt_return ASSIGNING FIELD-SYMBOL(<ls_return>).
-      <ls_return>-message = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error
-                                                                     iv_id = zif_al30_data=>cv_msg_id
-                                                                     iv_number = '034'
-                                                                     iv_field = <ls_return>-field )-message.
+    INSERT LINES OF lt_return INTO TABLE et_return.
 
-      INSERT <ls_return> INTO TABLE et_return. " Se añaden los mensajes de la exit a los generales
-    ENDLOOP.
+    " Una de la mejoras es mover los mensajes a una estructura que guardará los mensajes en un campo específico de
+    " del registro. De esta manera se podrá mejorar como se gestionan los errores a nivel de fila. Como estos registros
+    " se alimentan en cada exit, el paso final es en base a los mensajes informados sacar el mensaje más crítico
+    determine_row_status_from_row( CHANGING cs_row_data = cs_row_data ).
+
   ENDMETHOD.
 
 
@@ -2155,8 +2291,8 @@ CLASS zcl_al30_view IMPLEMENTATION.
       INSERT <ls_data> INTO TABLE <lt_datos>.
 
       internal_verify_row_data( EXPORTING iv_row = lv_tabix
-                                           is_row_data = <ls_data>
-                                IMPORTING et_return = DATA(lt_return) ) .
+                                IMPORTING et_return = DATA(lt_return)
+                                CHANGING cs_row_data = <ls_data> ) .
 
       INSERT LINES OF lt_return INTO TABLE et_return.
       CLEAR lt_return.
@@ -2206,54 +2342,4 @@ CLASS zcl_al30_view IMPLEMENTATION.
                 WHERE a~tabname IN it_r_views.
 
   ENDMETHOD.
-
-  METHOD conv_return_2_row_msg.
-    FIELD-SYMBOLS <lt_row_msg> TYPE zal30_i_row_status_msg.
-
-    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status_msg OF STRUCTURE cs_row_data TO <lt_row_msg>.
-    IF sy-subrc = 0.
-
-      IF iv_clear_row_msg = abap_true. " Borrado de registros previos en el campo
-        CLEAR <lt_row_msg>.
-      ENDIF.
-
-      LOOP AT it_return ASSIGNING FIELD-SYMBOL(<ls_return>).
-        INSERT VALUE #( type = <ls_return>-type  ) INTO TABLE <lt_row_msg> ASSIGNING FIELD-SYMBOL(<ls_row_msg>).
-        IF <ls_return>-message IS INITIAL. " Si no hay texto se genera
-          <ls_row_msg>-message = zcl_al30_util=>fill_return( EXPORTING iv_type = <ls_return>-type
-                                                                       iv_number = <ls_return>-number
-                                                                       iv_message_v1 = <ls_return>-message_v1
-                                                                       iv_message_v2 = <ls_return>-message_v2
-                                                                       iv_message_v3 = <ls_return>-message_v3
-                                                                       iv_message_v4 = <ls_return>-message_v4
-                                                                       iv_langu = iv_langu )-message.
-        ENDIF.
-      ENDLOOP.
-    ENDIF.
-
-  ENDMETHOD.
-
-
-  METHOD determine_row_status_from_row.
-    FIELD-SYMBOLS <lt_row_msg> TYPE zal30_i_row_status_msg.
-
-    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status OF STRUCTURE cs_row_data TO FIELD-SYMBOL(<row_status>).
-    IF sy-subrc = 0.
-      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status_msg OF STRUCTURE cs_row_data TO <lt_row_msg>.
-      IF sy-subrc = 0.
-
-        " Solo se pone el row status si hay error. Si no lo hay se deja en blanco.
-        READ TABLE <lt_row_msg> TRANSPORTING NO FIELDS WITH KEY type = zif_al30_data=>cs_msg_type-error.
-        IF sy-subrc = 0.
-          <row_status> = zif_al30_data=>cs_msg_type-error.
-        ELSE.
-          CLEAR <row_status>.
-        ENDIF.
-
-      ENDIF.
-    ENDIF.
-
-
-  ENDMETHOD.
-
 ENDCLASS.

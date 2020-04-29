@@ -84,7 +84,8 @@ CLASS zcl_al30_ui5_test_exit IMPLEMENTATION.
       IF sy-subrc NE 0.
         INSERT VALUE #( type = zif_al30_data=>cs_msg_type-error
                         id = '5A'
-                        number = '139' ) INTO TABLE et_return.
+                        number = '139'
+                        field = 'FIELDWAERS' ) INTO TABLE et_return.
       ENDIF.
     ENDIF.
 
