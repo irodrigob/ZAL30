@@ -18,7 +18,14 @@ INTERFACE zif_al30_exit_class
       !it_data_del   TYPE STANDARD TABLE
       !iv_error_save TYPE sap_bool OPTIONAL .
   "! <p class="shorttext synchronized">Exit before save data</p>
+  "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+  "! @parameter ev_abort_save | <p class="shorttext synchronized">Abort save</p>
+  "! @parameter et_return | <p class="shorttext synchronized">Return</p>
+  "! @parameter ct_data | <p class="shorttext synchronized">Data</p>
+  "! @parameter ct_data_del | <p class="shorttext synchronized">Data to delete</p>
   METHODS exit_before_save_data
+    IMPORTING
+      !iv_langu      TYPE sylangu DEFAULT sy-langu
     EXPORTING
       !ev_abort_save TYPE sap_bool
       !et_return     TYPE bapiret2_t
@@ -38,10 +45,15 @@ INTERFACE zif_al30_exit_class
 
   "! <p class="shorttext synchronized">Exit verify and change row data</p>
   "!
-  "! @parameter et_return | <p class="shorttext synchronized" >Return table</p>
+  "! @parameter et_return | <p class="shorttext synchronized">Return table</p>
+  "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+  "! @parameter iv_row | <p class="shorttext synchronized">Row number</p>
+  "! @parameter et_return | <p class="shorttext synchronized">Return</p>
+  "! @parameter cs_row_data | <p class="shorttext synchronized">Row data</p>
   METHODS exit_verify_change_row_data
     IMPORTING
       !iv_row      TYPE bapi_line OPTIONAL
+      !iv_langu    TYPE sylangu DEFAULT sy-langu
     EXPORTING
       !et_return   TYPE bapiret2_t
     CHANGING
@@ -51,19 +63,25 @@ INTERFACE zif_al30_exit_class
   "! @parameter iv_row | <p class="shorttext synchronized">Row number</p>
   "! @parameter iv_save_process | <p class="shorttext synchronized">Enter in save process</p>
   "! @parameter is_row_data | <p class="shorttext synchronized">Row data</p>
+  "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
   "! @parameter et_return | <p class="shorttext synchronized">Return table</p>
   METHODS exit_verify_row_data
     IMPORTING
       !iv_row          TYPE bapi_line OPTIONAL
       !is_row_data     TYPE any
       !iv_save_process TYPE sap_bool DEFAULT abap_false
+      !iv_langu        TYPE sylangu DEFAULT sy-langu
     EXPORTING
       !et_return       TYPE bapiret2_t.
   "! <p class="shorttext synchronized">Exit verify field data</p>
+  "! @parameter iv_fieldname | <p class="shorttext synchronized">Fieldname</p>
+  "! @parameter iv_value | <p class="shorttext synchronized">Value</p>
+  "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
   METHODS exit_verify_field_data
     IMPORTING
       !iv_fieldname TYPE any
       !iv_value     TYPE any
+      !iv_langu     TYPE sylangu DEFAULT sy-langu
     EXPORTING
       !es_return    TYPE bapiret2 .
   "! <p class="shorttext synchronized">Exit process for fieldcatalog</p>
@@ -74,21 +92,23 @@ INTERFACE zif_al30_exit_class
   "! It allows the data to be recorded or deleted before performing the recording process
   "! @parameter it_data | <p class="shorttext synchronized">Data to be update or insert</p>
   "! @parameter it_data_del | <p class="shorttext synchronized">Data to be delete</p>
+  "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
   "! @parameter et_return | <p class="shorttext synchronized">return</p>
   METHODS exit_verify_save_data
     IMPORTING
-      it_data     TYPE STANDARD TABLE
-      it_data_del TYPE STANDARD TABLE
+      !it_data     TYPE STANDARD TABLE
+      !it_data_del TYPE STANDARD TABLE
+      !iv_langu    TYPE sylangu DEFAULT sy-langu
     EXPORTING
-      et_return   TYPE bapiret2_t.
-    "! <p class="shorttext synchronized">Set editable mode the ALV Data</p>
-    "! The ev_edit_mode parameter can be returned with two values:
-    "! zif_al30_data => cv_mode_change and zif_al30_data => cv_mode_view
-    "! @parameter it_data | <p class="shorttext synchronized">Data</p>
-    "! @parameter ev_edit_mode | <p class="shorttext synchronized">Edit mode</p>
-    METHODS exit_set_edit_mode_alv
-      IMPORTING
-        !it_data      TYPE STANDARD TABLE
-      EXPORTING
-        !ev_edit_mode TYPE cdchngind.
+      et_return    TYPE bapiret2_t.
+  "! <p class="shorttext synchronized">Set editable mode the ALV Data</p>
+  "! The ev_edit_mode parameter can be returned with two values:
+  "! zif_al30_data => cv_mode_change and zif_al30_data => cv_mode_view
+  "! @parameter it_data | <p class="shorttext synchronized">Data</p>
+  "! @parameter ev_edit_mode | <p class="shorttext synchronized">Edit mode</p>
+  METHODS exit_set_edit_mode_alv
+    IMPORTING
+      !it_data      TYPE STANDARD TABLE
+    EXPORTING
+      !ev_edit_mode TYPE cdchngind.
 ENDINTERFACE.

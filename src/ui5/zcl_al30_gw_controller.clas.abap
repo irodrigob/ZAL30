@@ -74,8 +74,8 @@ CLASS zcl_al30_gw_controller DEFINITION
     "!
     "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
     "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
-    "! @parameter ev_data | <p class="shorttext synchronized">Data in JSON format</p>
-    "! @parameter ev_data_template | <p class="shorttext synchronized">Data template in JSON format</p>
+    "! @parameter iv_row | <p class="shorttext synchronized">Row data in JSON format</p>
+    "! @parameter ev_row | <p class="shorttext synchronized">Row data in JSON format</p>
     METHODS row_validation_determination
       IMPORTING
         !iv_view_name TYPE tabname
@@ -100,6 +100,21 @@ CLASS zcl_al30_gw_controller DEFINITION
       EXPORTING
         !ev_message_type TYPE bapi_mtype
         !ev_message      TYPE string.
+    "! <p class="shorttext synchronized">Save data</p>
+    "!
+    "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
+    "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    "! @parameter ev_data | <p class="shorttext synchronized">Data in JSON format</p>
+    "! @parameter ev_data | <p class="shorttext synchronized">Data in JSON format</p>
+    "! @parameter ev_return | <p class="shorttext synchronized">Return of process</p>
+    METHODS save_data
+      IMPORTING
+        !iv_view_name TYPE tabname
+        !iv_langu     TYPE sylangu DEFAULT sy-langu
+        !iv_data      TYPE string
+      EXPORTING
+        !ev_data      TYPE string
+        !ev_return    TYPE string.
   PROTECTED SECTION.
     DATA mo_controller TYPE REF TO zcl_al30_controller.
     DATA mo_conf TYPE REF TO zcl_al30_conf.
@@ -167,6 +182,22 @@ CLASS zcl_al30_gw_controller DEFINITION
     METHODS adapt_ui5_field_style_2_alv
       CHANGING
         co_data TYPE REF TO data.
+    "! <p class="shorttext synchronized">Split data to save</p>
+    "! @parameter ct_data | <p class="shorttext synchronized">Data inserted o changed</p>
+    "! @parameter ct_data_del | <p class="shorttext synchronized">Data to delete</p>
+    METHODS split_data_to_save
+      CHANGING
+        ct_data     TYPE STANDARD TABLE
+        ct_data_del TYPE STANDARD TABLE.
+    "! <p class="shorttext synchronized">Convert return(BAPIRET2_T) to UI5 return</p>
+    "! @parameter it_return | <p class="shorttext synchronized">Return in BAPIRET2_T format</p>
+    "! @parameter et_return_ui5 | <p class="shorttext synchronized">Return UI5 format</p>
+    METHODS conv_return_2_return_ui5
+      IMPORTING
+        it_return     TYPE bapiret2_t
+        iv_langu      TYPE sylangu DEFAULT sy-langu
+      EXPORTING
+        et_return_ui5 TYPE zif_al30_ui5_data=>tt_return.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -585,4 +616,135 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     ENDIF.
 
   ENDMETHOD.
+  METHOD save_data.
+    FIELD-SYMBOLS <data> TYPE STANDARD TABLE.
+    FIELD-SYMBOLS <data_del> TYPE STANDARD TABLE.
+
+    " El mismo valor que entra es el que sale. En el proceso ya se irán cambiando valores
+    ev_data = iv_data.
+
+    "Para procesar el registro hay que crear una tabla interna del mismo tipo que la viene para guarda el valor pasado por parámetros
+
+    " Se llama al proceso que creará la tabla interna para poder leer los datos
+    create_it_data_view( EXPORTING iv_view_name = iv_view_name
+                                   iv_langu = iv_langu
+                                   iv_mode = zif_al30_data=>cv_mode_change
+                         IMPORTING eo_data = DATA(lo_data)
+                                   es_return = DATA(ls_return)
+                                   et_fields_ddic = DATA(lt_fields_ddic)
+                                   et_fields_view = DATA(lt_fields_view) ).
+
+    IF ls_return IS INITIAL AND lo_data IS BOUND.
+      " Se añade un registro en blanco para poder hace el mapeo
+      ASSIGN lo_data->* TO <data>.
+
+      " Creo la tabla dinámica para el borrado
+      CALL METHOD mo_view->create_it_data_view
+        EXPORTING
+          iv_mode = zif_al30_data=>cv_mode_change
+        IMPORTING
+          et_data = DATA(lo_data_del).
+      ASSIGN lo_data_del->* TO <data_del>.
+
+      " Se transforma el JSON al registro de la tabla
+      zcl_al30_ui5_json=>deserialize( EXPORTING json = iv_data
+                                                pretty_name = /ui2/cl_json=>pretty_mode-none
+                                      CHANGING data = <data> ).
+
+      " Se adaptan los estilos de UI5 al del ALV por si se modifican en las exit
+      adapt_ui5_field_style_2_alv( CHANGING co_data = lo_data ).
+
+      " Separo los datos borrados de los modificados/insertados
+      split_data_to_save( CHANGING ct_data = <data>
+                                  ct_data_del = <data_del> ).
+
+      mo_view->verify_save_data(
+        EXPORTING
+          it_data_del = <data_del>
+          iv_save_process = abap_true
+        IMPORTING
+          et_return = DATA(lt_return)
+        CHANGING ct_data   = <data> ).
+
+      " Si hay errores no se continua el proceso
+      IF ( line_exists( lt_return[ type = zif_al30_data=>cs_msg_type-error ] ) OR
+          line_exists( lt_return[ type = zif_al30_data=>cs_msg_type-dump ] ) ).
+      ELSE.
+        " Se valida que no haya ningúna línea errónea.
+        READ TABLE <data> TRANSPORTING NO FIELDS WITH KEY (zif_al30_data=>cs_control_fields_alv_data-row_status) = zif_al30_data=>cs_msg_type-error.
+        IF sy-subrc NE 0.
+
+          CALL METHOD mo_view->save_data
+            EXPORTING
+              iv_allow_request = abap_false
+            IMPORTING
+              et_return        = lt_return
+            CHANGING
+*             cv_order         = cv_order
+              ct_datos         = <data>
+              ct_datos_del     = <data_del>.
+
+        ENDIF.
+
+      ENDIF.
+
+      " Se adapta lo estilos de SAP a los de UI5
+      adapt_alv_field_style_2_ui5( CHANGING co_data = lo_data ).
+
+      " Se convierte de los datos de sap a JSON
+      ev_data = zcl_al30_ui5_json=>zserialize( data = <data> pretty_name = /ui2/cl_json=>pretty_mode-none ).
+
+      " Si hay mennsajes se adaptan al formato de ui5
+      IF lt_return IS NOT INITIAL.
+        DATA lt_return_ui5 TYPE zif_al30_ui5_data=>tt_return.
+
+        conv_return_2_return_ui5( EXPORTING it_return = lt_return
+                                            iv_langu = iv_langu
+                                  IMPORTING et_return_ui5 = lt_return_ui5 ).
+
+        ev_return = zcl_al30_ui5_json=>zserialize( data = lt_return_ui5 pretty_name = /ui2/cl_json=>pretty_mode-none ).
+      ENDIF.
+
+    ENDIF.
+
+
+  ENDMETHOD.
+
+
+  METHOD split_data_to_save.
+    CLEAR ct_data_del.
+
+    " Se leen los registros marcados para borrar
+    DATA(lv_cond) = |{ zif_al30_data=>cs_control_fields_alv_data-updkz } = '{ zif_al30_data=>cv_mode_delete }'|.
+    LOOP AT ct_data ASSIGNING FIELD-SYMBOL(<ls_data>) WHERE (lv_cond).
+      DATA(lv_tabix) = sy-tabix.
+
+      INSERT <ls_data> INTO TABLE ct_data_del.
+      DELETE ct_data INDEX lv_tabix.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD conv_return_2_return_ui5.
+    CLEAR: et_return_ui5.
+
+    LOOP AT it_return ASSIGNING FIELD-SYMBOL(<ls_return>).
+      INSERT VALUE #( type = <ls_return>-type ) INTO TABLE et_return_ui5 ASSIGNING FIELD-SYMBOL(<ls_return_ui5>).
+
+      " El mensaje aunque este informado lo fuerzo en el idioma del parámetro. El motivo es que no se en que idioma puede estar debido a las exit.
+      <ls_return_ui5>-message = zcl_al30_util=>fill_return( EXPORTING iv_type = <ls_return>-type
+                                                                     iv_number = <ls_return>-number
+                                                                     iv_id = <ls_return>-id
+                                                                     iv_message_v1 = <ls_return>-message_v1
+                                                                     iv_message_v2 = <ls_return>-message_v2
+                                                                     iv_message_v3 = <ls_return>-message_v3
+                                                                     iv_message_v4 = <ls_return>-message_v4
+                                                                     iv_langu = iv_langu )-message.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
 ENDCLASS.

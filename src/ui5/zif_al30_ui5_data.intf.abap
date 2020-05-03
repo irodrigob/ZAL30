@@ -17,6 +17,11 @@ INTERFACE zif_al30_ui5_data
          datatype  TYPE datatype_d,
          END OF ts_view_fields.
   TYPES: tt_view_fields TYPE STANDARD TABLE OF ts_view_fields WITH EMPTY KEY.
+  TYPES: BEGIN OF ts_return,
+           type    TYPE bapiret2-type,
+           message TYPE string,
+         END OF ts_return.
+  TYPES:tt_return TYPE STANDARD TABLE OF ts_return WITH EMPTY KEY.
 
   CONSTANTS: BEGIN OF cs_control_fields_ui5_data,
                style TYPE fieldname VALUE 'ZAL30_UI5_STYLE' ##NO_TEXT,

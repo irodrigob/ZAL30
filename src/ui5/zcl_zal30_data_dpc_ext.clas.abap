@@ -22,8 +22,9 @@ CLASS zcl_zal30_data_dpc_ext DEFINITION
         REDEFINITION .
     METHODS rowvalidationdet_create_entity
         REDEFINITION .
-    METHODS rowvalidationdet_get_entity REDEFINITION.
+
     METHODS verifyfielddatas_get_entity REDEFINITION.
+    METHODS savedataset_create_entity REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -233,8 +234,6 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
 
 
   METHOD rowvalidationdet_create_entity.
-    DATA lv_langu TYPE sy-langu.
-    DATA lv_viewname TYPE zal30_t_view-tabname.
     DATA ls_data TYPE zcl_zal30_data_mpc=>ts_rowvalidationdetermination.
 
     " Lectura de los datos provenientes del body de la llamada
@@ -253,9 +252,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
 
 
   ENDMETHOD.
-  METHOD rowvalidationdet_get_entity.
 
-  ENDMETHOD.
 
   METHOD verifyfielddatas_get_entity.
     DATA lv_langu TYPE sy-langu.
@@ -274,35 +271,41 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
 
     ENDIF.
 
-    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'COLUMN'.
-    IF sy-subrc = 0.
-      DATA(lv_fieldname) = CONV fieldname( <ls_key_tab>-value ).
-    ENDIF.
 
-    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'VIEWNAME'.
-    IF sy-subrc = 0.
-      DATA(lv_viewname) = CONV tabname( <ls_key_tab>-value ).
-    ENDIF.
-
-    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'VALUE'.
-    IF sy-subrc = 0.
-      DATA(lv_value) = <ls_key_tab>-value.
-    ENDIF.
-
-    er_entity-fieldname = lv_fieldname.
-    er_entity-tabname = lv_viewname.
-    er_entity-value = lv_value.
+    er_entity-fieldname = it_key_tab[ name = 'VIEWNAME' ]-value.
+    er_entity-tabname = it_key_tab[ name = 'COLUMN' ]-value.
+    er_entity-value = it_key_tab[ name = 'VALUE' ]-value.
     er_entity-langu = lv_langu.
 
     mo_controller->verify_field_data(
       EXPORTING
         iv_langu        = lv_langu
-        iv_view_name    = lv_viewname
-        iv_fieldname    = lv_fieldname
-        iv_value        = lv_value
+        iv_view_name    = CONV tabname( it_key_tab[ name = 'VIEWNAME' ]-value )
+        iv_fieldname    = CONV fieldname( it_key_tab[ name = 'COLUMN' ]-value )
+        iv_value        = it_key_tab[ name = 'VALUE' ]-value
       IMPORTING
         ev_message_type = er_entity-message_type
         ev_message      = er_entity-message ).
+
+  ENDMETHOD.
+
+  METHOD savedataset_create_entity.
+
+    DATA ls_data TYPE zcl_zal30_data_mpc=>ts_savedata.
+
+    " Lectura de los datos provenientes del body de la llamada
+    io_data_provider->read_entry_data( IMPORTING es_data = ls_data ).
+
+    " Si iguala los datos de salida a los de entrada.
+    er_entity = ls_data.
+
+    mo_controller->save_data(
+      EXPORTING
+        iv_view_name =  ls_data-tabname
+        iv_langu     = ls_data-langu
+        iv_data       = ls_data-data
+      IMPORTING
+        ev_data       = er_entity-data ).
 
   ENDMETHOD.
 

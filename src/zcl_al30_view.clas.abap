@@ -61,7 +61,7 @@ CLASS zcl_al30_view DEFINITION
       CHANGING
         !ct_datos_del     TYPE STANDARD TABLE
         !ct_datos         TYPE STANDARD TABLE
-        !cv_order         TYPE e070-trkorr .
+        !cv_order         TYPE e070-trkorr OPTIONAL.
     "! <p class="shorttext synchronized">Check the contents of field</p>
     METHODS verify_field_data
       IMPORTING
@@ -102,11 +102,11 @@ CLASS zcl_al30_view DEFINITION
     "! @parameter et_return | <p class="shorttext synchronized">return</p>
     METHODS verify_save_data
       IMPORTING
-        it_data          TYPE STANDARD TABLE
-        it_data_del      TYPE STANDARD TABLE
-        !iv_save_process TYPE sap_bool DEFAULT abap_false
+                it_data_del      TYPE STANDARD TABLE
+                !iv_save_process TYPE sap_bool DEFAULT abap_false
       EXPORTING
-        et_return        TYPE bapiret2_t.
+                et_return        TYPE bapiret2_t
+      CHANGING  ct_data          TYPE STANDARD TABLE.
 
     "! <p class="shorttext synchronized">Check SAP authorization</p>
     METHODS check_sap_authorization
@@ -450,7 +450,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_AL30_VIEW IMPLEMENTATION.
+CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD add_edit_fields.
@@ -571,7 +571,7 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
       ENDIF.
 
       LOOP AT it_return ASSIGNING FIELD-SYMBOL(<ls_return>).
-        INSERT VALUE #( type = <ls_return>-type fieldname = <ls_return>-field  ) INTO TABLE <lt_row_msg> ASSIGNING FIELD-SYMBOL(<ls_row_msg>).
+        INSERT VALUE #( type = <ls_return>-type fieldname = <ls_return>-field message = <ls_return>-message  ) INTO TABLE <lt_row_msg> ASSIGNING FIELD-SYMBOL(<ls_row_msg>).
         IF <ls_return>-message IS INITIAL. " Si no hay texto se genera
           <ls_row_msg>-message = zcl_al30_util=>fill_return( EXPORTING iv_type = <ls_return>-type
                                                                        iv_number = <ls_return>-number
@@ -967,6 +967,7 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
             IMPORTING
               ev_abort_save = ev_abort_save
               et_return     = et_return
+              iv_langu      = mv_langu
             CHANGING
               ct_data       = ct_data
               ct_data_del   = ct_data_del.
@@ -1094,6 +1095,7 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
           CALL METHOD mo_exit_class->(ld_metodo)
             EXPORTING
               iv_row      = iv_row
+              iv_langu    = mv_langu
             IMPORTING
               et_return   = et_return
             CHANGING
@@ -1141,6 +1143,7 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
             EXPORTING
               iv_fieldname = iv_fieldname
               iv_value     = iv_value
+              iv_langu     = mv_langu
             IMPORTING
               es_return    = es_return.
         CATCH cx_root.
@@ -1167,6 +1170,7 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
               iv_row          = iv_row
               is_row_data     = cs_row_data
               iv_save_process = iv_save_process
+              iv_langu        = mv_langu
             IMPORTING
               et_return       = et_return.
 
@@ -2279,13 +2283,13 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
     CLEAR et_return.
 
     " Se crea una tabla como la de entrada para pasarla con los datos modificados a las exit
-    CREATE DATA lo_datos LIKE it_data.
+    CREATE DATA lo_datos LIKE ct_data.
     ASSIGN lo_datos->* TO <lt_datos>.
 
     " Se hacen las verificacion internas
     DATA(lv_cond) = |{ zif_al30_data=>cs_control_fields_alv_data-updkz } IS NOT INITIAL|.
 
-    LOOP AT it_data ASSIGNING FIELD-SYMBOL(<ls_data>) WHERE (lv_cond).
+    LOOP AT ct_data ASSIGNING FIELD-SYMBOL(<ls_data>) WHERE (lv_cond).
       DATA(lv_tabix) = sy-tabix.
 
       INSERT <ls_data> INTO TABLE <lt_datos>.
@@ -2293,6 +2297,11 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
       internal_verify_row_data( EXPORTING iv_row = lv_tabix
                                 IMPORTING et_return = DATA(lt_return)
                                 CHANGING cs_row_data = <ls_data> ) .
+
+      " Una de la mejoras es mover los mensajes a una estructura que guardará los mensajes en un campo específico de
+      " del registro. De esta manera se podrá mejorar como se gestionan los errores a nivel de fila. Como estos registros
+      " se alimentan en cada exit, el paso final es en base a los mensajes informados sacar el mensaje más crítico
+      determine_row_status_from_row( CHANGING cs_row_data = <ls_data> ).
 
       INSERT LINES OF lt_return INTO TABLE et_return.
       CLEAR lt_return.

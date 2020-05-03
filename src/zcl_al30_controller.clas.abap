@@ -314,7 +314,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_al30_controller IMPLEMENTATION.
+CLASS ZCL_AL30_CONTROLLER IMPLEMENTATION.
 
 
   METHOD adjust_view_dictionary.
@@ -724,30 +724,35 @@ CLASS zcl_al30_controller IMPLEMENTATION.
 
     mo_view->verify_save_data(
       EXPORTING
-        it_data   = ct_datos
         it_data_del = ct_datos_del
         iv_save_process = abap_true
       IMPORTING
-        et_return = DATA(lt_return) ).
+        et_return = DATA(lt_return)
+      CHANGING ct_data   = ct_datos ).
 
     " Si hay errores no se continua el proceso
     IF ( line_exists( lt_return[ type = zif_al30_data=>cs_msg_type-error ] ) OR
         line_exists( lt_return[ type = zif_al30_data=>cs_msg_type-dump ] ) ).
       et_return = lt_return.
     ELSE.
+      " Se valida que no haya ningúna línea errónea.
+      READ TABLE ct_datos TRANSPORTING NO FIELDS WITH KEY (zif_al30_data=>cs_control_fields_alv_data-row_status) = zif_al30_data=>cs_msg_type-error.
+      IF sy-subrc NE 0.
 
-      CALL METHOD mo_view->save_data
-        EXPORTING
-          iv_allow_request = iv_allow_request
-        IMPORTING
-          et_return        = et_return
-        CHANGING
-          cv_order         = cv_order
-          ct_datos         = ct_datos
-          ct_datos_del     = ct_datos_del.
+        CALL METHOD mo_view->save_data
+          EXPORTING
+            iv_allow_request = iv_allow_request
+          IMPORTING
+            et_return        = et_return
+          CHANGING
+            cv_order         = cv_order
+            ct_datos         = ct_datos
+            ct_datos_del     = ct_datos_del.
 
-      " Se añaden los posibles mensajes de la validación a los que devuelva el propio método
-      INSERT LINES OF lt_return INTO TABLE et_return.
+        " Se añaden los posibles mensajes de la validación a los que devuelva el propio método
+        INSERT LINES OF lt_return INTO TABLE et_return.
+
+      ENDIF.
 
     ENDIF.
 
@@ -794,6 +799,12 @@ CLASS zcl_al30_controller IMPLEMENTATION.
                                  it_fields_view = lt_fields_view
                                  it_fields_text_view = lt_fields_text_view
                                  it_fields_ddic = it_fields_ddic ).
+  ENDMETHOD.
+
+
+  METHOD set_edit_mode_alv_data.
+    mo_view->set_edit_mode_alv( EXPORTING it_data = it_data
+                                IMPORTING ev_edit_mode = ev_edit_mode ).
   ENDMETHOD.
 
 
@@ -868,9 +879,4 @@ CLASS zcl_al30_controller IMPLEMENTATION.
                                   it_r_views = it_r_views
                         IMPORTING et_view_list = et_view_list ).
   ENDMETHOD.
-  METHOD set_edit_mode_alv_data.
-    mo_view->set_edit_mode_alv( EXPORTING it_data = it_data
-                                IMPORTING ev_edit_mode = ev_edit_mode ).
-  ENDMETHOD.
-
 ENDCLASS.
