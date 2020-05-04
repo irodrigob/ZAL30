@@ -56,6 +56,8 @@ CLASS zcl_al30_ui5_test_exit IMPLEMENTATION.
 
   METHOD zif_al30_exit_class~exit_before_save_data.
 
+  ev_abort_save = abap_true.
+
   ENDMETHOD.
 
   METHOD zif_al30_exit_class~exit_check_auth_data_read.
@@ -92,6 +94,11 @@ CLASS zcl_al30_ui5_test_exit IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_al30_exit_class~exit_verify_row_data.
+
+
+    IF iv_save_process = abap_true.
+      INSERT VALUE #( type = 'E' id = 'ZCA_AL30' number = '0000' message_v1 = 'Dummy Error' ) INTO TABLE et_return.
+    ENDIF.
 
   ENDMETHOD.
 

@@ -59,7 +59,7 @@ INTERFACE zif_al30_exit_class
     CHANGING
       !cs_row_data TYPE any .
   "! <p class="shorttext synchronized">Exit verify row data</p>
-  "! This exit enters both when modifying / inserting fields, and when recording data
+  "! This exit enters both when modifying / inserting fields, and when save data
   "! @parameter iv_row | <p class="shorttext synchronized">Row number</p>
   "! @parameter iv_save_process | <p class="shorttext synchronized">Enter in save process</p>
   "! @parameter is_row_data | <p class="shorttext synchronized">Row data</p>

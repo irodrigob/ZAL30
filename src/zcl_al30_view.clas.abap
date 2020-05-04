@@ -2292,19 +2292,20 @@ CLASS zcl_al30_view IMPLEMENTATION.
     LOOP AT ct_data ASSIGNING FIELD-SYMBOL(<ls_data>) WHERE (lv_cond).
       DATA(lv_tabix) = sy-tabix.
 
-      INSERT <ls_data> INTO TABLE <lt_datos>.
-
-      internal_verify_row_data( EXPORTING iv_row = lv_tabix
-                                IMPORTING et_return = DATA(lt_return)
-                                CHANGING cs_row_data = <ls_data> ) .
-
-      " Una de la mejoras es mover los mensajes a una estructura que guardará los mensajes en un campo específico de
-      " del registro. De esta manera se podrá mejorar como se gestionan los errores a nivel de fila. Como estos registros
-      " se alimentan en cada exit, el paso final es en base a los mensajes informados sacar el mensaje más crítico
-      determine_row_status_from_row( CHANGING cs_row_data = <ls_data> ).
+      verify_row_data(
+        EXPORTING
+          iv_row          = lv_tabix
+          iv_save_process = abap_true
+        IMPORTING
+          et_return       = DATA(lt_return)
+        CHANGING
+          cs_row_data     = <ls_data> ).
 
       INSERT LINES OF lt_return INTO TABLE et_return.
       CLEAR lt_return.
+
+      INSERT <ls_data> INTO TABLE <lt_datos>.
+
     ENDLOOP.
 
     " Exit para la verificación de los datos a grabar
