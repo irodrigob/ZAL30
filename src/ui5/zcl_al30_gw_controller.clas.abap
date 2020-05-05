@@ -104,17 +104,19 @@ CLASS zcl_al30_gw_controller DEFINITION
     "!
     "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
     "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
-    "! @parameter ev_data | <p class="shorttext synchronized">Data in JSON format</p>
+    "! @parameter iv_data | <p class="shorttext synchronized">Data in JSON format</p>
+    "! @parameter iv_original_data | <p class="shorttext synchronized">Original data</p>
     "! @parameter ev_data | <p class="shorttext synchronized">Data in JSON format</p>
     "! @parameter ev_return | <p class="shorttext synchronized">Return of process</p>
     METHODS save_data
       IMPORTING
-        !iv_view_name TYPE tabname
-        !iv_langu     TYPE sylangu DEFAULT sy-langu
-        !iv_data      TYPE string
+        !iv_view_name     TYPE tabname
+        !iv_langu         TYPE sylangu DEFAULT sy-langu
+        !iv_data          TYPE string
+        !iv_original_data TYPE string
       EXPORTING
-        !ev_data      TYPE string
-        !ev_return    TYPE string.
+        !ev_data          TYPE string
+        !ev_return        TYPE string.
   PROTECTED SECTION.
     DATA mo_controller TYPE REF TO zcl_al30_controller.
     DATA mo_conf TYPE REF TO zcl_al30_conf.
@@ -618,6 +620,7 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
   ENDMETHOD.
   METHOD save_data.
     FIELD-SYMBOLS <data> TYPE STANDARD TABLE.
+    FIELD-SYMBOLS <original_data> TYPE STANDARD TABLE.
     FIELD-SYMBOLS <data_del> TYPE STANDARD TABLE.
 
     " El mismo valor que entra es el que sale. En el proceso ya se irán cambiando valores
@@ -639,12 +642,22 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
       ASSIGN lo_data->* TO <data>.
 
       " Creo la tabla dinámica para el borrado
-      CALL METHOD mo_view->create_it_data_view
-        EXPORTING
-          iv_mode = zif_al30_data=>cv_mode_change
-        IMPORTING
-          et_data = DATA(lo_data_del).
+      mo_view->create_it_data_view( EXPORTING iv_mode = zif_al30_data=>cv_mode_change
+                                    IMPORTING et_data = DATA(lo_data_del) ).
       ASSIGN lo_data_del->* TO <data_del>.
+
+      " Se crea la tabla para los datos originales
+      mo_view->create_it_data_view( EXPORTING iv_mode = zif_al30_data=>cv_mode_change
+                                    IMPORTING et_data = DATA(lo_original_data) ).
+
+      " Se convierte los datos originales
+      ASSIGN lo_original_data->* TO <original_data>.
+      zcl_al30_ui5_json=>deserialize( EXPORTING json = iv_data
+                                            pretty_name = /ui2/cl_json=>pretty_mode-none
+                                  CHANGING data = <original_data> ).
+
+      " Se pasa a la clase para que lo tenga para el proceso de grabación
+      mo_view->set_original_data( lo_original_data ).
 
       " Se transforma el JSON al registro de la tabla
       zcl_al30_ui5_json=>deserialize( EXPORTING json = iv_data

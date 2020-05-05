@@ -103,6 +103,7 @@ public section.
      TABNAME type TABNAME,
      DATA type string,
      RETURN type string,
+     ORIGINAL_DATA type string,
   end of TS_SAVEDATA .
   types:
     TT_SAVEDATA type standard table of TS_SAVEDATA .
@@ -1008,6 +1009,17 @@ lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
       EXPORTING
         iv_key      = 'unicode'
         iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'ORIGINAL_DATA' iv_abap_fieldname = 'ORIGINAL_DATA' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
 
 lo_entity_type->bind_structure( iv_structure_name  = 'ZCL_ZAL30_DATA_MPC=>TS_SAVEDATA' ). "#EC NOTEXT
 
@@ -1159,7 +1171,7 @@ lo_entity_set->set_filter_required( abap_false ).
 *&---------------------------------------------------------------------*
 
 
-  CONSTANTS: lc_gen_date_time TYPE timestamp VALUE '20200503170538'.                  "#EC NOTEXT
+  CONSTANTS: lc_gen_date_time TYPE timestamp VALUE '20200505200315'.                  "#EC NOTEXT
   rv_last_modified = super->get_last_modified( ).
   IF rv_last_modified LT lc_gen_date_time.
     rv_last_modified = lc_gen_date_time.

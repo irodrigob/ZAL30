@@ -97,7 +97,7 @@ CLASS zcl_al30_ui5_test_exit IMPLEMENTATION.
 
 
     IF iv_save_process = abap_true.
-      INSERT VALUE #( type = 'E' id = 'ZCA_AL30' number = '0000' message_v1 = 'Dummy Error' ) INTO TABLE et_return.
+      INSERT VALUE #( type = 'S' id = 'ZCA_AL30' number = '0000' message_v1 = 'Dummy Error' ) INTO TABLE et_return.
     ENDIF.
 
   ENDMETHOD.
