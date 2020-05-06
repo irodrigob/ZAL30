@@ -652,7 +652,7 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
       " Se convierte los datos originales
       ASSIGN lo_original_data->* TO <original_data>.
-      zcl_al30_ui5_json=>deserialize( EXPORTING json = iv_data
+      zcl_al30_ui5_json=>deserialize( EXPORTING json = iv_original_data
                                             pretty_name = /ui2/cl_json=>pretty_mode-none
                                   CHANGING data = <original_data> ).
 
