@@ -460,7 +460,8 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     read_view_conf_for_data( EXPORTING iv_view_name = iv_view_name
                                        iv_langu = iv_langu
                              IMPORTING es_return = DATA(ls_return)
-                                       et_fields_view = DATA(lt_fields) ).
+                                       et_fields_view = DATA(lt_fields)
+                                       et_fields_ddic = DATA(lt_fields_ddic) ).
 
     IF ls_return IS INITIAL.
 
@@ -620,6 +621,7 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
   ENDMETHOD.
   METHOD save_data.
     FIELD-SYMBOLS <data> TYPE STANDARD TABLE.
+    FIELD-SYMBOLS <data_ok> TYPE STANDARD TABLE.
     FIELD-SYMBOLS <original_data> TYPE STANDARD TABLE.
     FIELD-SYMBOLS <data_del> TYPE STANDARD TABLE.
 
@@ -691,11 +693,13 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
             EXPORTING
               iv_allow_request = abap_false
             IMPORTING
-              et_return        = lt_return
+              et_return        = DATA(lt_return_save)
             CHANGING
 *             cv_order         = cv_order
               ct_datos         = <data>
               ct_datos_del     = <data_del>.
+
+          INSERT LINES OF lt_return_save INTO TABLE lt_return.
 
         ENDIF.
 

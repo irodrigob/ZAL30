@@ -255,37 +255,38 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
 
 
   METHOD verifyfielddatas_get_entity.
-    DATA lv_langu TYPE sy-langu.
-
-
-    READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_key_tab>) WITH KEY name = 'LANGU'.
-    IF sy-subrc = 0.
-      CALL FUNCTION 'CONVERSION_EXIT_ISOLA_INPUT'
-        EXPORTING
-          input            = <ls_key_tab>-value
-        IMPORTING
-          output           = lv_langu
-        EXCEPTIONS
-          unknown_language = 1
-          OTHERS           = 2.
-
-    ENDIF.
-
-
-    er_entity-fieldname = it_key_tab[ name = 'VIEWNAME' ]-value.
-    er_entity-tabname = it_key_tab[ name = 'COLUMN' ]-value.
-    er_entity-value = it_key_tab[ name = 'VALUE' ]-value.
-    er_entity-langu = lv_langu.
-
-    mo_controller->verify_field_data(
-      EXPORTING
-        iv_langu        = lv_langu
-        iv_view_name    = CONV tabname( it_key_tab[ name = 'VIEWNAME' ]-value )
-        iv_fieldname    = CONV fieldname( it_key_tab[ name = 'COLUMN' ]-value )
-        iv_value        = it_key_tab[ name = 'VALUE' ]-value
-      IMPORTING
-        ev_message_type = er_entity-message_type
-        ev_message      = er_entity-message ).
+  " ----- DEPRECATED ----
+*    DATA lv_langu TYPE sy-langu.
+*
+*
+*    READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_key_tab>) WITH KEY name = 'LANGU'.
+*    IF sy-subrc = 0.
+*      CALL FUNCTION 'CONVERSION_EXIT_ISOLA_INPUT'
+*        EXPORTING
+*          input            = <ls_key_tab>-value
+*        IMPORTING
+*          output           = lv_langu
+*        EXCEPTIONS
+*          unknown_language = 1
+*          OTHERS           = 2.
+*
+*    ENDIF.
+*
+*
+*    er_entity-fieldname = it_key_tab[ name = 'VIEWNAME' ]-value.
+*    er_entity-tabname = it_key_tab[ name = 'COLUMN' ]-value.
+*    er_entity-value = it_key_tab[ name = 'VALUE' ]-value.
+*    er_entity-langu = lv_langu.
+*
+*    mo_controller->verify_field_data(
+*      EXPORTING
+*        iv_langu        = lv_langu
+*        iv_view_name    = CONV tabname( it_key_tab[ name = 'VIEWNAME' ]-value )
+*        iv_fieldname    = CONV fieldname( it_key_tab[ name = 'COLUMN' ]-value )
+*        iv_value        = it_key_tab[ name = 'VALUE' ]-value
+*      IMPORTING
+*        ev_message_type = er_entity-message_type
+*        ev_message      = er_entity-message ).
 
   ENDMETHOD.
 
