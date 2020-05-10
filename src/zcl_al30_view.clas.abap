@@ -1707,22 +1707,30 @@ CLASS zcl_al30_view IMPLEMENTATION.
 * el campo de línea en el diccionario
     LOOP AT ct_datos ASSIGNING FIELD-SYMBOL(<ls_wa>).
 
-      " Campo de posicion
-      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-tabix OF STRUCTURE <ls_wa> TO FIELD-SYMBOL(<field>).
-      IF sy-subrc = 0.
-        <field> = sy-tabix.
-      ENDIF.
+      " Desde el 10/05/2020 la posición no se inicializa porque ya se hace al insertar posiciones o cuando se leen del diccionario. Y resetearla
+      " provoca inconsistencia con la aplicación de UI5
+*      " Campo de posicion
+*      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-tabix OF STRUCTURE <ls_wa> TO FIELD-SYMBOL(<field>).
+*      IF sy-subrc = 0.
+*        <field> = sy-tabix.
+*      ENDIF.
 
-      " El registro ya no existe en el diccionario
-      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-is_dict OF STRUCTURE <ls_wa> TO <field>.
-      IF sy-subrc = 0.
-        <field> = abap_false.
-      ENDIF.
 
 * Campo de actualizacion
-      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-updkz OF STRUCTURE <ls_wa> TO <field>.
+      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-updkz OF STRUCTURE <ls_wa> TO FIELD-SYMBOL(<updkz>).
       IF sy-subrc = 0.
-        <field> = space.
+
+
+        " Si se inserta el registro después de grabar se marca como del diccionario
+        IF <updkz> = zif_al30_data=>cv_mode_insert.
+
+          ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-is_dict OF STRUCTURE <ls_wa> TO FIELD-SYMBOL(<is_dict>).
+          IF sy-subrc = 0.
+            <is_dict> = abap_true.
+          ENDIF.
+        ENDIF.
+
+        <updkz> = space.
       ENDIF.
 
     ENDLOOP.

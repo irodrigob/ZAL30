@@ -462,12 +462,19 @@ FORM row_insert USING pe_modif TYPE lvc_s_modi
 
   ENDLOOP.
 
-* Pongo que esa línea es insertada
+  " Pongo que esa línea es insertada
   CALL METHOD ps_data_changed->modify_cell
     EXPORTING
       i_row_id    = pe_modif-row_id
       i_fieldname = zif_al30_data=>cs_control_fields_alv_data-updkz
       i_value     = zif_al30_data=>cv_mode_insert.
+
+  " Pongo el número de linea
+  CALL METHOD ps_data_changed->modify_cell
+    EXPORTING
+      i_row_id    = pe_modif-row_id
+      i_fieldname = zif_al30_data=>cs_control_fields_alv_data-tabix
+      i_value     = pe_modif-row_id.
 
 ENDFORM.                    " ROW_INSERT
 *&---------------------------------------------------------------------*

@@ -96,12 +96,12 @@ CLASS zcl_al30_ui5_test_exit IMPLEMENTATION.
   METHOD zif_al30_exit_class~exit_verify_row_data.
 
 
-    IF iv_save_process = abap_true.
-      ASSIGN COMPONENT 'FIELDWAERS' OF STRUCTURE is_row_data TO FIELD-SYMBOL(<waers>).
-      IF sy-subrc = 0.
-        INSERT VALUE #( type = 'E' id = 'ZCA_AL30' number = '0000' message_v1 = 'GBP no permitido' ) INTO TABLE et_return.
-      ENDIF.
-    ENDIF.
+*    IF iv_save_process = abap_true.
+*      ASSIGN COMPONENT 'FIELDWAERS' OF STRUCTURE is_row_data TO FIELD-SYMBOL(<waers>).
+*      IF sy-subrc = 0.
+*        INSERT VALUE #( type = 'E' id = 'ZCA_AL30' number = '0000' message_v1 = 'GBP no permitido' ) INTO TABLE et_return.
+*      ENDIF.
+*    ENDIF.
 
   ENDMETHOD.
 

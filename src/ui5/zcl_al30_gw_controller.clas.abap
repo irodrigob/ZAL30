@@ -620,10 +620,12 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
   ENDMETHOD.
   METHOD save_data.
+    DATA lo_data_del_orig TYPE REF TO data.
     FIELD-SYMBOLS <data> TYPE STANDARD TABLE.
     FIELD-SYMBOLS <data_ok> TYPE STANDARD TABLE.
     FIELD-SYMBOLS <original_data> TYPE STANDARD TABLE.
     FIELD-SYMBOLS <data_del> TYPE STANDARD TABLE.
+    FIELD-SYMBOLS <data_del_orig> TYPE STANDARD TABLE.
 
     " El mismo valor que entra es el que sale. En el proceso ya se irán cambiando valores
     ev_data = iv_data.
@@ -673,6 +675,14 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
       split_data_to_save( CHANGING ct_data = <data>
                                   ct_data_del = <data_del> ).
 
+      " Como en proceso de grabación los datos original se "limpian" si va todo bien, lo que hago es crear una tabla local
+      " temporal para guardar los datos originales del borrado. Para cuando el proceso de grabación termine ponerlo en la tabla original
+      " y pueda ser procesado por UI5.
+      CREATE DATA lo_data_del_orig LIKE <data_del>.
+      ASSIGN lo_data_del_orig->* TO <data_del_orig>.
+      INSERT LINES OF <data_del> INTO TABLE <data_del_orig>.
+
+
       mo_view->verify_save_data(
         EXPORTING
           it_data_del = <data_del>
@@ -689,17 +699,25 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
         READ TABLE <data> TRANSPORTING NO FIELDS WITH KEY (zif_al30_data=>cs_control_fields_alv_data-row_status) = zif_al30_data=>cs_msg_type-error.
         IF sy-subrc NE 0.
 
-          CALL METHOD mo_view->save_data
-            EXPORTING
-              iv_allow_request = abap_false
-            IMPORTING
-              et_return        = DATA(lt_return_save)
-            CHANGING
-*             cv_order         = cv_order
-              ct_datos         = <data>
-              ct_datos_del     = <data_del>.
+*          CALL METHOD mo_view->save_data
+*            EXPORTING
+*              iv_allow_request = abap_false
+*            IMPORTING
+*              et_return        = DATA(lt_return_save)
+*            CHANGING
+**             cv_order         = cv_order
+*              ct_datos         = <data>
+*              ct_datos_del     = <data_del>.
 
-          INSERT LINES OF lt_return_save INTO TABLE lt_return.
+*          INSERT LINES OF lt_return_save INTO TABLE lt_return.
+
+          " Si hay registros en los datos de borrado originales pero no hay en los que se han enviado a procesar. Es que todo ha ido
+          " bien, por lo tanto, inserto los originales.Sino, añado lo que se ha enviado por el servicio
+          IF <data_del> IS INITIAL AND <data_del_orig> IS NOT INITIAL.
+            INSERT LINES OF <data_del_orig> INTO TABLE <data>.
+          ELSE.
+            INSERT LINES OF <data_del> INTO TABLE <data>.
+          ENDIF.
 
         ENDIF.
 
