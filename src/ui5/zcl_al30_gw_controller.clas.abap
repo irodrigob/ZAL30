@@ -174,11 +174,18 @@ CLASS zcl_al30_gw_controller DEFINITION
         iv_langu       TYPE sylangu
       CHANGING
         cs_data        TYPE any.
-    "! <p class="shorttext synchronized">Adapt ALV style to UI5</p>
+    "! <p class="shorttext synchronized">Adapt ALV data to UI5</p>
+    "! 1) Apply conversion exit
+    "! 2) Adapt ALV field style to UI5
+    "! @parameter it_fields_ddic | <p class="shorttext synchronized">DDIC fields</p>
     "! @parameter co_data | <p class="shorttext synchronized">Values</p>
-    METHODS adapt_alv_field_style_2_ui5
+    "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    METHODS adapt_alv_data_2_ui5
+      IMPORTING
+        !it_fields_ddic TYPE dd03ptab
+        !iv_langu       TYPE sylangu DEFAULT sy-langu
       CHANGING
-        co_data TYPE REF TO data.
+        !co_data        TYPE REF TO data.
     "! <p class="shorttext synchronized">Adapt UI5 style to ALV</p>
     "! @parameter co_data | <p class="shorttext synchronized">Values</p>
     METHODS adapt_ui5_field_style_2_alv
@@ -200,6 +207,16 @@ CLASS zcl_al30_gw_controller DEFINITION
         iv_langu      TYPE sylangu DEFAULT sy-langu
       EXPORTING
         et_return_ui5 TYPE zif_al30_ui5_data=>tt_return.
+    "! <p class="shorttext synchronized">Apply output conversion exit to the row</p>
+    "! @parameter it_fields_ddic | <p class="shorttext synchronized">DDIC fields</p>
+    "! @parameter cs_row | <p class="shorttext synchronized">Row data</p>
+    "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    METHODS apply_conv_exit_output
+      IMPORTING
+        !iv_langu       TYPE sylangu DEFAULT sy-langu
+        !it_fields_ddic TYPE dd03ptab
+      CHANGING
+        !cs_row         TYPE any.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -208,7 +225,7 @@ ENDCLASS.
 CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
 
-  METHOD adapt_alv_field_style_2_ui5.
+  METHOD adapt_alv_data_2_ui5.
     FIELD-SYMBOLS <data> TYPE STANDARD TABLE.
     FIELD-SYMBOLS <lt_alv_style> TYPE lvc_t_styl.
     FIELD-SYMBOLS <lt_ui5_style> TYPE zal30_i_ui5_fields_styles.
@@ -216,6 +233,11 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     ASSIGN co_data->* TO <data>.
 
     LOOP AT <data> ASSIGNING FIELD-SYMBOL(<wa>).
+
+      " Aplico las rutinas de conversion a los campos que la tengan
+      apply_conv_exit_output( EXPORTING it_fields_ddic = it_fields_ddic
+                                        CHANGING cs_row = <wa> ).
+
       ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-style OF STRUCTURE <wa> TO <lt_alv_style>.
       IF sy-subrc = 0.
         IF <lt_alv_style> IS NOT INITIAL.
@@ -422,8 +444,10 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
                           IMPORTING es_return = ls_return
                           CHANGING co_data = lo_data ).
 
-      " Se adapta lo estilos de SAP a los de UI5
-      adapt_alv_field_style_2_ui5( CHANGING co_data = lo_data ).
+
+      " Se adapta los datos del ALV a los de UI5.
+      adapt_alv_data_2_ui5( EXPORTING it_fields_ddic = lt_fields_ddic
+                            CHANGING co_data = lo_data ).
 
 
       ASSIGN lo_data->* TO <data>.
@@ -475,6 +499,7 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
       LOOP AT lt_fieldcat ASSIGNING FIELD-SYMBOL(<ls_fieldcat>).
         DATA(ls_fields) = CORRESPONDING zif_al30_ui5_data=>ts_view_fields( <ls_fieldcat> ).
+        ls_fields-tabname = iv_view_name. " Pongo el nombre de la vista, porque en el fieldcatalog viene el valor 1
         ls_fields-len = <ls_fieldcat>-intlen.
         ls_fields-type = <ls_fieldcat>-inttype.
 
@@ -569,8 +594,9 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
         CHANGING
           cs_row_data = <wa> ).
 
-      " Se adapta lo estilos de SAP a los de UI5
-      adapt_alv_field_style_2_ui5( CHANGING co_data = lo_data ).
+      " Se adapta los datos de SAP a UI5
+      adapt_alv_data_2_ui5( EXPORTING it_fields_ddic = lt_fields_ddic
+                            CHANGING co_data = lo_data ).
 
       " Se convierte de los datos de sap a JSON
       ev_row = zcl_al30_ui5_json=>zserialize( data = <wa> pretty_name = /ui2/cl_json=>pretty_mode-none ).
@@ -723,8 +749,9 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
       ENDIF.
 
-      " Se adapta lo estilos de SAP a los de UI5
-      adapt_alv_field_style_2_ui5( CHANGING co_data = lo_data ).
+      " Se adapta los datos de SAP a los de UI5
+      adapt_alv_data_2_ui5( EXPORTING it_fields_ddic = lt_fields_ddic
+                            CHANGING co_data = lo_data ).
 
       " Se convierte de los datos de sap a JSON
       ev_data = zcl_al30_ui5_json=>zserialize( data = <data> pretty_name = /ui2/cl_json=>pretty_mode-none ).
@@ -778,6 +805,39 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
                                                                      iv_message_v4 = <ls_return>-message_v4
                                                                      iv_langu = iv_langu )-message.
 
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD apply_conv_exit_output.
+
+    LOOP AT it_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WHERE convexit IS NOT INITIAL.
+      ASSIGN COMPONENT <ls_fields_ddic>-fieldname OF STRUCTURE cs_row TO FIELD-SYMBOL(<field>).
+      " Hay determinadas conversiones que no se pueden hacer dinámicas, como la de unidad que se pasa el idioma
+      CASE <ls_fields_ddic>-convexit.
+        WHEN 'CUNIT'.
+          CALL FUNCTION 'CONVERSION_EXIT_CUNIT_OUTPUT'
+            EXPORTING
+              input          = <field>
+              language       = iv_langu
+            IMPORTING
+              output         = <field>
+            EXCEPTIONS
+              unit_not_found = 1
+              OTHERS         = 2.
+
+        WHEN OTHERS.
+          DATA(lv_function) = |CONVERSION_EXIT_{ <ls_fields_ddic>-convexit }_OUTPUT|.
+          TRY.
+              CALL FUNCTION lv_function
+                EXPORTING
+                  input  = <field>
+                IMPORTING
+                  output = <field>.
+            CATCH cx_root.
+          ENDTRY.
+      ENDCASE.
     ENDLOOP.
 
   ENDMETHOD.
