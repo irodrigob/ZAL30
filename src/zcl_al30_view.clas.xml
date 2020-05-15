@@ -184,6 +184,12 @@
     </SEOCOMPOTX>
     <SEOCOMPOTX>
      <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
+     <CMPNAME>GET_ALLOWED_TRANSPORT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Returns if it is possible to transport</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW</CLSNAME>
      <CMPNAME>GET_FIELDCAT_VIEW</CMPNAME>
      <LANGU>E</LANGU>
      <DESCRIPT>Get fieldcat for the display the view</DESCRIPT>

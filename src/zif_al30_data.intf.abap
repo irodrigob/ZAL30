@@ -77,6 +77,11 @@ INTERFACE zif_al30_data
            message TYPE string,
          END OF ts_row_status_msg.
   TYPES: tt_row_status_msg TYPE STANDARD TABLE OF ts_row_status_msg WITH EMPTY KEY.
+  TYPES: BEGIN OF ts_allowed_transport_view,
+           view_name TYPE tabname,
+           allowed   TYPE sap_bool,
+         END OF ts_allowed_transport_view.
+  TYPES: tt_allowed_transport_view TYPE SORTED TABLE OF ts_allowed_transport_view WITH UNIQUE KEY view_name.
 
   CONSTANTS:
     BEGIN OF cs_internal_tables,

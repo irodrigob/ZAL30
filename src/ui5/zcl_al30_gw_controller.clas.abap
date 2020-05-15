@@ -6,24 +6,24 @@ CLASS zcl_al30_gw_controller DEFINITION
   PUBLIC SECTION.
     "! <p class="shorttext synchronized">Get the view list</p>
     "!
-    "! @parameter iv_user | <p class="shorttext synchronized" >User</p>
-    "! @parameter iv_langu | <p class="shorttext synchronized" >Language</p>
-    "! @parameter it_r_views | <p class="shorttext synchronized" >Views to filter</p>
-    "! @parameter et_view | <p class="shorttext synchronized" >View list</p>
+    "! @parameter iv_user | <p class="shorttext synchronized">User</p>
+    "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    "! @parameter it_r_views | <p class="shorttext synchronized">Views to filter</p>
+    "! @parameter et_view | <p class="shorttext synchronized">View list</p>
     METHODS get_views
       IMPORTING
         !iv_user    TYPE string
         !iv_langu   TYPE sylangu DEFAULT sy-langu
         !it_r_views TYPE zif_al30_data=>tt_r_tabname OPTIONAL
       EXPORTING
-        !et_views   TYPE zif_al30_ui5_data=>tt_view_list_auth.
+        !et_views   TYPE zif_al30_ui5_data=>tt_view_list.
     "! <p class="shorttext synchronized" lang="en">CONSTRUCTOR</p>
     "!
     METHODS constructor.
     "! <p class="shorttext synchronized">Check the authorization level in view</p>
     "!
-    "! @parameter iv_view_name | <p class="shorttext synchronized" >View name</p>
-    "! @parameter iv_view_action | <p class="shorttext synchronized" l>'U' Update 'S' Show</p>
+    "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
+    "! @parameter iv_view_action | <p class="shorttext synchronized">'U' Update 'S' Show</p>
     "! @parameter iv_user | <p class="shorttext synchronized">Username</p>
     "! @parameter rv_level_auth | <p class="shorttext synchronized">Level auth</p>
     METHODS check_authorization_view
@@ -145,8 +145,8 @@ CLASS zcl_al30_gw_controller DEFINITION
         !et_fields_text_view TYPE zif_al30_data=>tt_fields_text_view
         !et_fields_ddic      TYPE dd03ptab .
 
-    "! <p class="shorttext synchronized">Reading the view configuration to be used in the view data class</p>
-    "!
+    "! <p class="shorttext synchronized">Reading the view configuration to used in view data class</p>
+    "!Reading the view configuration to be used in the view data class
     "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
     "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
     "! @parameter es_return | <p class="shorttext synchronized">Return</p>
@@ -186,11 +186,23 @@ CLASS zcl_al30_gw_controller DEFINITION
         !iv_langu       TYPE sylangu DEFAULT sy-langu
       CHANGING
         !co_data        TYPE REF TO data.
-    "! <p class="shorttext synchronized">Adapt UI5 style to ALV</p>
+    "! <p class="shorttext synchronized">Adapt UI5 data to ALV</p>
+    "! 1) Apply conversion exit
+    "! 2) Adapt UI5 field style to ALV
+    "! @parameter it_fields_ddic | <p class="shorttext synchronized">DDIC fields</p>
     "! @parameter co_data | <p class="shorttext synchronized">Values</p>
+    "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    METHODS adapt_ui5_data_2_alv
+      IMPORTING
+        !it_fields_ddic TYPE dd03ptab
+        !iv_langu       TYPE sylangu DEFAULT sy-langu
+      CHANGING
+        !co_data        TYPE REF TO data.
+    "! <p class="shorttext synchronized">Adapt UI5 style to ALV</p>
+    "! @parameter cs_row | <p class="shorttext synchronized">Row data</p>
     METHODS adapt_ui5_field_style_2_alv
       CHANGING
-        co_data TYPE REF TO data.
+        cs_row TYPE any.
     "! <p class="shorttext synchronized">Split data to save</p>
     "! @parameter ct_data | <p class="shorttext synchronized">Data inserted o changed</p>
     "! @parameter ct_data_del | <p class="shorttext synchronized">Data to delete</p>
@@ -213,10 +225,25 @@ CLASS zcl_al30_gw_controller DEFINITION
     "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
     METHODS apply_conv_exit_output
       IMPORTING
-        !iv_langu       TYPE sylangu DEFAULT sy-langu
-        !it_fields_ddic TYPE dd03ptab
+        iv_langu       TYPE sylangu DEFAULT sy-langu
+        it_fields_ddic TYPE dd03ptab
       CHANGING
-        !cs_row         TYPE any.
+        cs_row         TYPE any.
+    "! <p class="shorttext synchronized">Adapt ALV style to UI5</p>
+    "! @parameter co_data | <p class="shorttext synchronized">Values</p>
+    METHODS adapt_alv_field_style_2_ui5
+      CHANGING
+        cs_row TYPE any.
+    "! <p class="shorttext synchronized">Apply input conversion exit to the row</p>
+    "! @parameter it_fields_ddic | <p class="shorttext synchronized">DDIC fields</p>
+    "! @parameter cs_row | <p class="shorttext synchronized">Row data</p>
+    "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    METHODS apply_conv_exit_input
+      IMPORTING
+        it_fields_ddic TYPE dd03ptab
+        iv_langu       TYPE sylangu DEFAULT sy-langu
+      CHANGING
+        cs_row         TYPE any.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -227,45 +254,17 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
   METHOD adapt_alv_data_2_ui5.
     FIELD-SYMBOLS <data> TYPE STANDARD TABLE.
-    FIELD-SYMBOLS <lt_alv_style> TYPE lvc_t_styl.
-    FIELD-SYMBOLS <lt_ui5_style> TYPE zal30_i_ui5_fields_styles.
-
     ASSIGN co_data->* TO <data>.
 
     LOOP AT <data> ASSIGNING FIELD-SYMBOL(<wa>).
 
       " Aplico las rutinas de conversion a los campos que la tengan
       apply_conv_exit_output( EXPORTING it_fields_ddic = it_fields_ddic
+                                        iv_langu = iv_langu
                                         CHANGING cs_row = <wa> ).
 
-      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-style OF STRUCTURE <wa> TO <lt_alv_style>.
-      IF sy-subrc = 0.
-        IF <lt_alv_style> IS NOT INITIAL.
-          ASSIGN COMPONENT zif_al30_ui5_data=>cs_control_fields_ui5_data-style OF STRUCTURE <wa> TO <lt_ui5_style>.
-          IF sy-subrc = 0.
-            LOOP AT <lt_alv_style> ASSIGNING FIELD-SYMBOL(<ls_alv_style>).
-              " Como puede ser que el estilo lo hayan metido en el estilo de ui5, lo  verifico antes de insertarlo
-              IF <ls_alv_style>-style = cl_gui_alv_grid=>mc_style_disabled.
-                READ TABLE <lt_ui5_style> TRANSPORTING NO FIELDS WITH KEY fieldname = <ls_alv_style>-fieldname
-                                                                          editable = zif_al30_ui5_data=>cs_javascript_boolean-false.
-                IF sy-subrc NE 0.
-                  INSERT VALUE #( fieldname = <ls_alv_style>-fieldname editable = zif_al30_ui5_data=>cs_javascript_boolean-false ) INTO TABLE <lt_ui5_style>.
-                ENDIF.
-              ENDIF.
-              IF <ls_alv_style>-style = cl_gui_alv_grid=>mc_style_enabled.
-                READ TABLE <lt_ui5_style> TRANSPORTING NO FIELDS WITH KEY fieldname = <ls_alv_style>-fieldname
-                                                                          editable = zif_al30_ui5_data=>cs_javascript_boolean-true.
-                IF sy-subrc NE 0.
-                  INSERT VALUE #( fieldname = <ls_alv_style>-fieldname editable = zif_al30_ui5_data=>cs_javascript_boolean-true ) INTO TABLE <lt_ui5_style>.
-                ENDIF.
-              ENDIF.
-            ENDLOOP.
-          ENDIF.
-
-          " Se limpia la tabla de estilos de ALV porque no es necesario que viaje y asi se reduce el tamaño de datos a enviar
-          CLEAR <lt_alv_style>.
-        ENDIF.
-      ENDIF.
+      " Se convierten los estilo del ALV a UI5.
+      adapt_alv_field_style_2_ui5( CHANGING cs_row = <wa> ).
 
     ENDLOOP.
 
@@ -277,27 +276,22 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     FIELD-SYMBOLS <lt_alv_style> TYPE lvc_t_styl.
     FIELD-SYMBOLS <lt_ui5_style> TYPE zal30_i_ui5_fields_styles.
 
-    ASSIGN co_data->* TO <data>.
-
-    LOOP AT <data> ASSIGNING FIELD-SYMBOL(<wa>).
-      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-style OF STRUCTURE <wa> TO <lt_alv_style>.
-      IF sy-subrc = 0.
-        IF <lt_alv_style> IS NOT INITIAL.
-          ASSIGN COMPONENT zif_al30_ui5_data=>cs_control_fields_ui5_data-style OF STRUCTURE <wa> TO <lt_ui5_style>.
-          IF sy-subrc = 0.
-            " Los estilos del ALV se borran cuando se envian a UI5 para reducir los datos que viajan. Por lo tanto, ahora hay que leer e insertar
-            LOOP AT <lt_ui5_style> ASSIGNING FIELD-SYMBOL(<ls_ui5_style>).
-              INSERT VALUE #( fieldname = <ls_ui5_style>-fieldname
-                              style = COND #( WHEN <ls_ui5_style>-editable = abap_true THEN cl_gui_alv_grid=>mc_style_disabled ELSE cl_gui_alv_grid=>mc_style_enabled ) )
-                     INTO TABLE <lt_alv_style>.
-            ENDLOOP.
-          ENDIF.
-          " Se limpia la tabla de estilos de UI5
-          CLEAR <lt_ui5_style>.
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-style OF STRUCTURE cs_row TO <lt_alv_style>.
+    IF sy-subrc = 0.
+      IF <lt_alv_style> IS NOT INITIAL.
+        ASSIGN COMPONENT zif_al30_ui5_data=>cs_control_fields_ui5_data-style OF STRUCTURE cs_row TO <lt_ui5_style>.
+        IF sy-subrc = 0.
+          " Los estilos del ALV se borran cuando se envian a UI5 para reducir los datos que viajan. Por lo tanto, ahora hay que leer e insertar
+          LOOP AT <lt_ui5_style> ASSIGNING FIELD-SYMBOL(<ls_ui5_style>).
+            INSERT VALUE #( fieldname = <ls_ui5_style>-fieldname
+                            style = COND #( WHEN <ls_ui5_style>-editable = abap_true THEN cl_gui_alv_grid=>mc_style_disabled ELSE cl_gui_alv_grid=>mc_style_enabled ) )
+                   INTO TABLE <lt_alv_style>.
+          ENDLOOP.
         ENDIF.
+        " Se limpia la tabla de estilos de UI5
+        CLEAR <lt_ui5_style>.
       ENDIF.
-
-    ENDLOOP.
+    ENDIF.
 
   ENDMETHOD.
 
@@ -379,6 +373,9 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
                                   it_r_views = it_r_views
                         IMPORTING et_view_list = DATA(lt_views) ).
 
+    mo_view->get_allowed_transport( EXPORTING it_r_views = it_r_views
+                                    IMPORTING et_allowed_transport = DATA(lt_allowed_transport) ).
+
     " Se recorre los datos y se mira si te tiene autorización
     LOOP AT lt_views REFERENCE INTO DATA(lo_views).
       DATA(lv_auth) = mo_controller->check_authorization_view( EXPORTING iv_view_name   = lo_views->view_name
@@ -388,9 +385,18 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
       IF lv_auth NE zif_al30_data=>cs_level_auth_user-non. " Si tiene permiso se añade
         INSERT VALUE #( view_name = lo_views->view_name
                         view_desc = lo_views->view_desc
-                        level_auth = lv_auth ) INTO TABLE et_views.
+                        level_auth = lv_auth ) INTO TABLE et_views ASSIGNING FIELD-SYMBOL(<s_views>).
+
+        " Se mira si se puede para transportar
+        READ TABLE lt_allowed_transport ASSIGNING FIELD-SYMBOL(<ls_allowed_transport>) WITH TABLE KEY view_name = lo_views->view_name.
+        IF sy-subrc = 0.
+          <s_views>-allow_transport = <ls_allowed_transport>-allowed.
+        ENDIF.
+
       ENDIF.
       CLEAR lv_auth.
+
+
     ENDLOOP.
 
   ENDMETHOD.
@@ -581,8 +587,10 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
                                                 pretty_name = /ui2/cl_json=>pretty_mode-none
                                       CHANGING data = <wa> ).
 
-      " Se adaptan los estilos de UI5 al del ALV por si se modifican en las exit
-      adapt_ui5_field_style_2_alv( CHANGING co_data = lo_data ).
+      " Se adaptan los datos de UI5 al del ALV por si se modifican en las exit
+      adapt_ui5_data_2_alv( EXPORTING it_fields_ddic = lt_fields_ddic
+                                     iv_langu = iv_langu
+                            CHANGING co_data = lo_data ).
 
       " Al método de verificación y validación se le tiene que pasar la fila del ALV en que se modifica el registro. Ese dato viene en el campo
       " fijo ZAL30_TABIX que lo recupero para pasarlo
@@ -694,8 +702,10 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
                                                 pretty_name = /ui2/cl_json=>pretty_mode-none
                                       CHANGING data = <data> ).
 
-      " Se adaptan los estilos de UI5 al del ALV por si se modifican en las exit
-      adapt_ui5_field_style_2_alv( CHANGING co_data = lo_data ).
+      " Se adaptan los datos de UI5 al del ALV por si se modifican en las exit
+      adapt_ui5_data_2_alv( EXPORTING it_fields_ddic = lt_fields_ddic
+                                iv_langu = iv_langu
+                       CHANGING co_data = lo_data ).
 
       " Separo los datos borrados de los modificados/insertados
       split_data_to_save( CHANGING ct_data = <data>
@@ -725,17 +735,17 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
         READ TABLE <data> TRANSPORTING NO FIELDS WITH KEY (zif_al30_data=>cs_control_fields_alv_data-row_status) = zif_al30_data=>cs_msg_type-error.
         IF sy-subrc NE 0.
 
-*          CALL METHOD mo_view->save_data
-*            EXPORTING
-*              iv_allow_request = abap_false
-*            IMPORTING
-*              et_return        = DATA(lt_return_save)
-*            CHANGING
-**             cv_order         = cv_order
-*              ct_datos         = <data>
-*              ct_datos_del     = <data_del>.
+          CALL METHOD mo_view->save_data
+            EXPORTING
+              iv_allow_request = abap_false
+            IMPORTING
+              et_return        = DATA(lt_return_save)
+            CHANGING
+*             cv_order         = cv_order
+              ct_datos         = <data>
+              ct_datos_del     = <data_del>.
 
-*          INSERT LINES OF lt_return_save INTO TABLE lt_return.
+          INSERT LINES OF lt_return_save INTO TABLE lt_return.
 
           " Si hay registros en los datos de borrado originales pero no hay en los que se han enviado a procesar. Es que todo ha ido
           " bien, por lo tanto, inserto los originales.Sino, añado lo que se ha enviado por el servicio
@@ -840,6 +850,88 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
       ENDCASE.
     ENDLOOP.
 
+  ENDMETHOD.
+
+
+  METHOD adapt_alv_field_style_2_ui5.
+    FIELD-SYMBOLS <lt_alv_style> TYPE lvc_t_styl.
+    FIELD-SYMBOLS <lt_ui5_style> TYPE zal30_i_ui5_fields_styles.
+
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-style OF STRUCTURE cs_row TO <lt_alv_style>.
+    IF sy-subrc = 0.
+      IF <lt_alv_style> IS NOT INITIAL.
+        ASSIGN COMPONENT zif_al30_ui5_data=>cs_control_fields_ui5_data-style OF STRUCTURE cs_row TO <lt_ui5_style>.
+        IF sy-subrc = 0.
+          LOOP AT <lt_alv_style> ASSIGNING FIELD-SYMBOL(<ls_alv_style>).
+            " Como puede ser que el estilo lo hayan metido en el estilo de ui5, lo  verifico antes de insertarlo
+            IF <ls_alv_style>-style = cl_gui_alv_grid=>mc_style_disabled.
+              READ TABLE <lt_ui5_style> TRANSPORTING NO FIELDS WITH KEY fieldname = <ls_alv_style>-fieldname
+                                                                        editable = zif_al30_ui5_data=>cs_javascript_boolean-false.
+              IF sy-subrc NE 0.
+                INSERT VALUE #( fieldname = <ls_alv_style>-fieldname editable = zif_al30_ui5_data=>cs_javascript_boolean-false ) INTO TABLE <lt_ui5_style>.
+              ENDIF.
+            ENDIF.
+            IF <ls_alv_style>-style = cl_gui_alv_grid=>mc_style_enabled.
+              READ TABLE <lt_ui5_style> TRANSPORTING NO FIELDS WITH KEY fieldname = <ls_alv_style>-fieldname
+                                                                        editable = zif_al30_ui5_data=>cs_javascript_boolean-true.
+              IF sy-subrc NE 0.
+                INSERT VALUE #( fieldname = <ls_alv_style>-fieldname editable = zif_al30_ui5_data=>cs_javascript_boolean-true ) INTO TABLE <lt_ui5_style>.
+              ENDIF.
+            ENDIF.
+          ENDLOOP.
+        ENDIF.
+
+        " Se limpia la tabla de estilos de ALV porque no es necesario que viaje y asi se reduce el tamaño de datos a enviar
+        CLEAR <lt_alv_style>.
+      ENDIF.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD adapt_ui5_data_2_alv.
+    FIELD-SYMBOLS <data> TYPE STANDARD TABLE.
+    ASSIGN co_data->* TO <data>.
+
+    LOOP AT <data> ASSIGNING FIELD-SYMBOL(<wa>).
+
+      " Aplico las rutinas de conversion a los campos que la tengan
+      apply_conv_exit_input( EXPORTING it_fields_ddic = it_fields_ddic
+                                        CHANGING cs_row = <wa> ).
+
+      " Se convierten los estilo del ALV a UI5.
+      adapt_ui5_field_style_2_alv( CHANGING cs_row = <wa> ).
+
+    ENDLOOP.
+  ENDMETHOD.
+
+
+  METHOD apply_conv_exit_input.
+    LOOP AT it_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WHERE convexit IS NOT INITIAL.
+      ASSIGN COMPONENT <ls_fields_ddic>-fieldname OF STRUCTURE cs_row TO FIELD-SYMBOL(<field>).
+      " Hay determinadas conversiones que no se pueden hacer dinámicas, como la de unidad que se pasa el idioma
+      CASE <ls_fields_ddic>-convexit.
+        WHEN 'CUNIT'.
+          CALL FUNCTION 'CONVERSION_EXIT_CUNIT_INPUT'
+            EXPORTING
+              input          = <field>
+              language       = iv_langu
+            IMPORTING
+              output         = <field>
+            EXCEPTIONS
+              unit_not_found = 1
+              OTHERS         = 2.
+
+        WHEN OTHERS.
+          DATA(lv_function) = |CONVERSION_EXIT_{ <ls_fields_ddic>-convexit }_INPUT|.
+          TRY.
+              CALL FUNCTION lv_function
+                EXPORTING
+                  input  = <field>
+                IMPORTING
+                  output = <field>.
+            CATCH cx_root.
+          ENDTRY.
+      ENDCASE.
+    ENDLOOP.
   ENDMETHOD.
 
 ENDCLASS.

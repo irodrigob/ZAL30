@@ -28,6 +28,9 @@ CLASS zcl_al30_view DEFINITION
       EXPORTING
         !et_view_list TYPE tt_view_list .
     "! <p class="shorttext synchronized">Read data of view</p>
+    "! @parameter is_filters | <p class="shorttext synchronized">Filters</p>
+    "! @parameter es_return | <p class="shorttext synchronized">Return</p>
+    "! @parameter co_data | <p class="shorttext synchronized">Data</p>
     METHODS read_data
       IMPORTING
         !is_filters TYPE zif_al30_data=>ts_filter_read_data
@@ -83,7 +86,7 @@ CLASS zcl_al30_view DEFINITION
     "! This method enters both when modifying / inserting fields, and when recording data
     "! @parameter iv_row | <p class="shorttext synchronized">Row number</p>
     "! @parameter cs_row_data | <p class="shorttext synchronized">Row data</p>
-    "! @parameter iv_save_process | <p class="shorttext synchronized" >Enter in save process</p>
+    "! @parameter iv_save_process | <p class="shorttext synchronized">Enter in save process</p>
     "! @parameter et_return | <p class="shorttext synchronized">Return table</p>
     METHODS verify_row_data
       IMPORTING
@@ -98,7 +101,7 @@ CLASS zcl_al30_view DEFINITION
     "! This exit is called when recording data
     "! @parameter it_data | <p class="shorttext synchronized">Data</p>
     "! @parameter it_data_del | <p class="shorttext synchronized">Data deleted</p>
-    "! @parameter iv_save_process | <p class="shorttext synchronized" >Enter in save process</p>
+    "! @parameter iv_save_process | <p class="shorttext synchronized">Enter in save process</p>
     "! @parameter et_return | <p class="shorttext synchronized">return</p>
     METHODS verify_save_data
       IMPORTING
@@ -181,6 +184,13 @@ CLASS zcl_al30_view DEFINITION
     METHODS constructor
       IMPORTING
         iv_langu TYPE sylangu DEFAULT sy-langu.
+    "! <p class="shorttext synchronized">Returns if it is possible to transport</p>
+    "! @parameter it_r_view_name | <p class="shorttext synchronized">Range of views</p>
+    METHODS get_allowed_transport
+      IMPORTING
+        it_r_views TYPE zif_al30_data=>tt_r_tabname
+      EXPORTING
+        et_allowed_transport TYPE zif_al30_data=>tt_allowed_transport_view.
 
   PROTECTED SECTION.
 
@@ -2360,4 +2370,24 @@ CLASS zcl_al30_view IMPLEMENTATION.
                 WHERE a~tabname IN it_r_views.
 
   ENDMETHOD.
+  METHOD get_allowed_transport.
+
+    CLEAR et_allowed_transport.
+
+    " Devuelve si se puede transportar a nivel de sistema.
+    DATA(lv_allowed_general) = zcl_al30_util=>allowed_transport( ).
+
+    " Se busca a nivel de vista
+    SELECT tabname, transport INTO TABLE @DATA(lt_views)
+           FROM zal30_t_view
+           WHERE tabname IN @it_r_views.
+
+    IF sy-subrc = 0.
+      " Si a nivel de sistema se puede transportar entonces se informa el valor configurado a nivel de vista. En caso contrario, no se podra transportar.
+      et_allowed_transport = VALUE #( FOR <wa> IN lt_views ( view_name = <wa>-tabname
+                                                             allowed = COND #( WHEN lv_allowed_general = abap_true THEN <wa>-transport ELSE abap_false ) ) ).
+    ENDIF.
+
+  ENDMETHOD.
+
 ENDCLASS.

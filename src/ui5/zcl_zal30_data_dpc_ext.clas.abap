@@ -106,7 +106,8 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
         et_views = DATA(lt_views) ).
 
     et_entityset = VALUE #( FOR <wa> IN lt_views ( view_name = <wa>-view_name view_desc = <wa>-view_desc
-                                                   level_auth = <wa>-level_auth ) ).
+                                                   level_auth = <wa>-level_auth
+                                                   allow_transport = <wa>-allow_transport ) ).
 
 
   ENDMETHOD.
@@ -255,7 +256,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
 
 
   METHOD verifyfielddatas_get_entity.
-  " ----- DEPRECATED ----
+    " ----- DEPRECATED ----
 *    DATA lv_langu TYPE sy-langu.
 *
 *
