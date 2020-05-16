@@ -22,6 +22,7 @@ CLASS zcl_zal30_data_dpc_ext DEFINITION
         REDEFINITION .
     METHODS rowvalidationdet_create_entity
         REDEFINITION .
+    METHODS userorderset_get_entityset REDEFINITION.
 
     METHODS verifyfielddatas_get_entity REDEFINITION.
     METHODS savedataset_create_entity REDEFINITION.
@@ -107,7 +108,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
 
     et_entityset = VALUE #( FOR <wa> IN lt_views ( view_name = <wa>-view_name view_desc = <wa>-view_desc
                                                    level_auth = <wa>-level_auth
-                                                   allow_transport = <wa>-allow_transport ) ).
+                                                   allowed_transport = <wa>-allowed_transport ) ).
 
 
   ENDMETHOD.
@@ -122,7 +123,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
       lv_viewname = <ls_key_tab>-value.
     ENDIF.
 
-    mo_controller->lock_view( EXPORTING iv_view_name = lv_viewname
+    mo_controller->lock_view( EXPORTING iv_view_name = CONV tabname( it_key_tab[ name = 'VIEWNAME' ]-value )
                               IMPORTING ev_locked = er_entity-already_locked
                                         ev_lock_by_user = er_entity-lockbyuser ).
 
@@ -153,23 +154,23 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
     ENDIF.
 
     " Nombre de la vista
-    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'VIEWNAME'.
-    IF sy-subrc = 0.
-      lv_viewname = <ls_key_tab>-value.
-    ENDIF.
-
-    " Modo de edición
-    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'MODE'.
-    IF sy-subrc = 0.
-      lv_mode = <ls_key_tab>-value.
-    ENDIF.
+*    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'VIEWNAME'.
+*    IF sy-subrc = 0.
+*      lv_viewname = <ls_key_tab>-value.
+*    ENDIF.
+*
+*    " Modo de edición
+*    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'MODE'.
+*    IF sy-subrc = 0.
+*      lv_mode = <ls_key_tab>-value.
+*    ENDIF.
 
     " Se llama al controlador para leer los datos
     mo_controller->read_data(
       EXPORTING
-        iv_view_name = lv_viewname
+        iv_view_name = CONV tabname( it_key_tab[ name = 'VIEWNAME' ]-value )
         iv_langu     = lv_langu
-        iv_mode      = lv_mode
+        iv_mode      = CONV #( it_key_tab[ name = 'MODE' ]-value )
       IMPORTING
         ev_data      = er_entity-data
         ev_data_template = er_entity-data_template ).
@@ -222,7 +223,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
       EXPORTING
         iv_view_name = lv_viewname
         iv_langu     = lv_langu
-        iv_mode = lv_mode
+        iv_mode =  lv_mode
       IMPORTING
         et_fields    = DATA(lt_fields) ).
 
@@ -310,6 +311,47 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
       IMPORTING
         ev_data       = er_entity-data
         ev_return = er_entity-return ).
+
+  ENDMETHOD.
+
+  METHOD userorderset_get_entityset.
+    DATA lv_langu.
+    DATA lv_user TYPE sy-uname.
+
+
+    " Se recupera el diioma
+    READ TABLE it_filter_select_options ASSIGNING FIELD-SYMBOL(<ls_filter>) WITH KEY property = 'LANGU'.
+    IF sy-subrc = 0.
+      READ TABLE <ls_filter>-select_options ASSIGNING FIELD-SYMBOL(<ls_select_options>) INDEX 1.
+      CALL FUNCTION 'CONVERSION_EXIT_ISOLA_INPUT'
+        EXPORTING
+          input            = <ls_select_options>-low
+        IMPORTING
+          output           = lv_langu
+        EXCEPTIONS
+          unknown_language = 1
+          OTHERS           = 2.
+
+    ENDIF.
+
+    " Usuario
+    READ TABLE it_filter_select_options ASSIGNING <ls_filter> WITH KEY property = 'USER'.
+    IF sy-subrc = 0.
+      READ TABLE <ls_filter>-select_options ASSIGNING <ls_select_options> INDEX 1.
+      IF sy-subrc = 0.
+        lv_user = <ls_select_options>-low.
+      ENDIF.
+    ENDIF.
+
+    mo_controller->get_user_orders(
+      EXPORTING
+        iv_user   = COND #( WHEN lv_user IS INITIAL THEN sy-uname ELSE lv_user  )
+        iv_langu  = lv_langu
+      IMPORTING
+        et_orders = DATA(lt_orders) ).
+
+    et_entityset = CORRESPONDING #( lt_orders ).
+
 
   ENDMETHOD.
 

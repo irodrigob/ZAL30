@@ -4,7 +4,7 @@ INTERFACE zif_al30_ui5_data
   TYPES: BEGIN OF ts_view_list.
       INCLUDE TYPE zcl_al30_view=>ts_view_list.
   TYPES: level_auth TYPE zal30_e_level_auth,
-         allow_transport type sap_bool,
+         allowed_transport type sap_bool,
          END OF ts_view_list.
   TYPES: tt_view_list TYPE STANDARD TABLE OF ts_view_list WITH EMPTY KEY.
   TYPES: BEGIN OF ts_view_fields.

@@ -1,7 +1,6 @@
 CLASS zcl_al30_view_ui5 DEFINITION
   PUBLIC
   INHERITING FROM zcl_al30_view
-  FINAL
   CREATE PUBLIC .
 
   PUBLIC SECTION.
@@ -11,6 +10,8 @@ CLASS zcl_al30_view_ui5 DEFINITION
     METHODS set_original_data
       IMPORTING
         !io_original_data TYPE REF TO data.
+
+
   PROTECTED SECTION.
     METHODS add_edit_fields REDEFINITION.
   PRIVATE SECTION.

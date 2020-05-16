@@ -117,6 +117,17 @@ CLASS zcl_al30_gw_controller DEFINITION
       EXPORTING
         !ev_data          TYPE string
         !ev_return        TYPE string.
+
+    "! <p class="shorttext synchronized">Get user orders</p>
+    "! @parameter iv_user | <p class="shorttext synchronized">User</p>
+    "! @parameter et_orders | <p class="shorttext synchronized">Orders of user</p>
+    METHODS get_user_orders
+      IMPORTING
+        !iv_user   TYPE syuname DEFAULT sy-uname
+        !iv_langu  TYPE sylangu DEFAULT sy-langu
+      EXPORTING
+        !et_orders TYPE zcl_al30_ui5_transport_order=>tt_user_orders.
+
   PROTECTED SECTION.
     DATA mo_controller TYPE REF TO zcl_al30_controller.
     DATA mo_conf TYPE REF TO zcl_al30_conf.
@@ -390,7 +401,7 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
         " Se mira si se puede para transportar
         READ TABLE lt_allowed_transport ASSIGNING FIELD-SYMBOL(<ls_allowed_transport>) WITH TABLE KEY view_name = lo_views->view_name.
         IF sy-subrc = 0.
-          <s_views>-allow_transport = <ls_allowed_transport>-allowed.
+          <s_views>-allowed_transport = <ls_allowed_transport>-allowed.
         ENDIF.
 
       ENDIF.
@@ -932,6 +943,14 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
           ENDTRY.
       ENDCASE.
     ENDLOOP.
+  ENDMETHOD.
+
+  METHOD get_user_orders.
+    NEW zcl_al30_ui5_transport_order( iv_langu )->get_user_orders(
+      EXPORTING
+        iv_user   = iv_user
+      IMPORTING
+        et_orders = et_orders ).
   ENDMETHOD.
 
 ENDCLASS.
