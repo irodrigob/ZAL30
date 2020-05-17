@@ -106,17 +106,19 @@ CLASS zcl_al30_gw_controller DEFINITION
     "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
     "! @parameter iv_data | <p class="shorttext synchronized">Data in JSON format</p>
     "! @parameter iv_original_data | <p class="shorttext synchronized">Original data</p>
+    "! @parameter iv_transport_order | <p class="shorttext synchronized">Transport order</p>
     "! @parameter ev_data | <p class="shorttext synchronized">Data in JSON format</p>
     "! @parameter ev_return | <p class="shorttext synchronized">Return of process</p>
     METHODS save_data
       IMPORTING
-        !iv_view_name     TYPE tabname
-        !iv_langu         TYPE sylangu DEFAULT sy-langu
-        !iv_data          TYPE string
-        !iv_original_data TYPE string
+        !iv_view_name       TYPE tabname
+        !iv_langu           TYPE sylangu DEFAULT sy-langu
+        !iv_data            TYPE string
+        !iv_original_data   TYPE string
+        !iv_transport_order TYPE trkorr OPTIONAL
       EXPORTING
-        !ev_data          TYPE string
-        !ev_return        TYPE string.
+        !ev_data            TYPE string
+        !ev_return          TYPE string.
 
     "! <p class="shorttext synchronized">Get user orders</p>
     "! @parameter iv_user | <p class="shorttext synchronized">User</p>
@@ -143,7 +145,8 @@ CLASS zcl_al30_gw_controller DEFINITION
     "! @parameter es_return | <p class="shorttext synchronized">Return</p>
     "! @parameter et_fields_view | <p class="shorttext synchronized">Fields of table</p>
     "! @parameter et_fields_text_view | <p class="shorttext synchronized">Texts of fields of table</p>
-    "! @parameter et_fields_ddic | <p class="shorttext synchronized">Fields of data from data dictioary</p>
+    "! @parameter et_fields_ddic | <p class="shorttext synchronized">Fields of data from data dictionary</p>
+    "! @parameter es_view | <p class="shorttext synchronized">View info</p>
     METHODS create_it_data_view
       IMPORTING
         !iv_view_name        TYPE tabname
@@ -154,7 +157,9 @@ CLASS zcl_al30_gw_controller DEFINITION
         !es_return           TYPE bapiret2
         !et_fields_view      TYPE zif_al30_data=>tt_fields_view
         !et_fields_text_view TYPE zif_al30_data=>tt_fields_text_view
-        !et_fields_ddic      TYPE dd03ptab .
+        !et_fields_ddic      TYPE dd03ptab
+        !es_view             TYPE zal30_t_view
+      .
 
     "! <p class="shorttext synchronized">Reading the view configuration to used in view data class</p>
     "!Reading the view configuration to be used in the view data class
@@ -255,6 +260,12 @@ CLASS zcl_al30_gw_controller DEFINITION
         iv_langu       TYPE sylangu DEFAULT sy-langu
       CHANGING
         cs_row         TYPE any.
+    "! <p class="shorttext synchronized">Get allowed transport for the view</p>
+    "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
+    "! @parameter rv_allowed | <p class="shorttext synchronized">Allowed</p>
+    METHODS get_allowed_transport
+      IMPORTING !iv_view_name     TYPE tabname
+      RETURNING VALUE(rv_allowed) TYPE sap_bool.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -354,7 +365,7 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
   METHOD create_it_data_view.
 
-    CLEAR: es_return, et_fields_ddic, et_fields_text_view, et_fields_view.
+    CLEAR: es_return, et_fields_ddic, et_fields_text_view, et_fields_view, es_view.
 
     " Se leen los datos de la vista y se pasan dichos valores a la clase encargada de gestionar los datos
     read_view_conf_for_data( EXPORTING iv_langu = iv_langu
@@ -362,7 +373,8 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
                              IMPORTING es_return = es_return
                                        et_fields_ddic = et_fields_ddic
                                        et_fields_text_view = et_fields_text_view
-                                       et_fields_view = et_fields_view ).
+                                       et_fields_view = et_fields_view
+                                       es_view = es_view ).
 
     IF es_return IS INITIAL.
 
@@ -684,7 +696,8 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
                          IMPORTING eo_data = DATA(lo_data)
                                    es_return = DATA(ls_return)
                                    et_fields_ddic = DATA(lt_fields_ddic)
-                                   et_fields_view = DATA(lt_fields_view) ).
+                                   et_fields_view = DATA(lt_fields_view)
+                                   es_view = DATA(ls_view) ).
 
     IF ls_return IS INITIAL AND lo_data IS BOUND.
       " Se añade un registro en blanco para poder hace el mapeo
@@ -746,13 +759,16 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
         READ TABLE <data> TRANSPORTING NO FIELDS WITH KEY (zif_al30_data=>cs_control_fields_alv_data-row_status) = zif_al30_data=>cs_msg_type-error.
         IF sy-subrc NE 0.
 
+          " la orden se pasa a una variable para que funcione con el parámetro changing
+          DATA(lv_order) = iv_transport_order.
+
           CALL METHOD mo_view->save_data
             EXPORTING
-              iv_allow_request = abap_false
+              iv_allow_request = get_allowed_transport( iv_view_name )
             IMPORTING
               et_return        = DATA(lt_return_save)
             CHANGING
-*             cv_order         = cv_order
+              cv_order         = lv_order
               ct_datos         = <data>
               ct_datos_del     = <data_del>.
 
@@ -951,6 +967,16 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
         iv_user   = iv_user
       IMPORTING
         et_orders = et_orders ).
+  ENDMETHOD.
+
+  METHOD get_allowed_transport.
+    mo_view->get_allowed_transport( EXPORTING it_r_views = VALUE #( ( sign = 'I' option = 'EQ' low = iv_view_name ) )
+                                    IMPORTING et_allowed_transport = DATA(lt_allowed) ).
+
+    READ TABLE lt_allowed ASSIGNING FIELD-SYMBOL(<ls_allowed>) INDEX 1.
+    IF sy-subrc = 0.
+      rv_allowed = <ls_allowed>-allowed.
+    ENDIF.
   ENDMETHOD.
 
 ENDCLASS.

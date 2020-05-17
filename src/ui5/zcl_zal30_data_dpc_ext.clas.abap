@@ -308,6 +308,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
         iv_langu     = ls_data-langu
         iv_data       = ls_data-data
         iv_original_data = ls_data-original_data
+        iv_transport_order = ls_data-transport_order
       IMPORTING
         ev_data       = er_entity-data
         ev_return = er_entity-return ).
