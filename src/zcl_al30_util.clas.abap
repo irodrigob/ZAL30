@@ -192,7 +192,7 @@ CLASS zcl_al30_util IMPLEMENTATION.
         EXCEPTIONS
           OTHERS      = 3.
       IF sy-subrc NE 0.
-        es_return = fill_return( iv_type = 'S' iv_number = '033' ). " Mensaje de cancelacion.
+        es_return = fill_return( iv_type = zif_al30_data=>cs_msg_type-success iv_number = '033' ). " Mensaje de cancelacion.
       ENDIF.
     ENDIF.
 
@@ -226,7 +226,7 @@ CLASS zcl_al30_util IMPLEMENTATION.
         OTHERS             = 2.
 
     IF sy-subrc <> 0.
-      es_return =  fill_return( iv_type = 'E'
+      es_return =  fill_return( iv_type = zif_al30_data=>cs_msg_type-error
                                 iv_number = sy-msgno
                                 iv_message_v1 = sy-msgv1
                                 iv_message_v2 = sy-msgv2
@@ -269,7 +269,7 @@ CLASS zcl_al30_util IMPLEMENTATION.
               invalid_input     = 8
               OTHERS            = 9.
           IF sy-subrc <> 0.
-            es_return =  fill_return( iv_type = 'E'
+            es_return =  fill_return( iv_type = zif_al30_data=>cs_msg_type-error
                                       iv_number = sy-msgno
                                       iv_message_v1 = sy-msgv1
                                       iv_message_v2 = sy-msgv2

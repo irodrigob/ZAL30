@@ -311,7 +311,8 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
         iv_transport_order = ls_data-transport_order
       IMPORTING
         ev_data       = er_entity-data
-        ev_return = er_entity-return ).
+        ev_return = er_entity-return
+        ev_order = er_entity-transport_order ).
 
   ENDMETHOD.
 

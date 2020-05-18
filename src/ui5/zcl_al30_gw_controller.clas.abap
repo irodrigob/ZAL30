@@ -109,6 +109,7 @@ CLASS zcl_al30_gw_controller DEFINITION
     "! @parameter iv_transport_order | <p class="shorttext synchronized">Transport order</p>
     "! @parameter ev_data | <p class="shorttext synchronized">Data in JSON format</p>
     "! @parameter ev_return | <p class="shorttext synchronized">Return of process</p>
+    "! @parameter ev_order | <p class="shorttext synchronized">Order used for transport</p>
     METHODS save_data
       IMPORTING
         !iv_view_name       TYPE tabname
@@ -118,7 +119,8 @@ CLASS zcl_al30_gw_controller DEFINITION
         !iv_transport_order TYPE trkorr OPTIONAL
       EXPORTING
         !ev_data            TYPE string
-        !ev_return          TYPE string.
+        !ev_return          TYPE string
+        !ev_order           TYPE trkorr.
 
     "! <p class="shorttext synchronized">Get user orders</p>
     "! @parameter iv_user | <p class="shorttext synchronized">User</p>
@@ -129,6 +131,19 @@ CLASS zcl_al30_gw_controller DEFINITION
         !iv_langu  TYPE sylangu DEFAULT sy-langu
       EXPORTING
         !et_orders TYPE zcl_al30_ui5_transport_order=>tt_user_orders.
+    "! <p class="shorttext synchronized">Check the transport order</p>
+    "!
+    "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    "! @parameter iv_order | <p class="shorttext synchronized">Order</p>
+    "! @parameter ev_order | <p class="shorttext synchronized">new Order</p>
+    METHODS check_transport_order
+      IMPORTING
+        !iv_langu  TYPE sylangu DEFAULT sy-langu
+        !iv_order  TYPE trkorr
+      EXPORTING
+        !ev_order  TYPE trkorr
+        !es_return TYPE zif_al30_ui5_data=>ts_return.
+
 
   PROTECTED SECTION.
     DATA mo_controller TYPE REF TO zcl_al30_controller.
@@ -759,8 +774,9 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
         READ TABLE <data> TRANSPORTING NO FIELDS WITH KEY (zif_al30_data=>cs_control_fields_alv_data-row_status) = zif_al30_data=>cs_msg_type-error.
         IF sy-subrc NE 0.
 
-          " la orden se pasa a una variable para que funcione con el parámetro changing
-          DATA(lv_order) = iv_transport_order.
+          " la orden se pasa a la variable para que funcione con el parámetro changing. En el proceso de grabación el valor de la orden cambia
+          " porque se sustituye por la tarea donde estara el contenido
+          ev_order = iv_transport_order.
 
           CALL METHOD mo_view->save_data
             EXPORTING
@@ -768,7 +784,7 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
             IMPORTING
               et_return        = DATA(lt_return_save)
             CHANGING
-              cv_order         = lv_order
+              cv_order         = ev_order
               ct_datos         = <data>
               ct_datos_del     = <data_del>.
 
@@ -977,6 +993,24 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     IF sy-subrc = 0.
       rv_allowed = <ls_allowed>-allowed.
     ENDIF.
+  ENDMETHOD.
+
+  METHOD check_transport_order.
+
+    CLEAR: ev_order, es_return.
+
+    ev_order = iv_order.
+
+    " Se valida la orden, este método si la tarea no es valida añade una nueva.
+    zcl_al30_util=>check_transport_order(
+      EXPORTING
+        iv_category = zif_al30_data=>cs_order_category-workbench
+      IMPORTING
+        es_return   = DATA(ls_return)
+      CHANGING
+        cv_order    = ev_order ).
+
+
   ENDMETHOD.
 
 ENDCLASS.
