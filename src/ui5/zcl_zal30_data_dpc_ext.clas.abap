@@ -23,6 +23,7 @@ CLASS zcl_zal30_data_dpc_ext DEFINITION
     METHODS rowvalidationdet_create_entity
         REDEFINITION .
     METHODS userorderset_get_entityset REDEFINITION.
+    METHODS checktransportor_get_entity REDEFINITION.
 
     METHODS verifyfielddatas_get_entity REDEFINITION.
     METHODS savedataset_create_entity REDEFINITION.
@@ -354,6 +355,24 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
 
     et_entityset = CORRESPONDING #( lt_orders ).
 
+
+  ENDMETHOD.
+
+  METHOD checktransportor_get_entity.
+
+
+    er_entity-transport_order = it_key_tab[ name = 'TRANSPORT_ORDER' ]-value.
+    er_entity-langu = it_key_tab[ name = 'LANGU' ]-value.
+
+    mo_controller->check_transport_order(
+      EXPORTING
+        iv_langu  = er_entity-langu
+        iv_order  = er_entity-transport_order
+      IMPORTING
+        ev_order  = er_entity-transport_order
+        es_return = DATA(ls_return) ).
+
+    er_entity-message = ls_return-message.
 
   ENDMETHOD.
 

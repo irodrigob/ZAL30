@@ -1010,6 +1010,25 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
       CHANGING
         cv_order    = ev_order ).
 
+    " Solo se devuelven mensaje de error. Si la orden es correcta no se devuelve nada.
+    IF ls_return-type = zif_al30_data=>cs_msg_type-error.
+      es_return-type = ls_return-type.
+
+      IF ls_return-message IS INITIAL.
+        ls_return-message = zcl_al30_util=>fill_return( EXPORTING iv_type = ls_return-type
+                                                                            iv_number = ls_return-number
+                                                                            iv_id = ls_return-id
+                                                                            iv_message_v1 = ls_return-message_v1
+                                                                            iv_message_v2 = ls_return-message_v2
+                                                                            iv_message_v3 = ls_return-message_v3
+                                                                            iv_message_v4 = ls_return-message_v4
+                                                                            iv_langu = iv_langu )-message.
+      ELSE.
+        es_return-message = ls_return-message.
+      ENDIF.
+
+    ENDIF.
+
 
   ENDMETHOD.
 
