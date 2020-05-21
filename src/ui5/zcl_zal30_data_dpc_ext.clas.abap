@@ -47,6 +47,25 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD checktransportor_get_entity.
+
+
+    data(lv_order) = conv trkorr( it_key_tab[ name = 'TRANSPORTORDER' ]-value ) .
+    er_entity-langu = it_key_tab[ name = 'LANGU' ]-value.
+
+    mo_controller->check_transport_order(
+      EXPORTING
+        iv_langu  = er_entity-langu
+        iv_order  = lv_order
+      IMPORTING
+        ev_order  = er_entity-transport_order
+        es_return = DATA(ls_return) ).
+
+    er_entity-message = ls_return-message.
+
+  ENDMETHOD.
+
+
   METHOD constructor.
     super->constructor(  ).
 
@@ -257,42 +276,6 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD verifyfielddatas_get_entity.
-    " ----- DEPRECATED ----
-*    DATA lv_langu TYPE sy-langu.
-*
-*
-*    READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_key_tab>) WITH KEY name = 'LANGU'.
-*    IF sy-subrc = 0.
-*      CALL FUNCTION 'CONVERSION_EXIT_ISOLA_INPUT'
-*        EXPORTING
-*          input            = <ls_key_tab>-value
-*        IMPORTING
-*          output           = lv_langu
-*        EXCEPTIONS
-*          unknown_language = 1
-*          OTHERS           = 2.
-*
-*    ENDIF.
-*
-*
-*    er_entity-fieldname = it_key_tab[ name = 'VIEWNAME' ]-value.
-*    er_entity-tabname = it_key_tab[ name = 'COLUMN' ]-value.
-*    er_entity-value = it_key_tab[ name = 'VALUE' ]-value.
-*    er_entity-langu = lv_langu.
-*
-*    mo_controller->verify_field_data(
-*      EXPORTING
-*        iv_langu        = lv_langu
-*        iv_view_name    = CONV tabname( it_key_tab[ name = 'VIEWNAME' ]-value )
-*        iv_fieldname    = CONV fieldname( it_key_tab[ name = 'COLUMN' ]-value )
-*        iv_value        = it_key_tab[ name = 'VALUE' ]-value
-*      IMPORTING
-*        ev_message_type = er_entity-message_type
-*        ev_message      = er_entity-message ).
-
-  ENDMETHOD.
-
   METHOD savedataset_create_entity.
 
     DATA ls_data TYPE zcl_zal30_data_mpc=>ts_savedata.
@@ -316,6 +299,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
         ev_order = er_entity-transport_order ).
 
   ENDMETHOD.
+
 
   METHOD userorderset_get_entityset.
     DATA lv_langu.
@@ -358,22 +342,40 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
 
   ENDMETHOD.
 
-  METHOD checktransportor_get_entity.
 
-
-    er_entity-transport_order = it_key_tab[ name = 'TRANSPORT_ORDER' ]-value.
-    er_entity-langu = it_key_tab[ name = 'LANGU' ]-value.
-
-    mo_controller->check_transport_order(
-      EXPORTING
-        iv_langu  = er_entity-langu
-        iv_order  = er_entity-transport_order
-      IMPORTING
-        ev_order  = er_entity-transport_order
-        es_return = DATA(ls_return) ).
-
-    er_entity-message = ls_return-message.
+  METHOD verifyfielddatas_get_entity.
+    " ----- DEPRECATED ----
+*    DATA lv_langu TYPE sy-langu.
+*
+*
+*    READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_key_tab>) WITH KEY name = 'LANGU'.
+*    IF sy-subrc = 0.
+*      CALL FUNCTION 'CONVERSION_EXIT_ISOLA_INPUT'
+*        EXPORTING
+*          input            = <ls_key_tab>-value
+*        IMPORTING
+*          output           = lv_langu
+*        EXCEPTIONS
+*          unknown_language = 1
+*          OTHERS           = 2.
+*
+*    ENDIF.
+*
+*
+*    er_entity-fieldname = it_key_tab[ name = 'VIEWNAME' ]-value.
+*    er_entity-tabname = it_key_tab[ name = 'COLUMN' ]-value.
+*    er_entity-value = it_key_tab[ name = 'VALUE' ]-value.
+*    er_entity-langu = lv_langu.
+*
+*    mo_controller->verify_field_data(
+*      EXPORTING
+*        iv_langu        = lv_langu
+*        iv_view_name    = CONV tabname( it_key_tab[ name = 'VIEWNAME' ]-value )
+*        iv_fieldname    = CONV fieldname( it_key_tab[ name = 'COLUMN' ]-value )
+*        iv_value        = it_key_tab[ name = 'VALUE' ]-value
+*      IMPORTING
+*        ev_message_type = er_entity-message_type
+*        ev_message      = er_entity-message ).
 
   ENDMETHOD.
-
 ENDCLASS.

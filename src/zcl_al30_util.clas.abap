@@ -254,7 +254,7 @@ CLASS zcl_al30_util IMPLEMENTATION.
               wi_kurztext       = <ls_req_head>-as4text
               wi_trfunction     = lv_trfunction
               iv_username       = sy-uname
-              wi_strkorr        = <ls_req_head>-strkorr
+              wi_strkorr        = <ls_req_head>-trkorr
               wi_client         = sy-mandt
             IMPORTING
               we_trkorr         = cv_order

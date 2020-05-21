@@ -692,136 +692,156 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
   ENDMETHOD.
   METHOD save_data.
-    DATA lo_data_del_orig TYPE REF TO data.
+
     FIELD-SYMBOLS <data> TYPE STANDARD TABLE.
     FIELD-SYMBOLS <data_ok> TYPE STANDARD TABLE.
     FIELD-SYMBOLS <original_data> TYPE STANDARD TABLE.
     FIELD-SYMBOLS <data_del> TYPE STANDARD TABLE.
     FIELD-SYMBOLS <data_del_orig> TYPE STANDARD TABLE.
+    DATA lt_return_ui5 TYPE zif_al30_ui5_data=>tt_return.
+    DATA lo_data_del_orig TYPE REF TO data.
 
     " El mismo valor que entra es el que sale. En el proceso ya se irán cambiando valores
     ev_data = iv_data.
 
-    "Para procesar el registro hay que crear una tabla interna del mismo tipo que la viene para guarda el valor pasado por parámetros
+    " Si hay orden se lanza el proceso de validación de la orden, el motivo es que la orden que se escoje en UI5 puede ser valida pero no tener tarea valida. Ese chequeo validará que
+    " tenga tarea y en caso de no tenerla añadirá una tarea valida
 
-    " Se llama al proceso que creará la tabla interna para poder leer los datos
-    create_it_data_view( EXPORTING iv_view_name = iv_view_name
-                                   iv_langu = iv_langu
-                                   iv_mode = zif_al30_data=>cv_mode_change
-                         IMPORTING eo_data = DATA(lo_data)
-                                   es_return = DATA(ls_return)
-                                   et_fields_ddic = DATA(lt_fields_ddic)
-                                   et_fields_view = DATA(lt_fields_view)
-                                   es_view = DATA(ls_view) ).
+    IF iv_transport_order IS NOT INITIAL.
 
-    IF ls_return IS INITIAL AND lo_data IS BOUND.
-      " Se añade un registro en blanco para poder hace el mapeo
-      ASSIGN lo_data->* TO <data>.
-
-      " Creo la tabla dinámica para el borrado
-      mo_view->create_it_data_view( EXPORTING iv_mode = zif_al30_data=>cv_mode_change
-                                    IMPORTING et_data = DATA(lo_data_del) ).
-      ASSIGN lo_data_del->* TO <data_del>.
-
-      " Se crea la tabla para los datos originales
-      mo_view->create_it_data_view( EXPORTING iv_mode = zif_al30_data=>cv_mode_change
-                                    IMPORTING et_data = DATA(lo_original_data) ).
-
-      " Se convierte los datos originales
-      ASSIGN lo_original_data->* TO <original_data>.
-      zcl_al30_ui5_json=>deserialize( EXPORTING json = iv_original_data
-                                            pretty_name = /ui2/cl_json=>pretty_mode-none
-                                  CHANGING data = <original_data> ).
-
-      " Se pasa a la clase para que lo tenga para el proceso de grabación
-      mo_view->set_original_data( lo_original_data ).
-
-      " Se transforma el JSON al registro de la tabla
-      zcl_al30_ui5_json=>deserialize( EXPORTING json = iv_data
-                                                pretty_name = /ui2/cl_json=>pretty_mode-none
-                                      CHANGING data = <data> ).
-
-      " Se adaptan los datos de UI5 al del ALV por si se modifican en las exit
-      adapt_ui5_data_2_alv( EXPORTING it_fields_ddic = lt_fields_ddic
-                                iv_langu = iv_langu
-                       CHANGING co_data = lo_data ).
-
-      " Separo los datos borrados de los modificados/insertados
-      split_data_to_save( CHANGING ct_data = <data>
-                                  ct_data_del = <data_del> ).
-
-      " Como en proceso de grabación los datos original se "limpian" si va todo bien, lo que hago es crear una tabla local
-      " temporal para guardar los datos originales del borrado. Para cuando el proceso de grabación termine ponerlo en la tabla original
-      " y pueda ser procesado por UI5.
-      CREATE DATA lo_data_del_orig LIKE <data_del>.
-      ASSIGN lo_data_del_orig->* TO <data_del_orig>.
-      INSERT LINES OF <data_del> INTO TABLE <data_del_orig>.
-
-
-      mo_view->verify_save_data(
+      check_transport_order(
         EXPORTING
-          it_data_del = <data_del>
-          iv_save_process = abap_true
+          iv_langu  = iv_langu
+          iv_order  = iv_transport_order
         IMPORTING
-          et_return = DATA(lt_return)
-        CHANGING ct_data   = <data> ).
+          ev_order  = ev_order
+          es_return = DATA(ls_return_ui5) ).
 
-      " Si hay errores no se continua el proceso
-      IF ( line_exists( lt_return[ type = zif_al30_data=>cs_msg_type-error ] ) OR
-          line_exists( lt_return[ type = zif_al30_data=>cs_msg_type-dump ] ) ).
-      ELSE.
-        " Se valida que no haya ningúna línea errónea.
-        READ TABLE <data> TRANSPORTING NO FIELDS WITH KEY (zif_al30_data=>cs_control_fields_alv_data-row_status) = zif_al30_data=>cs_msg_type-error.
-        IF sy-subrc NE 0.
+      IF ls_return_ui5 IS NOT INITIAL. " Si hay mensaje es que hay error y el proceso se cancela
+        INSERT ls_return_ui5 INTO TABLE lt_return_ui5.
+      ENDIF.
+    ENDIF.
 
-          " la orden se pasa a la variable para que funcione con el parámetro changing. En el proceso de grabación el valor de la orden cambia
-          " porque se sustituye por la tarea donde estara el contenido
-          ev_order = iv_transport_order.
+    IF lt_return_ui5 IS INITIAL.
 
-          CALL METHOD mo_view->save_data
-            EXPORTING
-              iv_allow_request = get_allowed_transport( iv_view_name )
-            IMPORTING
-              et_return        = DATA(lt_return_save)
-            CHANGING
-              cv_order         = ev_order
-              ct_datos         = <data>
-              ct_datos_del     = <data_del>.
+      "Para procesar el registro hay que crear una tabla interna del mismo tipo que la viene para guarda el valor pasado por parámetros
 
-          INSERT LINES OF lt_return_save INTO TABLE lt_return.
+      " Se llama al proceso que creará la tabla interna para poder leer los datos
+      create_it_data_view( EXPORTING iv_view_name = iv_view_name
+                                     iv_langu = iv_langu
+                                     iv_mode = zif_al30_data=>cv_mode_change
+                           IMPORTING eo_data = DATA(lo_data)
+                                     es_return = DATA(ls_return)
+                                     et_fields_ddic = DATA(lt_fields_ddic)
+                                     et_fields_view = DATA(lt_fields_view)
+                                     es_view = DATA(ls_view) ).
 
-          " Si hay registros en los datos de borrado originales pero no hay en los que se han enviado a procesar. Es que todo ha ido
-          " bien, por lo tanto, inserto los originales.Sino, añado lo que se ha enviado por el servicio
-          IF <data_del> IS INITIAL AND <data_del_orig> IS NOT INITIAL.
-            INSERT LINES OF <data_del_orig> INTO TABLE <data>.
-          ELSE.
-            INSERT LINES OF <data_del> INTO TABLE <data>.
+      IF ls_return IS INITIAL AND lo_data IS BOUND.
+        " Se añade un registro en blanco para poder hace el mapeo
+        ASSIGN lo_data->* TO <data>.
+
+        " Creo la tabla dinámica para el borrado
+        mo_view->create_it_data_view( EXPORTING iv_mode = zif_al30_data=>cv_mode_change
+                                      IMPORTING et_data = DATA(lo_data_del) ).
+        ASSIGN lo_data_del->* TO <data_del>.
+
+        " Se crea la tabla para los datos originales
+        mo_view->create_it_data_view( EXPORTING iv_mode = zif_al30_data=>cv_mode_change
+                                      IMPORTING et_data = DATA(lo_original_data) ).
+
+        " Se convierte los datos originales
+        ASSIGN lo_original_data->* TO <original_data>.
+        zcl_al30_ui5_json=>deserialize( EXPORTING json = iv_original_data
+                                              pretty_name = /ui2/cl_json=>pretty_mode-none
+                                    CHANGING data = <original_data> ).
+
+        " Se pasa a la clase para que lo tenga para el proceso de grabación
+        mo_view->set_original_data( lo_original_data ).
+
+        " Se transforma el JSON al registro de la tabla
+        zcl_al30_ui5_json=>deserialize( EXPORTING json = iv_data
+                                                  pretty_name = /ui2/cl_json=>pretty_mode-none
+                                        CHANGING data = <data> ).
+
+        " Se adaptan los datos de UI5 al del ALV por si se modifican en las exit
+        adapt_ui5_data_2_alv( EXPORTING it_fields_ddic = lt_fields_ddic
+                                  iv_langu = iv_langu
+                         CHANGING co_data = lo_data ).
+
+        " Separo los datos borrados de los modificados/insertados
+        split_data_to_save( CHANGING ct_data = <data>
+                                    ct_data_del = <data_del> ).
+
+        " Como en proceso de grabación los datos original se "limpian" si va todo bien, lo que hago es crear una tabla local
+        " temporal para guardar los datos originales del borrado. Para cuando el proceso de grabación termine ponerlo en la tabla original
+        " y pueda ser procesado por UI5.
+        CREATE DATA lo_data_del_orig LIKE <data_del>.
+        ASSIGN lo_data_del_orig->* TO <data_del_orig>.
+        INSERT LINES OF <data_del> INTO TABLE <data_del_orig>.
+
+
+        mo_view->verify_save_data(
+          EXPORTING
+            it_data_del = <data_del>
+            iv_save_process = abap_true
+          IMPORTING
+            et_return = DATA(lt_return)
+          CHANGING ct_data   = <data> ).
+
+        " Si hay errores no se continua el proceso
+        IF ( line_exists( lt_return[ type = zif_al30_data=>cs_msg_type-error ] ) OR
+            line_exists( lt_return[ type = zif_al30_data=>cs_msg_type-dump ] ) ).
+        ELSE.
+          " Se valida que no haya ningúna línea errónea.
+          READ TABLE <data> TRANSPORTING NO FIELDS WITH KEY (zif_al30_data=>cs_control_fields_alv_data-row_status) = zif_al30_data=>cs_msg_type-error.
+          IF sy-subrc NE 0.
+
+            CALL METHOD mo_view->save_data
+              EXPORTING
+                iv_allow_request = get_allowed_transport( iv_view_name )
+              IMPORTING
+                et_return        = DATA(lt_return_save)
+              CHANGING
+                cv_order         = ev_order
+                ct_datos         = <data>
+                ct_datos_del     = <data_del>.
+
+            INSERT LINES OF lt_return_save INTO TABLE lt_return.
+
+            " Si hay registros en los datos de borrado originales pero no hay en los que se han enviado a procesar. Es que todo ha ido
+            " bien, por lo tanto, inserto los originales.Sino, añado lo que se ha enviado por el servicio
+            IF <data_del> IS INITIAL AND <data_del_orig> IS NOT INITIAL.
+              INSERT LINES OF <data_del_orig> INTO TABLE <data>.
+            ELSE.
+              INSERT LINES OF <data_del> INTO TABLE <data>.
+            ENDIF.
+
           ENDIF.
 
         ENDIF.
 
+        " Se adapta los datos de SAP a los de UI5
+        adapt_alv_data_2_ui5( EXPORTING it_fields_ddic = lt_fields_ddic
+                              CHANGING co_data = lo_data ).
+
+        " Se convierte de los datos de sap a JSON
+        ev_data = zcl_al30_ui5_json=>zserialize( data = <data> pretty_name = /ui2/cl_json=>pretty_mode-none ).
+
+        " Si hay mennsajes se adaptan al formato de ui5
+        IF lt_return IS NOT INITIAL.
+          conv_return_2_return_ui5( EXPORTING it_return = lt_return
+                                              iv_langu = iv_langu
+                                    IMPORTING et_return_ui5 = lt_return_ui5 ).
+
+          ev_return = zcl_al30_ui5_json=>zserialize( data = lt_return_ui5 pretty_name = /ui2/cl_json=>pretty_mode-none ).
+        ENDIF.
+
       ENDIF.
 
-      " Se adapta los datos de SAP a los de UI5
-      adapt_alv_data_2_ui5( EXPORTING it_fields_ddic = lt_fields_ddic
-                            CHANGING co_data = lo_data ).
-
-      " Se convierte de los datos de sap a JSON
-      ev_data = zcl_al30_ui5_json=>zserialize( data = <data> pretty_name = /ui2/cl_json=>pretty_mode-none ).
-
-      " Si hay mennsajes se adaptan al formato de ui5
-      IF lt_return IS NOT INITIAL.
-        DATA lt_return_ui5 TYPE zif_al30_ui5_data=>tt_return.
-
-        conv_return_2_return_ui5( EXPORTING it_return = lt_return
-                                            iv_langu = iv_langu
-                                  IMPORTING et_return_ui5 = lt_return_ui5 ).
-
-        ev_return = zcl_al30_ui5_json=>zserialize( data = lt_return_ui5 pretty_name = /ui2/cl_json=>pretty_mode-none ).
-      ENDIF.
-
+    ELSE.
+      " Se transforma el mensaje de error a JSON para devolverlo
+      ev_return = zcl_al30_ui5_json=>zserialize( data = lt_return_ui5 pretty_name = /ui2/cl_json=>pretty_mode-none ).
     ENDIF.
-
 
   ENDMETHOD.
 
