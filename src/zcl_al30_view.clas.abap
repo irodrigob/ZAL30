@@ -188,7 +188,7 @@ CLASS zcl_al30_view DEFINITION
     "! @parameter it_r_view_name | <p class="shorttext synchronized">Range of views</p>
     METHODS get_allowed_transport
       IMPORTING
-        it_r_views TYPE zif_al30_data=>tt_r_tabname
+        it_r_views           TYPE zif_al30_data=>tt_r_tabname
       EXPORTING
         et_allowed_transport TYPE zif_al30_data=>tt_allowed_transport_view.
 
@@ -1853,10 +1853,8 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
         " Si no hay errores, por el borrado, se continua el proceso.
         IF ls_return-type NE zif_al30_data=>cs_msg_type-error.
-          " Si el retorno esta informado se añade al mensaje de retorno
-          IF ls_return IS NOT INITIAL.
-            INSERT ls_return INTO TABLE et_return.
-          ENDIF.
+
+
           CLEAR ls_return.
 
           DATA(lv_save_error) = abap_false.
@@ -1867,7 +1865,6 @@ CLASS zcl_al30_view IMPLEMENTATION.
             save_data_inup( EXPORTING it_data = <lt_datos>
                                       iv_save_transport = iv_allow_request
                             IMPORTING es_return = ls_return
-
                             CHANGING cv_order = cv_order
                                      cv_save_error = lv_save_error ).
 
@@ -1878,8 +1875,14 @@ CLASS zcl_al30_view IMPLEMENTATION.
             " Se hace el commit
             COMMIT WORK AND WAIT.
 
+
             " Se informa que se han grabado los datos
             INSERT zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-success iv_number = '023' ) INTO TABLE et_return.
+
+            " Si hay orden de transport se devuelve en que orden se ha guardado los datos
+            IF cv_order IS NOT INITIAL.
+              INSERT zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-success iv_number = '028' iv_message_v1 = cv_order ) INTO TABLE et_return.
+            ENDIF.
 
             " Si la tabla tiene marcada la opción de log de modificación se ejecuta el proceso donde se informará de los cambios
             IF ms_view-change_log = abap_true.
@@ -1940,10 +1943,9 @@ CLASS zcl_al30_view IMPLEMENTATION.
     DATA lo_view TYPE REF TO data.
     DATA lo_view_texttable TYPE REF TO data.
 
+    CLEAR es_return.
 
     IF ct_datos_del IS INITIAL. EXIT. ENDIF.
-
-    CLEAR es_return.
 
     " Se crea una tabla exactamente igual que las del diccionario para mover los datos a borrar.
     CREATE DATA lo_view TYPE STANDARD TABLE OF  (ms_view-tabname).
@@ -1987,22 +1989,30 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
       " Si va todo bien y esta permitido guardar en orden de transporte, se inicia el proceso para añadir los registros en la orden. Al liberar
       " la tarea/orden sap detecta que no existe el contenido en la tabla lo que hará será borrarla en el sistema de destino
+      " Los mensajes de la orden no se devuelven salvo, el error, claro esta.
       IF iv_allow_request = abap_true.
         zcl_al30_util=>values_itab_2_transport_order( EXPORTING it_values  = <lt_view>
                                                                 iv_tabname = ms_view-tabname
-                                                      IMPORTING es_return  = es_return
+                                                      IMPORTING es_return  = DATA(ls_return)
                                                       CHANGING cv_order = cv_order ).
 
-        IF es_return-type NE zif_al30_data=>cs_msg_type-error. " Si no hay error se continua el proceso
+        IF ls_return-type NE zif_al30_data=>cs_msg_type-error. " Si no hay error se continua el proceso
+          CLEAR: ls_return.
 
           " Si hay tabla de textos se hace el mismo proceso
           IF ms_view-texttable IS NOT INITIAL.
             zcl_al30_util=>values_itab_2_transport_order( EXPORTING it_values  = <lt_view_texttable>
                                                             iv_tabname = ms_view-texttable
-                                                  IMPORTING es_return  = es_return
+                                                  IMPORTING es_return  = ls_return
                                                   CHANGING cv_order = cv_order ).
           ENDIF.
 
+        ENDIF.
+
+        " Solo si hay mensaje de error este se devolverá en caso contrario no. El motivo es que ya mensajes genericos que se
+        " devuelven en la grabación
+        IF ls_return-type = zif_al30_data=>cs_msg_type-error.
+          es_return = ls_return.
         ENDIF.
 
       ENDIF.
@@ -2018,6 +2028,8 @@ CLASS zcl_al30_view IMPLEMENTATION.
     FIELD-SYMBOLS <lt_view_texttable> TYPE STANDARD TABLE.
     DATA lo_view TYPE REF TO data.
     DATA lo_view_texttable TYPE REF TO data.
+
+    CLEAR: es_return.
 
     " Se crea una tabla exactamente igual que las del diccionario para mover los datos a borrar.
     CREATE DATA lo_view TYPE STANDARD TABLE OF (ms_view-tabname).
@@ -2072,14 +2084,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
       " Si hay errores en la generación de la orden lo que se hace es que se marca el proceso de grabación como erróneo
       cv_save_error = COND #( WHEN es_return-type = zif_al30_data=>cs_msg_type-error THEN abap_true  ).
 
-      " Si no hay errores limpio los mensajes que devuelve el método de ordenes de transporte. Ya que se pondrá el mensaje generico de grabación
-      IF cv_save_error = abap_false.
-        CLEAR es_return.
-      ENDIF.
     ENDIF.
-
-
-
 
   ENDMETHOD.
 
