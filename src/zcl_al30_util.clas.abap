@@ -22,7 +22,7 @@ CLASS zcl_al30_util DEFINITION
         !iv_message_v4   TYPE any OPTIONAL
         !iv_id           TYPE symsgid OPTIONAL
         !iv_field        TYPE any OPTIONAL
-        !iv_langu type sylangu DEFAULT sy-langu
+        !iv_langu        TYPE sylangu DEFAULT sy-langu
       RETURNING
         VALUE(rs_return) TYPE bapiret2 .
     CLASS-METHODS f4_view
@@ -61,8 +61,15 @@ CLASS zcl_al30_util DEFINITION
         !es_return   TYPE bapiret2
       CHANGING
         !cv_order    TYPE e070-trkorr .
+    "! <p class="shorttext synchronized">Check transport order</p>
+    "!
+    "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    "! @parameter iv_category | <p class="shorttext synchronized">Category order</p>
+    "! @parameter es_return | <p class="shorttext synchronized">Return</p>
+    "! @parameter cv_order | <p class="shorttext synchronized">Transport order</p>
     CLASS-METHODS check_transport_order
       IMPORTING
+        !iv_langu    TYPE sylangu DEFAULT sy-langu
         !iv_category TYPE e070-korrdev
       EXPORTING
         !es_return   TYPE bapiret2
@@ -232,7 +239,8 @@ CLASS zcl_al30_util IMPLEMENTATION.
                                 iv_message_v2 = sy-msgv2
                                 iv_message_v3 = sy-msgv3
                                 iv_message_v4 = sy-msgv4
-                                iv_id         = sy-msgid ).
+                                iv_id         = sy-msgid
+                                iv_langu = iv_langu ).
 
     ELSE.
 
@@ -275,7 +283,8 @@ CLASS zcl_al30_util IMPLEMENTATION.
                                       iv_message_v2 = sy-msgv2
                                       iv_message_v3 = sy-msgv3
                                       iv_message_v4 = sy-msgv4
-                                      iv_id         = sy-msgid ).
+                                      iv_id         = sy-msgid
+                                      iv_langu = iv_langu ).
 
           ELSE.
 

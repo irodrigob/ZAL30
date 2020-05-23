@@ -183,7 +183,8 @@ CLASS zcl_al30_gw_controller DEFINITION
     "! @parameter es_return | <p class="shorttext synchronized">Return</p>
     "! @parameter et_fields_view | <p class="shorttext synchronized">Fields of table</p>
     "! @parameter et_fields_text_view | <p class="shorttext synchronized">Texts of fields of table</p>
-    "! @parameter et_fields_ddic | <p class="shorttext synchronized">Fields of data from data dictioary</p>
+    "! @parameter et_fields_ddic | <p class="shorttext synchronized">Fields of data from data dictionary</p>
+    "! @parameter et_foreign_key_ddic | <p class="shorttext synchronized">Foreing key of data from data dictionary</p>
     METHODS read_view_conf_for_data
       IMPORTING
                 iv_view_name        TYPE tabname
@@ -192,7 +193,8 @@ CLASS zcl_al30_gw_controller DEFINITION
                 es_view             TYPE zal30_t_view
                 et_fields_view      TYPE zif_al30_data=>tt_fields_view
                 et_fields_text_view TYPE zif_al30_data=>tt_fields_text_view
-                et_fields_ddic      TYPE dd03ptab .
+                et_fields_ddic      TYPE dd03ptab
+                et_foreign_key_ddic TYPE dd05mttyp .
     "! <p class="shorttext synchronized">Complete data for template data</p>
     "! @parameter it_fields_ddic | <p class="shorttext synchronized">Fields of data from data dictionary</p>
     "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
@@ -472,6 +474,7 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     " Si el modo pasado no es el esperado se le pone el de visualizar
     DATA(lv_mode) = COND #( WHEN iv_mode = zif_al30_data=>cv_mode_change OR iv_mode = zif_al30_data=>cv_mode_view THEN iv_mode ELSE zif_al30_data=>cv_mode_view ).
 
+    mo_view->set_language( iv_langu ). " Idioma del servicio
 
     " Se llama al proceso que creará la tabla interna para poder leer los datos
     create_it_data_view( EXPORTING iv_view_name = iv_view_name
@@ -571,15 +574,16 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 * Leo los datos de la vista
     CALL METHOD mo_conf->read_view
       EXPORTING
-        iv_name_view    = iv_view_name
-        iv_langu        = iv_langu
-        iv_all_language = abap_false
+        iv_name_view        = iv_view_name
+        iv_langu            = iv_langu
+        iv_all_language     = abap_false
       IMPORTING
-        es_return       = es_return
-        es_view         = es_view
-        et_fields       = et_fields_view
-        et_fields_text  = et_fields_text_view
-        et_fields_ddic  = et_fields_ddic.
+        es_return           = es_return
+        es_view             = es_view
+        et_fields           = et_fields_view
+        et_fields_text      = et_fields_text_view
+        et_fields_ddic      = et_fields_ddic
+        et_foreign_key_ddic = et_foreign_key_ddic.
 
 
     IF es_return IS INITIAL. " Si no hay errores se continua el proceso
@@ -593,7 +597,8 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
       mo_view->set_data_conf_view( is_view = es_view
                              it_fields_view = et_fields_view
                              it_fields_text_view = et_fields_text_view
-                             it_fields_ddic = et_fields_ddic ).
+                             it_fields_ddic = et_fields_ddic
+                             it_foreign_key_ddic = et_foreign_key_ddic ).
 
     ENDIF.
   ENDMETHOD.
@@ -629,6 +634,8 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
       adapt_ui5_data_2_alv( EXPORTING it_fields_ddic = lt_fields_ddic
                                      iv_langu = iv_langu
                             CHANGING co_data = lo_data ).
+
+      mo_view->set_language( iv_langu ). " Idioma del servicio
 
       " Al método de verificación y validación se le tiene que pasar la fila del ALV en que se modifica el registro. Ese dato viene en el campo
       " fijo ZAL30_TABIX que lo recupero para pasarlo
@@ -703,6 +710,8 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
     " El mismo valor que entra es el que sale. En el proceso ya se irán cambiando valores
     ev_data = iv_data.
+
+    mo_view->set_language( iv_langu ). " Idioma del servicio
 
     " Si hay orden se lanza el proceso de validación de la orden, el motivo es que la orden que se escoje en UI5 puede ser valida pero no tener tarea valida. Ese chequeo validará que
     " tenga tarea y en caso de no tenerla añadirá una tarea valida
@@ -1020,6 +1029,8 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     CLEAR: ev_order, es_return.
 
     ev_order = iv_order.
+
+
 
     " Se valida la orden, este método si la tarea no es valida añade una nueva.
     zcl_al30_util=>check_transport_order(

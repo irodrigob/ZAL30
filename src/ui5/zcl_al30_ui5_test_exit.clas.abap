@@ -80,16 +80,16 @@ CLASS zcl_al30_ui5_test_exit IMPLEMENTATION.
 
     CLEAR et_return.
 
-    ASSIGN COMPONENT 'FIELDWAERS' OF STRUCTURE cs_row_data TO FIELD-SYMBOL(<waers>).
-    IF sy-subrc = 0.
-      SELECT SINGLE waers INTO @DATA(lv_waers) FROM tcurc WHERE waers =  @<waers>.
-      IF sy-subrc NE 0.
-        INSERT VALUE #( type = zif_al30_data=>cs_msg_type-error
-                        id = '5A'
-                        number = '139'
-                        field = 'FIELDWAERS' ) INTO TABLE et_return.
-      ENDIF.
-    ENDIF.
+*    ASSIGN COMPONENT 'FIELDWAERS' OF STRUCTURE cs_row_data TO FIELD-SYMBOL(<waers>).
+*    IF sy-subrc = 0.
+*      SELECT SINGLE waers INTO @DATA(lv_waers) FROM tcurc WHERE waers =  @<waers>.
+*      IF sy-subrc NE 0.
+*        INSERT VALUE #( type = zif_al30_data=>cs_msg_type-error
+*                        id = '5A'
+*                        number = '139'
+*                        field = 'FIELDWAERS' ) INTO TABLE et_return.
+*      ENDIF.
+*    ENDIF.
 
   ENDMETHOD.
 

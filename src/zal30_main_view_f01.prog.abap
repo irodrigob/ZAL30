@@ -83,7 +83,8 @@ FORM chequeo_vista.
           es_return    = ls_return
           et_fields_view_alv = mt_fields
           et_fields_text_view_alv = mt_fields_text
-          es_view = ms_view ).
+          es_view = ms_view
+          et_foreign_key_ddic = mt_foreign_key_ddic  ).
 
       " Solo si hay errores en el ajuste
       IF ls_return-type = zif_al30_data=>cs_msg_type-error.
@@ -107,7 +108,8 @@ FORM chequeo_vista.
       it_fields_view_alv      = mt_fields
       it_fields_text_view_alv =  mt_fields_text
       is_view                 = ms_view
-      it_fields_ddic = mt_fields_ddic  ).
+      it_fields_ddic = mt_fields_ddic
+      it_foreign_key_ddic = mt_foreign_key_ddic  ).
 
 ENDFORM.                    " VALIDACION_PANTALLA
 *&---------------------------------------------------------------------*

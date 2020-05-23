@@ -14,17 +14,18 @@ CLASS zcl_al30_conf DEFINITION
     "! <p class="shorttext synchronized">Read view</p>
     METHODS read_view
       IMPORTING
-        !iv_name_view    TYPE tabname
-        !iv_all_language TYPE sap_bool DEFAULT abap_false
-        !iv_langu        TYPE sylangu DEFAULT sy-langu
-        !iv_read_ddic    TYPE sap_bool DEFAULT abap_true
+        !iv_name_view         TYPE tabname
+        !iv_all_language      TYPE sap_bool DEFAULT abap_false
+        !iv_langu             TYPE sylangu DEFAULT sy-langu
+        !iv_read_ddic         TYPE sap_bool DEFAULT abap_true
       EXPORTING
-        !ev_text_view    TYPE as4text
-        !es_return       TYPE bapiret2
-        !es_view         TYPE zal30_t_view
-        !et_fields       TYPE zif_al30_data=>tt_fields_view
-        !et_fields_text  TYPE zif_al30_data=>tt_fields_text_view
-        !et_fields_ddic  TYPE dd03ptab .
+        !ev_text_view         TYPE as4text
+        !es_return            TYPE bapiret2
+        !es_view              TYPE zal30_t_view
+        !et_fields            TYPE zif_al30_data=>tt_fields_view
+        !et_fields_text       TYPE zif_al30_data=>tt_fields_text_view
+        !et_fields_ddic       TYPE dd03ptab
+        !et_foreign_key_ddic TYPE dd05mttyp .
     "! <p class="shorttext synchronized">Checks if view is correct in DDIC</p>
     METHODS check_view_ddic
       IMPORTING
@@ -110,16 +111,17 @@ CLASS zcl_al30_conf DEFINITION
     "! <p class="shorttext synchronized">Get fields of data dictionary</p>
     METHODS get_fields_view_ddic
       IMPORTING
-        !iv_name_view     TYPE any
-        !iv_langu         TYPE sylangu DEFAULT sy-langu
-        !iv_add_texttable TYPE sap_bool DEFAULT abap_false
-        !iv_all_language  TYPE sap_bool DEFAULT abap_false
+        !iv_name_view         TYPE any
+        !iv_langu             TYPE sylangu DEFAULT sy-langu
+        !iv_add_texttable     TYPE sap_bool DEFAULT abap_false
+        !iv_all_language      TYPE sap_bool DEFAULT abap_false
       EXPORTING
-        !es_dd02v         TYPE dd02v
-        !et_fields        TYPE zif_al30_data=>tt_fields_view
-        !et_fields_text   TYPE zif_al30_data=>tt_fields_text_view
-        !ev_texttable     TYPE tabname
-        !et_fields_ddic   TYPE dd03ptab
+        !es_dd02v             TYPE dd02v
+        !et_fields            TYPE zif_al30_data=>tt_fields_view
+        !et_fields_text       TYPE zif_al30_data=>tt_fields_text_view
+        !ev_texttable         TYPE tabname
+        !et_fields_ddic       TYPE dd03ptab
+        !et_foreign_key_ddic TYPE dd05mttyp
       RAISING
         zcx_al30 .
     "! <p class="shorttext synchronized">Transport View</p>
@@ -174,6 +176,7 @@ CLASS zcl_al30_conf DEFINITION
     DATA mt_fields TYPE zif_al30_data=>tt_fields_view .
     DATA mt_fields_text TYPE zif_al30_data=>tt_fields_text_view .
     DATA mt_fields_ddic TYPE dd03ptab .
+    DATA mt_foreign_key_ddic TYPE dd05mttyp.
     DATA ms_view TYPE zal30_t_view .
 
     "! <p class="shorttext synchronized">Save the data in ddic format</p>
@@ -721,7 +724,8 @@ CLASS zcl_al30_conf IMPLEMENTATION.
           iv_langu     = iv_langu
         IMPORTING
           es_dd02v     = es_dd02v
-          et_dd03p     = et_fields_ddic.
+          et_dd03p     = et_fields_ddic
+          et_dd05m = et_foreign_key_ddic.
     ELSE.
       CALL METHOD read_single_view_ddic
         EXPORTING
@@ -729,7 +733,8 @@ CLASS zcl_al30_conf IMPLEMENTATION.
           iv_langu     = iv_langu
         IMPORTING
           es_dd02v     = es_dd02v
-          et_dd03p     = et_fields_ddic.
+          et_dd03p     = et_fields_ddic
+          et_dd05m = et_foreign_key_ddic.
     ENDIF.
 
     IF et_fields_ddic IS INITIAL.
@@ -1150,8 +1155,9 @@ CLASS zcl_al30_conf IMPLEMENTATION.
                 iv_add_texttable = abap_true
                 iv_all_language  = iv_all_language
               IMPORTING
-              es_dd02v = DATA(ls_dd02v)
-                et_fields_ddic   = mt_fields_ddic  ).
+                es_dd02v = DATA(ls_dd02v)
+                et_fields_ddic   = mt_fields_ddic
+                et_foreign_key_ddic = mt_foreign_key_ddic ).
 
 
           CATCH zcx_al30.
@@ -1183,6 +1189,9 @@ CLASS zcl_al30_conf IMPLEMENTATION.
       IF et_fields_ddic IS SUPPLIED.
         et_fields_ddic = mt_fields_ddic.
       ENDIF.
+      IF et_foreign_key_ddic IS SUPPLIED.
+        et_foreign_key_ddic = mt_foreign_key_ddic.
+      ENDIF.
 
 
     ELSE.
@@ -1193,7 +1202,7 @@ CLASS zcl_al30_conf IMPLEMENTATION.
 
   METHOD read_view_ddic_all_lang.
 
-    CLEAR: es_dd02v, et_dd03p.
+    CLEAR: es_dd02v, et_dd03p, et_dd05m.
 
 * Se obtiene todos los idioma de logon
     get_logon_languages( IMPORTING et_lang = DATA(lt_lang) ).

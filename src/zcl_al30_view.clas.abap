@@ -74,6 +74,7 @@ CLASS zcl_al30_view DEFINITION
         !es_return    TYPE bapiret2 .
     "! <p class="shorttext synchronized">Verify change row data + execute exit</p>
     "!
+    "! @parameter iv_row | <p class="shorttext synchronized">Row number</p>
     "! @parameter et_return | <p class="shorttext synchronized">Return table</p>
     METHODS verify_change_row_data
       IMPORTING
@@ -170,7 +171,8 @@ CLASS zcl_al30_view DEFINITION
         !it_fields_view      TYPE zif_al30_data=>tt_fields_view
         !it_fields_text_view TYPE zif_al30_data=>tt_fields_text_view
         !is_view             TYPE zal30_t_view
-        !it_fields_ddic      TYPE dd03ptab .
+        !it_fields_ddic      TYPE dd03ptab
+        !it_foreign_key_ddic TYPE dd05mttyp . .
     "! <p class="shorttext synchronized">Set editable mode the ALV Data</p>
     "!
     "! @parameter it_data | <p class="shorttext synchronized">Data</p>
@@ -191,6 +193,12 @@ CLASS zcl_al30_view DEFINITION
         it_r_views           TYPE zif_al30_data=>tt_r_tabname
       EXPORTING
         et_allowed_transport TYPE zif_al30_data=>tt_allowed_transport_view.
+    "! <p class="shorttext synchronized">Set language</p>
+    "!
+    "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    METHODS set_language
+      IMPORTING
+        !iv_langu TYPE sylangu DEFAULT sy-langu.
 
   PROTECTED SECTION.
 
@@ -212,6 +220,7 @@ CLASS zcl_al30_view DEFINITION
     DATA mt_fields TYPE zif_al30_data=>tt_fields_view .
     DATA mt_fields_text TYPE zif_al30_data=>tt_fields_text_view .
     DATA mt_fields_ddic TYPE dd03ptab .
+    DATA mt_foreign_key_ddic TYPE dd05mttyp.
     DATA ms_view TYPE zal30_t_view .
     DATA mo_original_data TYPE REF TO data .
     DATA mv_langu TYPE sylangu.
@@ -671,7 +680,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
         " Se le suma el campo idioma de la tabla de textos
         READ TABLE mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WITH KEY lang_texttable = abap_true.
         IF sy-subrc = 0.
-          lv_condition = |{ lv_condition } AND { zif_al30_data=>cs_alias_sql-texttable }.{ <ls_fields>-fieldname } = '{ sy-langu }'|.
+          lv_condition = |{ lv_condition } AND { zif_al30_data=>cs_alias_sql-texttable }.{ <ls_fields>-fieldname } = '{ mv_langu }'|.
         ENDIF.
 
 
@@ -2125,6 +2134,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
     mt_fields = it_fields_view.
     mt_fields_text = it_fields_text_view.
     mt_fields_ddic = it_fields_ddic.
+    mt_foreign_key_ddic = it_foreign_key_ddic.
   ENDMETHOD.
 
 
@@ -2393,6 +2403,10 @@ CLASS zcl_al30_view IMPLEMENTATION.
                                                              allowed = COND #( WHEN lv_allowed_general = abap_true THEN <wa>-transport ELSE abap_false ) ) ).
     ENDIF.
 
+  ENDMETHOD.
+
+  METHOD set_language.
+    mv_langu = iv_langu.
   ENDMETHOD.
 
 ENDCLASS.

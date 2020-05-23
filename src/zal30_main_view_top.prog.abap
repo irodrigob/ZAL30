@@ -51,6 +51,7 @@ TYPES: BEGIN OF ts_conf_screen,
 DATA mt_fields TYPE zif_al30_data=>tt_fields_view_alv.
 DATA mt_fields_text TYPE zif_al30_data=>tt_fields_text_view_alv.
 DATA mt_fields_ddic TYPE dd03ptab.
+DATA mt_foreign_key_ddic TYPE dd05mttyp.
 
 DATA mt_control_data TYPE tt_control_data.
 

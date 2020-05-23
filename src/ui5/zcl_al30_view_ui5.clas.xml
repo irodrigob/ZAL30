@@ -18,6 +18,12 @@
      <LANGU>E</LANGU>
      <DESCRIPT>Save the original data in the global variable</DESCRIPT>
     </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_VIEW_UI5</CLSNAME>
+     <CMPNAME>VERIFY_FOREIGN_KEY</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Verify foreign key data</DESCRIPT>
+    </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>
  </asx:abap>
