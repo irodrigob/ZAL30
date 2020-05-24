@@ -3,8 +3,8 @@ INTERFACE zif_al30_ui5_data
 
   TYPES: BEGIN OF ts_view_list.
       INCLUDE TYPE zcl_al30_view=>ts_view_list.
-  TYPES: level_auth TYPE zal30_e_level_auth,
-         allowed_transport type sap_bool,
+  TYPES: level_auth        TYPE zal30_e_level_auth,
+         allowed_transport TYPE sap_bool,
          END OF ts_view_list.
   TYPES: tt_view_list TYPE STANDARD TABLE OF ts_view_list WITH EMPTY KEY.
   TYPES: BEGIN OF ts_view_fields.
@@ -23,6 +23,17 @@ INTERFACE zif_al30_ui5_data
            message TYPE string,
          END OF ts_return.
   TYPES:tt_return TYPE STANDARD TABLE OF ts_return WITH EMPTY KEY.
+  TYPES: BEGIN OF ts_f4_values,
+           code        TYPE string,
+           description TYPE string,
+         END OF ts_f4_values.
+  TYPES: tt_f4_values TYPE STANDARD TABLE OF ts_f4_values WITH EMPTY KEY.
+  TYPES: BEGIN OF ts_f4_catalog,
+           fieldname               TYPE fieldname,
+           label_field_code        TYPE string,
+           label_field_description TYPE string,
+         END OF ts_f4_catalog.
+  TYPES tt_f4_catalog TYPE STANDARD TABLE OF ts_f4_catalog WITH EMPTY KEY.
 
   CONSTANTS: BEGIN OF cs_control_fields_ui5_data,
                style TYPE fieldname VALUE 'ZAL30_UI5_STYLE' ##NO_TEXT,

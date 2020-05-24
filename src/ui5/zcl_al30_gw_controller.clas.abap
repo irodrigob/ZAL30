@@ -143,7 +143,17 @@ CLASS zcl_al30_gw_controller DEFINITION
       EXPORTING
         !ev_order  TYPE trkorr
         !es_return TYPE zif_al30_ui5_data=>ts_return.
-
+    "! <p class="shorttext synchronized">Get catalog of fields wuth searc help</p>
+    "!
+    "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    "! @parameter iv_order | <p class="shorttext synchronized">Order</p>
+    "! @parameter ev_order | <p class="shorttext synchronized">new Order</p>
+    METHODS get_f4_catalog
+      IMPORTING
+        !iv_langu     TYPE sylangu DEFAULT sy-langu
+        !iv_view_name TYPE tabname
+      EXPORTING
+        !et_catalog   TYPE zif_al30_ui5_data=>tt_f4_catalog.
 
   PROTECTED SECTION.
     DATA mo_controller TYPE REF TO zcl_al30_controller.
@@ -1030,8 +1040,6 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
     ev_order = iv_order.
 
-
-
     " Se valida la orden, este método si la tarea no es valida añade una nueva.
     zcl_al30_util=>check_transport_order(
       EXPORTING
@@ -1060,6 +1068,17 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
     ENDIF.
 
+
+  ENDMETHOD.
+
+  METHOD get_f4_catalog.
+
+    " Se lee los datos de la vista
+    read_view_conf_for_data( EXPORTING iv_view_name        = iv_view_name
+                                       iv_langu            = iv_langu ).
+
+    " Se obtiene el catalogo de campos con ayuda para búsqueda
+    mo_view->get_f4_catalog( IMPORTING et_catalog = et_catalog ).
 
   ENDMETHOD.
 

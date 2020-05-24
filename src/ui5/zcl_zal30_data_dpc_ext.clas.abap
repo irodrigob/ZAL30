@@ -27,6 +27,7 @@ CLASS zcl_zal30_data_dpc_ext DEFINITION
 
     METHODS verifyfielddatas_get_entity REDEFINITION.
     METHODS savedataset_create_entity REDEFINITION.
+    METHODS getf4catalogset_get_entityset REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -50,7 +51,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
   METHOD checktransportor_get_entity.
 
 
-    data(lv_order) = conv trkorr( it_key_tab[ name = 'TRANSPORTORDER' ]-value ) .
+    DATA(lv_order) = CONV trkorr( it_key_tab[ name = 'TRANSPORTORDER' ]-value ) .
     er_entity-langu = it_key_tab[ name = 'LANGU' ]-value.
 
     mo_controller->check_transport_order(
@@ -302,7 +303,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
 
 
   METHOD userorderset_get_entityset.
-    DATA lv_langu.
+    DATA lv_langu TYPE sylangu.
     DATA lv_user TYPE sy-uname.
 
 
@@ -378,4 +379,42 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
 *        ev_message      = er_entity-message ).
 
   ENDMETHOD.
+  METHOD getf4catalogset_get_entityset.
+    DATA lv_langu TYPE SYLANGU.
+
+
+    " Se recupera el diioma
+    READ TABLE it_filter_select_options ASSIGNING FIELD-SYMBOL(<ls_filter>) WITH KEY property = 'LANGU'.
+    IF sy-subrc = 0.
+      READ TABLE <ls_filter>-select_options ASSIGNING FIELD-SYMBOL(<ls_select_options>) INDEX 1.
+      CALL FUNCTION 'CONVERSION_EXIT_ISOLA_INPUT'
+        EXPORTING
+          input            = <ls_select_options>-low
+        IMPORTING
+          output           = lv_langu
+        EXCEPTIONS
+          unknown_language = 1
+          OTHERS           = 2.
+
+    ENDIF.
+
+    " Nombre de la vista
+    READ TABLE it_filter_select_options ASSIGNING <ls_filter> WITH KEY property = 'VIEWNAME'.
+    IF sy-subrc = 0.
+      READ TABLE <ls_filter>-select_options ASSIGNING <ls_select_options> INDEX 1.
+      IF sy-subrc = 0.
+        data(lv_viewname) = conv tabname( <ls_select_options>-low ).
+      ENDIF.
+    ENDIF.
+
+    mo_controller->get_f4_catalog(
+      EXPORTING
+        iv_view_name = lv_viewname
+        iv_langu  = lv_langu
+      IMPORTING
+        et_catalog = data(lt_catalog) ).
+
+    et_entityset = CORRESPONDING #( lt_catalog ).
+  ENDMETHOD.
+
 ENDCLASS.

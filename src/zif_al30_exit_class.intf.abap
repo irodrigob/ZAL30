@@ -103,7 +103,6 @@ INTERFACE zif_al30_exit_class
       et_return    TYPE bapiret2_t.
   "! <p class="shorttext synchronized">Set editable mode the ALV Data</p>
   "! The ev_edit_mode parameter can be returned with two values:
-  "! zif_al30_data => cv_mode_change and zif_al30_data => cv_mode_view
   "! @parameter it_data | <p class="shorttext synchronized">Data</p>
   "! @parameter ev_edit_mode | <p class="shorttext synchronized">Edit mode</p>
   METHODS exit_set_edit_mode_alv
@@ -111,4 +110,23 @@ INTERFACE zif_al30_exit_class
       !it_data      TYPE STANDARD TABLE
     EXPORTING
       !ev_edit_mode TYPE cdchngind.
+  "! <p class="shorttext synchronized" lang="en">Exit UI5 for change F4 search help</p>
+  "! Field that in UI5 will still have search help. Only it's possible change the next fields:
+  "! LABEL_FIELD_CODE and LABEL_FIELD_DESCRIPTION
+  "! @parameter it_fields_text | <p class="shorttext synchronized">Descriptions of field</p>
+  "! @parameter is_field_ddic | <p class="shorttext synchronized">Information of fields in DDIC</p>
+  "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+  "! @parameter ev_no_include | <p class="shorttext synchronized">No include field un the catalog</p>
+  "! @parameter cs_f4_catalog | <p class="shorttext synchronized">Data of catalog</p>
+  METHODS exit_ui5_change_f4_catalog
+    IMPORTING
+      !it_fields_text TYPE zif_al30_data=>tt_fields_text_view
+      !is_field_ddic  TYPE dd03p
+      !iv_langu       TYPE sy-langu
+    EXPORTING
+      !ev_no_include  TYPE sap_bool
+    CHANGING
+      cs_f4_catalog   TYPE zif_al30_ui5_data=>ts_f4_catalog.
+
+
 ENDINTERFACE.
