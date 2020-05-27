@@ -127,19 +127,30 @@ public section.
   types:
     TT_CHECKTRANSPORTORDER type standard table of TS_CHECKTRANSPORTORDER .
   types:
-      begin of TS_GETF4CATALOG,
+      begin of TS_GETSEARCHHELPCATALOG,
      VIEW_NAME type TABNAME,
      LANGU type SPRAS,
      FIELDNAME type string,
      LABEL_FIELD_CODE type string,
      LABEL_FIELD_DESCRIPTION type string,
-  end of TS_GETF4CATALOG .
+  end of TS_GETSEARCHHELPCATALOG .
   types:
-    TT_GETF4CATALOG type standard table of TS_GETF4CATALOG .
+    TT_GETSEARCHHELPCATALOG type standard table of TS_GETSEARCHHELPCATALOG .
+  types:
+      begin of TS_GETSEARCHHELPDATA,
+     VIEW_NAME type TABNAME,
+     LANGU type SPRAS,
+     FIELDNAME type FIELDNAME,
+     CODE type string,
+     DESCRIPTION type string,
+  end of TS_GETSEARCHHELPDATA .
+  types:
+    TT_GETSEARCHHELPDATA type standard table of TS_GETSEARCHHELPDATA .
 
   constants GC_CHECKAUTHVIEW type /IWBEP/IF_MGW_MED_ODATA_TYPES=>TY_E_MED_ENTITY_NAME value 'checkAuthView' ##NO_TEXT.
   constants GC_CHECKTRANSPORTORDER type /IWBEP/IF_MGW_MED_ODATA_TYPES=>TY_E_MED_ENTITY_NAME value 'checkTransportOrder' ##NO_TEXT.
-  constants GC_GETF4CATALOG type /IWBEP/IF_MGW_MED_ODATA_TYPES=>TY_E_MED_ENTITY_NAME value 'getF4Catalog' ##NO_TEXT.
+  constants GC_GETSEARCHHELPCATALOG type /IWBEP/IF_MGW_MED_ODATA_TYPES=>TY_E_MED_ENTITY_NAME value 'getSearchHelpCatalog' ##NO_TEXT.
+  constants GC_GETSEARCHHELPDATA type /IWBEP/IF_MGW_MED_ODATA_TYPES=>TY_E_MED_ENTITY_NAME value 'getSearchHelpData' ##NO_TEXT.
   constants GC_GETVIEWS type /IWBEP/IF_MGW_MED_ODATA_TYPES=>TY_E_MED_ENTITY_NAME value 'getViews' ##NO_TEXT.
   constants GC_LOCKVIEW type /IWBEP/IF_MGW_MED_ODATA_TYPES=>TY_E_MED_ENTITY_NAME value 'lockView' ##NO_TEXT.
   constants GC_READDATA type /IWBEP/IF_MGW_MED_ODATA_TYPES=>TY_E_MED_ENTITY_NAME value 'readData' ##NO_TEXT.
@@ -193,7 +204,10 @@ private section.
   methods DEFINE_CHECKTRANSPORTORDER
     raising
       /IWBEP/CX_MGW_MED_EXCEPTION .
-  methods DEFINE_GETF4CATALOG
+  methods DEFINE_GETSEARCHHELPCATALOG
+    raising
+      /IWBEP/CX_MGW_MED_EXCEPTION .
+  methods DEFINE_GETSEARCHHELPDATA
     raising
       /IWBEP/CX_MGW_MED_EXCEPTION .
 ENDCLASS.
@@ -224,7 +238,8 @@ define_verifyfielddata( ).
 define_savedata( ).
 define_userorder( ).
 define_checktransportorder( ).
-define_getf4catalog( ).
+define_getsearchhelpcatalog( ).
+define_getsearchhelpdata( ).
   endmethod.
 
 
@@ -383,7 +398,7 @@ lo_entity_set->set_filter_required( abap_false ).
   endmethod.
 
 
-  method DEFINE_GETF4CATALOG.
+  method DEFINE_GETSEARCHHELPCATALOG.
 *&---------------------------------------------------------------------*
 *&           Generated code for the MODEL PROVIDER BASE CLASS         &*
 *&                                                                     &*
@@ -401,10 +416,10 @@ lo_entity_set->set_filter_required( abap_false ).
         lo_entity_set     type ref to /iwbep/if_mgw_odata_entity_set.                "#EC NEEDED
 
 ***********************************************************************************************************************************
-*   ENTITY - getF4Catalog
+*   ENTITY - getSearchHelpCatalog
 ***********************************************************************************************************************************
 
-lo_entity_type = model->create_entity_type( iv_entity_type_name = 'getF4Catalog' iv_def_entity_set = abap_false ). "#EC NOTEXT
+lo_entity_type = model->create_entity_type( iv_entity_type_name = 'getSearchHelpCatalog' iv_def_entity_set = abap_false ). "#EC NOTEXT
 
 ***********************************************************************************************************************************
 *Properties
@@ -469,13 +484,119 @@ lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
         iv_key      = 'unicode'
         iv_value    = 'false' ).
 
-lo_entity_type->bind_structure( iv_structure_name  = 'ZCL_ZAL30_DATA_MPC=>TS_GETF4CATALOG' ). "#EC NOTEXT
+lo_entity_type->bind_structure( iv_structure_name  = 'ZCL_ZAL30_DATA_MPC=>TS_GETSEARCHHELPCATALOG' ). "#EC NOTEXT
 
 
 ***********************************************************************************************************************************
 *   ENTITY SETS
 ***********************************************************************************************************************************
-lo_entity_set = lo_entity_type->create_entity_set( 'getF4CatalogSet' ). "#EC NOTEXT
+lo_entity_set = lo_entity_type->create_entity_set( 'getSearchHelpCatalogSet' ). "#EC NOTEXT
+
+lo_entity_set->set_creatable( abap_false ).
+lo_entity_set->set_updatable( abap_false ).
+lo_entity_set->set_deletable( abap_false ).
+
+lo_entity_set->set_pageable( abap_false ).
+lo_entity_set->set_addressable( abap_false ).
+lo_entity_set->set_has_ftxt_search( abap_false ).
+lo_entity_set->set_subscribable( abap_false ).
+lo_entity_set->set_filter_required( abap_false ).
+  endmethod.
+
+
+  method DEFINE_GETSEARCHHELPDATA.
+*&---------------------------------------------------------------------*
+*&           Generated code for the MODEL PROVIDER BASE CLASS         &*
+*&                                                                     &*
+*&  !!!NEVER MODIFY THIS CLASS. IN CASE YOU WANT TO CHANGE THE MODEL  &*
+*&        DO THIS IN THE MODEL PROVIDER SUBCLASS!!!                   &*
+*&                                                                     &*
+*&---------------------------------------------------------------------*
+
+
+  data:
+        lo_annotation     type ref to /iwbep/if_mgw_odata_annotation,                "#EC NEEDED
+        lo_entity_type    type ref to /iwbep/if_mgw_odata_entity_typ,                "#EC NEEDED
+        lo_complex_type   type ref to /iwbep/if_mgw_odata_cmplx_type,                "#EC NEEDED
+        lo_property       type ref to /iwbep/if_mgw_odata_property,                  "#EC NEEDED
+        lo_entity_set     type ref to /iwbep/if_mgw_odata_entity_set.                "#EC NEEDED
+
+***********************************************************************************************************************************
+*   ENTITY - getSearchHelpData
+***********************************************************************************************************************************
+
+lo_entity_type = model->create_entity_type( iv_entity_type_name = 'getSearchHelpData' iv_def_entity_set = abap_false ). "#EC NOTEXT
+
+***********************************************************************************************************************************
+*Properties
+***********************************************************************************************************************************
+
+lo_property = lo_entity_type->create_property( iv_property_name = 'VIEWNAME' iv_abap_fieldname = 'VIEW_NAME' ). "#EC NOTEXT
+lo_property->set_is_key( ).
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_true ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'LANGU' iv_abap_fieldname = 'LANGU' ). "#EC NOTEXT
+lo_property->set_is_key( ).
+lo_property->set_type_edm_string( ).
+lo_property->set_conversion_exit( 'ISOLA' ). "#EC NOTEXT
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_true ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'FIELDNAME' iv_abap_fieldname = 'FIELDNAME' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'CODE' iv_abap_fieldname = 'CODE' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'DESCRIPTION' iv_abap_fieldname = 'DESCRIPTION' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+
+lo_entity_type->bind_structure( iv_structure_name  = 'ZCL_ZAL30_DATA_MPC=>TS_GETSEARCHHELPDATA' ). "#EC NOTEXT
+
+
+***********************************************************************************************************************************
+*   ENTITY SETS
+***********************************************************************************************************************************
+lo_entity_set = lo_entity_type->create_entity_set( 'getSearchHelpDataSet' ). "#EC NOTEXT
 
 lo_entity_set->set_creatable( abap_false ).
 lo_entity_set->set_updatable( abap_false ).
@@ -1521,7 +1642,7 @@ lo_entity_set->set_filter_required( abap_false ).
 *&---------------------------------------------------------------------*
 
 
-  CONSTANTS: lc_gen_date_time TYPE timestamp VALUE '20200524153425'.                  "#EC NOTEXT
+  CONSTANTS: lc_gen_date_time TYPE timestamp VALUE '20200527192829'.                  "#EC NOTEXT
   rv_last_modified = super->get_last_modified( ).
   IF rv_last_modified LT lc_gen_date_time.
     rv_last_modified = lc_gen_date_time.

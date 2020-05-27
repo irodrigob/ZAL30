@@ -94,7 +94,13 @@
      <CLSNAME>ZCL_AL30_GW_CONTROLLER</CLSNAME>
      <CMPNAME>GET_F4_CATALOG</CMPNAME>
      <LANGU>E</LANGU>
-     <DESCRIPT>Get catalog of fields wuth searc help</DESCRIPT>
+     <DESCRIPT>Get catalog of fields with search help</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_GW_CONTROLLER</CLSNAME>
+     <CMPNAME>GET_F4_DATA</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Get data for search help of a field</DESCRIPT>
     </SEOCOMPOTX>
     <SEOCOMPOTX>
      <CLSNAME>ZCL_AL30_GW_CONTROLLER</CLSNAME>

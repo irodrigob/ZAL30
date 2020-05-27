@@ -135,7 +135,7 @@ CLASS zcl_al30_gw_controller DEFINITION
     "!
     "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
     "! @parameter iv_order | <p class="shorttext synchronized">Order</p>
-    "! @parameter ev_order | <p class="shorttext synchronized">new Order</p>
+    "! @parameter ev_order | <p class="shorttext synchronized">New Order</p>
     METHODS check_transport_order
       IMPORTING
         !iv_langu  TYPE sylangu DEFAULT sy-langu
@@ -143,17 +143,30 @@ CLASS zcl_al30_gw_controller DEFINITION
       EXPORTING
         !ev_order  TYPE trkorr
         !es_return TYPE zif_al30_ui5_data=>ts_return.
-    "! <p class="shorttext synchronized">Get catalog of fields wuth searc help</p>
+    "! <p class="shorttext synchronized">Get catalog of fields with search help</p>
     "!
     "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
-    "! @parameter iv_order | <p class="shorttext synchronized">Order</p>
-    "! @parameter ev_order | <p class="shorttext synchronized">new Order</p>
+    "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
+    "! @parameter et_catalog | <p class="shorttext synchronized">Catalog of search help</p>
     METHODS get_f4_catalog
       IMPORTING
         !iv_langu     TYPE sylangu DEFAULT sy-langu
         !iv_view_name TYPE tabname
       EXPORTING
         !et_catalog   TYPE zif_al30_ui5_data=>tt_f4_catalog.
+    "! <p class="shorttext synchronized">Get data for search help of a field</p>
+    "!
+    "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
+    "! @parameter iv_field_name | <p class="shorttext synchronized">Field name</p>
+    "! @parameter et_data | <p class="shorttext synchronized">Data for the search help</p>
+    METHODS get_f4_data
+      IMPORTING
+        !iv_langu      TYPE sylangu DEFAULT sy-langu
+        !iv_view_name  TYPE tabname
+        !iv_field_name TYPE fieldname
+      EXPORTING
+        !et_data       TYPE zif_al30_ui5_data=>tt_f4_data.
 
   PROTECTED SECTION.
     DATA mo_controller TYPE REF TO zcl_al30_controller.
@@ -1077,8 +1090,23 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     read_view_conf_for_data( EXPORTING iv_view_name        = iv_view_name
                                        iv_langu            = iv_langu ).
 
+    mo_view->set_language( iv_langu ).
+
     " Se obtiene el catalogo de campos con ayuda para búsqueda
     mo_view->get_f4_catalog( IMPORTING et_catalog = et_catalog ).
+
+  ENDMETHOD.
+
+  METHOD get_f4_data.
+
+    " Se lee los datos de la vista
+    read_view_conf_for_data( EXPORTING iv_view_name        = iv_view_name
+                                       iv_langu            = iv_langu ).
+
+    mo_view->set_language( iv_langu ).
+
+    mo_view->get_f4_data( EXPORTING iv_field_name = iv_field_name
+                          IMPORTING et_data = et_data ).
 
   ENDMETHOD.
 

@@ -28,6 +28,7 @@ CLASS zcl_zal30_data_dpc_ext DEFINITION
     METHODS verifyfielddatas_get_entity REDEFINITION.
     METHODS savedataset_create_entity REDEFINITION.
     METHODS getf4catalogset_get_entityset REDEFINITION.
+    METHODS getsearchhelpdat_get_entityset REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -380,7 +381,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
 
   ENDMETHOD.
   METHOD getf4catalogset_get_entityset.
-    DATA lv_langu TYPE SYLANGU.
+    DATA lv_langu TYPE sylangu.
 
 
     " Se recupera el diioma
@@ -403,7 +404,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
     IF sy-subrc = 0.
       READ TABLE <ls_filter>-select_options ASSIGNING <ls_select_options> INDEX 1.
       IF sy-subrc = 0.
-        data(lv_viewname) = conv tabname( <ls_select_options>-low ).
+        DATA(lv_viewname) = CONV tabname( <ls_select_options>-low ).
       ENDIF.
     ENDIF.
 
@@ -412,9 +413,60 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
         iv_view_name = lv_viewname
         iv_langu  = lv_langu
       IMPORTING
-        et_catalog = data(lt_catalog) ).
+        et_catalog = DATA(lt_catalog) ).
 
     et_entityset = CORRESPONDING #( lt_catalog ).
+  ENDMETHOD.
+
+  METHOD getsearchhelpdat_get_entityset.
+
+    DATA lv_langu TYPE sylangu.
+
+
+    " Se recupera el diioma
+    READ TABLE it_filter_select_options ASSIGNING FIELD-SYMBOL(<ls_filter>) WITH KEY property = 'LANGU'.
+    IF sy-subrc = 0.
+      READ TABLE <ls_filter>-select_options ASSIGNING FIELD-SYMBOL(<ls_select_options>) INDEX 1.
+      CALL FUNCTION 'CONVERSION_EXIT_ISOLA_INPUT'
+        EXPORTING
+          input            = <ls_select_options>-low
+        IMPORTING
+          output           = lv_langu
+        EXCEPTIONS
+          unknown_language = 1
+          OTHERS           = 2.
+
+    ENDIF.
+
+    " Nombre de la vista
+    READ TABLE it_filter_select_options ASSIGNING <ls_filter> WITH KEY property = 'VIEWNAME'.
+    IF sy-subrc = 0.
+      READ TABLE <ls_filter>-select_options ASSIGNING <ls_select_options> INDEX 1.
+      IF sy-subrc = 0.
+        DATA(lv_viewname) = CONV tabname( <ls_select_options>-low ).
+      ENDIF.
+    ENDIF.
+
+    " Nombre del campo
+    READ TABLE it_filter_select_options ASSIGNING <ls_filter> WITH KEY property = 'FIELDNAME'.
+    IF sy-subrc = 0.
+      READ TABLE <ls_filter>-select_options ASSIGNING <ls_select_options> INDEX 1.
+      IF sy-subrc = 0.
+        DATA(lv_fieldname) = CONV fieldname( <ls_select_options>-low ).
+      ENDIF.
+    ENDIF.
+
+
+    mo_controller->get_f4_data(
+      EXPORTING
+        iv_view_name = lv_viewname
+        iv_field_name = lv_fieldname
+        iv_langu  = lv_langu
+      IMPORTING
+        et_data = DATA(lt_data) ).
+
+    et_entityset = CORRESPONDING #( lt_data ).
+
   ENDMETHOD.
 
 ENDCLASS.

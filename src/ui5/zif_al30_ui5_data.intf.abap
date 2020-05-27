@@ -34,6 +34,11 @@ INTERFACE zif_al30_ui5_data
            label_field_description TYPE string,
          END OF ts_f4_catalog.
   TYPES tt_f4_catalog TYPE STANDARD TABLE OF ts_f4_catalog WITH EMPTY KEY.
+  TYPES: BEGIN OF ts_f4_data,
+           code        TYPE string,
+           description TYPE string,
+         END OF ts_f4_data.
+  TYPES: tt_f4_data TYPE STANDARD TABLE OF ts_f4_data WITH EMPTY KEY.
 
   CONSTANTS: BEGIN OF cs_control_fields_ui5_data,
                style TYPE fieldname VALUE 'ZAL30_UI5_STYLE' ##NO_TEXT,
