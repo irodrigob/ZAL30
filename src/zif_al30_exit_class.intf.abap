@@ -127,6 +127,21 @@ INTERFACE zif_al30_exit_class
       !ev_no_include  TYPE sap_bool
     CHANGING
       cs_f4_catalog   TYPE zif_al30_ui5_data=>ts_f4_catalog.
+  "! <p class="shorttext synchronized">Exit UI5 for get data for foreign key</p>
+  "! If data is returned, the ev_own_data parameter must be returned to "X" so that they are not overwritten
+  "! @parameter iv_fieldname | <p class="shorttext synchronized">Fieldname</p>
+  "! @parameter iv_checktable | <p class="shorttext synchronized">Checktable</p>
+  "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+  "! @parameter ev_own_data | <p class="shorttext synchronized">Own data obtained</p>
+  "! @parameter et_data | <p class="shorttext synchronized">Values</p>
+  METHODS exit_ui5_get_f4_data_forgn_key
+    IMPORTING
+      !iv_fieldname  TYPE fieldname
+      !iv_checktable TYPE tabname
+      !iv_langu      TYPE sylangu
+    EXPORTING
+      !ev_own_data   TYPE sap_bool
+      !et_data       TYPE zif_al30_ui5_data=>tt_f4_data.
 
 
 ENDINTERFACE.

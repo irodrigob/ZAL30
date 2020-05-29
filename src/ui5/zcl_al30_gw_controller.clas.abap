@@ -196,8 +196,7 @@ CLASS zcl_al30_gw_controller DEFINITION
         !et_fields_view      TYPE zif_al30_data=>tt_fields_view
         !et_fields_text_view TYPE zif_al30_data=>tt_fields_text_view
         !et_fields_ddic      TYPE dd03ptab
-        !es_view             TYPE zal30_t_view
-      .
+        !es_view             TYPE zal30_t_view.
 
     "! <p class="shorttext synchronized">Reading the view configuration to used in view data class</p>
     "!Reading the view configuration to be used in the view data class

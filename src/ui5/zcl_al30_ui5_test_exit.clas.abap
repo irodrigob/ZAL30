@@ -109,4 +109,12 @@ CLASS zcl_al30_ui5_test_exit IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD zif_al30_exit_class~exit_ui5_change_f4_catalog.
+
+  ENDMETHOD.
+
+  METHOD zif_al30_exit_class~exit_ui5_get_f4_data_forgn_key.
+
+  ENDMETHOD.
+
 ENDCLASS.
