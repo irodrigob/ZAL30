@@ -216,7 +216,7 @@ CLASS zcl_al30_view DEFINITION
     TYPES:
       tt_main_change_log TYPE STANDARD TABLE OF ts_main_change_log .
 
-    DATA mo_exit_class TYPE REF TO object .
+    DATA mo_exit_class TYPE REF TO zif_al30_exit_class .
     DATA mt_fields TYPE zif_al30_data=>tt_fields_view .
     DATA mt_fields_text TYPE zif_al30_data=>tt_fields_text_view .
     DATA mt_fields_ddic TYPE dd03ptab .
@@ -2224,6 +2224,11 @@ CLASS zcl_al30_view IMPLEMENTATION.
       CLEAR <lt_row_msg>.
     ENDIF.
 
+    " Se limpia el campo que marca el registro si es erroneo o no.
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status OF STRUCTURE cs_row_data TO FIELD-SYMBOL(<row_status>).
+    IF sy-subrc = 0.
+      CLEAR <row_status>.
+    ENDIF.
 
     CLEAR et_return.
 

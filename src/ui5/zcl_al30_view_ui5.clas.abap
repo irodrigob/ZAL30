@@ -4,6 +4,32 @@ CLASS zcl_al30_view_ui5 DEFINITION
   CREATE PUBLIC .
 
   PUBLIC SECTION.
+    "! <p class="shorttext synchronized">Apply output conversion exit to the field</p>
+    "!
+    "! @parameter iv_convexit | <p class="shorttext synchronized">Conversion exit</p>
+    "! @parameter iv_value | <p class="shorttext synchronized">Value input</p>
+    "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    "! @parameter ev_value | <p class="shorttext synchronized">Value output</p>
+    CLASS-METHODS apply_conv_exit_output
+      IMPORTING
+        iv_convexit TYPE dd03p-convexit
+        iv_value    TYPE any
+        iv_langu    TYPE sylangu DEFAULT sy-langu
+      EXPORTING
+        ev_value    TYPE any.
+    "! <p class="shorttext synchronized">Apply input conversion exit to the field</p>
+    "!
+    "! @parameter iv_convexit | <p class="shorttext synchronized">Conversion exit</p>
+    "! @parameter iv_value | <p class="shorttext synchronized">Value input</p>
+    "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    "! @parameter ev_value | <p class="shorttext synchronized">Value output</p>
+    CLASS-METHODS apply_conv_exit_input
+      IMPORTING
+        iv_convexit TYPE dd03p-convexit
+        iv_value    TYPE any
+        iv_langu    TYPE sylangu DEFAULT sy-langu
+      EXPORTING
+        ev_value    TYPE any.
     "! <p class="shorttext synchronized">Save the original data in the global variable</p>
     "! This has to be done because the original data is lost at the end of the data collection service.
     "! @parameter io_original_data | <p class="shorttext synchronized">Original data object</p>
@@ -19,13 +45,13 @@ CLASS zcl_al30_view_ui5 DEFINITION
         !et_catalog TYPE zif_al30_ui5_data=>tt_f4_catalog.
     "! <p class="shorttext synchronized">Get data for search help of a field</p>
     "!
-    "! @parameter iv_field_name | <p class="shorttext synchronized">Field name</p>
+    "! @parameter iv_fieldname | <p class="shorttext synchronized">Field name</p>
     "! @parameter et_data | <p class="shorttext synchronized">Data for the search help</p>
     METHODS get_f4_data
       IMPORTING
-        !iv_field_name TYPE fieldname
+        !iv_fieldname TYPE fieldname
       EXPORTING
-        !et_data       TYPE zif_al30_ui5_data=>tt_f4_data.
+        !et_data      TYPE zif_al30_ui5_data=>tt_f4_data.
 
 
   PROTECTED SECTION.
@@ -50,9 +76,9 @@ CLASS zcl_al30_view_ui5 DEFINITION
     "! @parameter cs_row_data | <p class="shorttext synchronized">Row data</p>
     METHODS verify_fix_values
       IMPORTING
-        iv_field_name TYPE dd03p-fieldname
+        iv_fieldname TYPE dd03p-fieldname
       CHANGING
-        cs_row_data   TYPE any.
+        cs_row_data  TYPE any.
     "! <p class="shorttext synchronized" lang="en">Exit UI5 for change F4 search help</p>
     "! Field that in UI5 will still have search help
     "! @parameter it_fields_text | <p class="shorttext synchronized">Descriptions of field</p>
@@ -70,20 +96,22 @@ CLASS zcl_al30_view_ui5 DEFINITION
       CHANGING
         cs_f4_catalog  TYPE zif_al30_ui5_data=>ts_f4_catalog.
     "! <p class="shorttext synchronized" lang="en">Get F4 Data for domain</p>
+    "! @parameter iv_fieldname | <p class="shorttext synchronized">Fieldname</p>
     "! @parameter iv_domain | <p class="shorttext synchronized">Dominio</p>
     "! @parameter et_data | <p class="shorttext synchronized">Data of domain</p>
     METHODS get_f4_data_domain
       IMPORTING
-        iv_domain TYPE dd03p-domname
+        iv_fieldname TYPE fieldname
+        iv_domain    TYPE dd03p-domname
       EXPORTING
-        et_data   TYPE zif_al30_ui5_data=>tt_f4_data.
+        et_data      TYPE zif_al30_ui5_data=>tt_f4_data.
     "! <p class="shorttext synchronized" lang="en">Get F4 Data for foreign key</p>
     "! @parameter iv_fieldname | <p class="shorttext synchronized">Fieldname</p>
     "! @parameter iv_checktable | <p class="shorttext synchronized">Check table</p>
     "! @parameter et_data | <p class="shorttext synchronized">Data of foreign key</p>
     METHODS get_f4_data_foreign_key
       IMPORTING
-        iv_field_name TYPE dd03p-fieldname
+        iv_fieldname  TYPE dd03p-fieldname
         iv_checktable TYPE dd03p-checktable
       EXPORTING
         et_data       TYPE zif_al30_ui5_data=>tt_f4_data.
@@ -119,7 +147,34 @@ CLASS zcl_al30_view_ui5 DEFINITION
         ev_texttable  TYPE tabname
         et_cols       TYPE adbc_column_tab
         eo_itab       TYPE REF TO data.
+    "! <p class="shorttext synchronized">Data filling from foreign key</p>
+    "!
+    "! @parameter io_foreign_key_data | <p class="shorttext synchronized" lang="en"></p>
+    "! @parameter iv_fieldname | <p class="shorttext synchronized">Fieldname</p>
+    "! @parameter ev_completed_data | <p class="shorttext synchronized" lang="en"></p>
+    "! @parameter et_data | <p class="shorttext synchronized" lang="en"></p>
+    METHODS exit_ui5_fill_f4_foreign_key
+      IMPORTING
+        !it_foreign_key_data TYPE STANDARD TABLE
+        !iv_fieldname        TYPE fieldname
+      EXPORTING
+        ev_completed_data    TYPE sap_bool
+        et_data              TYPE zif_al30_ui5_data=>tt_f4_data.
+    "! <p class="shorttext synchronized">Exit UI5 for the post-filling process</p>
+    "!
+    "! @parameter iv_fieldname | <p class="shorttext synchronized">Fieldname</p>
+    "! @parameter iv_checktable | <p class="shorttext synchronized">checktable</p>
+    "! @parameter iv_domain | <p class="shorttext synchronized">Domain</p>
+    "! @parameter ct_data | <p class="shorttext synchronized">Values</p>
+    METHODS exit_ui5_post_fill_f4_data
+      IMPORTING
+        iv_fieldname  TYPE dd03p-fieldname
+        iv_checktable TYPE dd03p-checktable OPTIONAL
+        iv_domain     TYPE dd03p-domname OPTIONAL
+      CHANGING
+        ct_data       TYPE zif_al30_ui5_data=>tt_f4_data.
   PRIVATE SECTION.
+
 ENDCLASS.
 
 
@@ -139,15 +194,11 @@ CLASS zcl_al30_view_ui5 IMPLEMENTATION.
 
 
   METHOD exit_ui5_change_f4_catalog.
-    DATA lv_metodo TYPE seocpdname.
 
     IF mo_exit_class IS BOUND.
 
-* Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_UI5_CHANGE_F4_CATALOG' INTO lv_metodo.
-
       TRY.
-          CALL METHOD mo_exit_class->(lv_metodo)
+          CALL METHOD mo_exit_class->exit_ui5_change_f4_catalog
             EXPORTING
               it_fields_text = it_fields_text
               is_field_ddic  = is_field_ddic
@@ -248,15 +299,16 @@ CLASS zcl_al30_view_ui5 IMPLEMENTATION.
     CLEAR et_data.
 
     " Se lee como es el campo para saber como buscar los datos
-    READ TABLE mt_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WITH KEY fieldname = iv_field_name.
+    READ TABLE mt_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WITH KEY fieldname = iv_fieldname.
     IF sy-subrc = 0.
 
       IF <ls_fields_ddic>-checktable IS NOT INITIAL. " Por tabla de verificación
         get_f4_data_foreign_key( EXPORTING iv_checktable = <ls_fields_ddic>-checktable
-                                           iv_field_name = <ls_fields_ddic>-fieldname
+                                           iv_fieldname = <ls_fields_ddic>-fieldname
                                     IMPORTING et_data = et_data ).
       ELSEIF <ls_fields_ddic>-domname IS NOT INITIAL. " Por dominio
         get_f4_data_domain( EXPORTING iv_domain = <ls_fields_ddic>-domname
+                                      iv_fieldname = iv_fieldname
                             IMPORTING et_data = et_data ).
       ENDIF.
 
@@ -296,7 +348,7 @@ CLASS zcl_al30_view_ui5 IMPLEMENTATION.
         verify_foreign_key( EXPORTING iv_fieldname = <ls_fields_ddic>-fieldname
                             CHANGING cs_row_data = cs_row_data ).
       ELSEIF <ls_fields_ddic>-domname IS NOT INITIAL.
-        verify_fix_values( EXPORTING iv_field_name = <ls_fields_ddic>-fieldname
+        verify_fix_values( EXPORTING iv_fieldname = <ls_fields_ddic>-fieldname
                             CHANGING cs_row_data = cs_row_data ).
       ENDIF.
     ENDLOOP.
@@ -310,7 +362,7 @@ CLASS zcl_al30_view_ui5 IMPLEMENTATION.
     DATA lt_dd07v      TYPE STANDARD TABLE OF dd07v.
 
     " Se procesan aquellos campos que tienen un clave externa
-    READ TABLE mt_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WITH KEY fieldname = iv_field_name.
+    READ TABLE mt_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WITH KEY fieldname = iv_fieldname.
     IF sy-subrc = 0.
       " No debería ocurrir porque la método se llama si el campo tiene clave externa, pero aún así pongo el contro.
       IF <ls_fields_ddic>-domname IS NOT INITIAL.
@@ -464,6 +516,11 @@ CLASS zcl_al30_view_ui5 IMPLEMENTATION.
 
     et_data = VALUE #( FOR <wa> IN lt_values ( code = <wa>-domvalue_l description = <wa>-ddtext ) ).
 
+    " Finalmente se ejecuta la exit que permite cambiar valores o hacer los ajustes que sean necesarios.
+    exit_ui5_post_fill_f4_data( EXPORTING iv_fieldname = iv_fieldname
+                                          iv_domain = iv_domain
+                                CHANGING ct_data = et_data ).
+
   ENDMETHOD.
 
   METHOD get_f4_data_foreign_key.
@@ -471,10 +528,11 @@ CLASS zcl_al30_view_ui5 IMPLEMENTATION.
 
     CLEAR et_data.
 
-    " Se llama la exit para ver si los datos se van a determinar de manera interna
+    " Se llama la exit para ver si los datos se van a determinar de manera interna. Esta exit, va a permitir que se busquen los textos
+    " en tablas especiales: como la de clientes o sociedad. Cuya descripción esta en la propia tabla.
     exit_ui5_get_f4_data_forgn_key(
       EXPORTING
-        iv_fieldname  = iv_field_name
+        iv_fieldname  = iv_fieldname
         iv_checktable = iv_checktable
       IMPORTING
         ev_own_data   = DATA(lv_own_data)
@@ -484,7 +542,7 @@ CLASS zcl_al30_view_ui5 IMPLEMENTATION.
     IF lv_own_data = abap_false.
 
       " se crea la sentencia SQL que se usará para buscar los datos
-      create_sql_foreign_key( EXPORTING iv_fieldname  = iv_field_name
+      create_sql_foreign_key( EXPORTING iv_fieldname  = iv_fieldname
                                         iv_checktable = iv_checktable
                               IMPORTING ev_sql = DATA(lv_sql)
                                         et_cols = DATA(lt_cols)
@@ -503,6 +561,62 @@ CLASS zcl_al30_view_ui5 IMPLEMENTATION.
 
             "Se leen los datos
             IF lo_result->next_package( ) > 0.
+
+              " En la exit va permitir modificar que campos se van a guardar en la tabla de datos. Esto porque, pues porque
+              " hay tablas de texto asociadas que hay más de un campo de texto (ejemplo, tabla de monedas, materiales, etc..)
+              exit_ui5_fill_f4_foreign_key( EXPORTING it_foreign_key_data = <tbl>
+                                                      iv_fieldname = iv_fieldname
+                                            IMPORTING ev_completed_data = DATA(lv_completed_data)
+                                                      et_data = lt_data ).
+
+              IF lv_completed_data = abap_false. " Si en la exit no se han rellenado los valores se hace aquí
+
+                LOOP AT <tbl> ASSIGNING FIELD-SYMBOL(<ls_wa>).
+                  DATA(ls_f4_data) = VALUE zif_al30_ui5_data=>ts_f4_data(  ).
+
+                  " Valor para el campo CODE
+                  ASSIGN COMPONENT iv_fieldname OF STRUCTURE <ls_wa> TO FIELD-SYMBOL(<field>).
+                  IF sy-subrc = 0.
+                    ls_f4_data-code = <field>. " Se pone el valor del campo, luego se ajustará si hace falta
+
+                    " Se mira si el campo tiene rutina de conversión para aplicarsela
+                    READ TABLE mt_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WITH KEY fieldname = iv_fieldname.
+                    IF sy-subrc = 0.
+                      IF <ls_fields_ddic>-convexit IS NOT INITIAL.
+                        apply_conv_exit_output( EXPORTING iv_convexit = <ls_fields_ddic>-convexit
+                                                          iv_value    = <field>
+                                                IMPORTING ev_value = ls_f4_data-code ).
+                      ENDIF.
+                    ENDIF.
+                  ENDIF.
+
+                  " Valor del campo de descripción. Para este campo se lee el primer campo que de la tabla de texto.
+                  " En tablas con un solo campos, pues cogerá el campo correcto. Si hay más de dos se leerá el primero.
+                  " pero para estos casos esta la exit anterior que permite ajustar estos valores
+                  LOOP AT lt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WHERE field_texttable = abap_true
+                                                                              AND lang_texttable = abap_false.
+                    ASSIGN COMPONENT <ls_fields>-fieldname OF STRUCTURE <ls_wa> TO <field>.
+                    IF sy-subrc = 0.
+                      ls_f4_data-description = <field>.
+                    ENDIF.
+                  ENDLOOP.
+
+                  " Si hay datos en los campos entonces se añade el registro. debería ser así excepciones. Por ello
+                  " prefiero controlarlo y no enviar datos vacios
+                  IF ls_f4_data IS NOT INITIAL.
+                    INSERT ls_f4_data INTO TABLE et_data.
+                  ENDIF.
+
+                ENDLOOP.
+
+                " Finalmente se ejecuta la exit que permite cambiar valores o hacer los ajustes que sean necesarios.
+                exit_ui5_post_fill_f4_data( EXPORTING iv_fieldname = iv_fieldname
+                                                      iv_checktable = iv_checktable
+                                            CHANGING ct_data = et_data ).
+
+              ELSE.
+                et_data = lt_data.
+              ENDIF.
 
             ENDIF.
           ENDIF.
@@ -649,6 +763,100 @@ CLASS zcl_al30_view_ui5 IMPLEMENTATION.
 
       CATCH cx_root.
     ENDTRY.
+  ENDMETHOD.
+
+
+  METHOD exit_ui5_fill_f4_foreign_key.
+    DATA lv_metodo TYPE seocpdname.
+
+    IF mo_exit_class IS BOUND.
+
+      TRY.
+          CALL METHOD mo_exit_class->exit_ui5_fill_f4_foreign_key
+            EXPORTING
+              it_foreign_key_data = it_foreign_key_data
+              iv_fieldname        = iv_fieldname
+            IMPORTING
+              ev_completed_data   = ev_completed_data
+              et_data             = et_data.
+
+        CATCH cx_root.
+      ENDTRY.
+
+    ENDIF.
+  ENDMETHOD.
+
+
+  METHOD apply_conv_exit_output.
+    CASE iv_convexit.
+      WHEN 'CUNIT'.
+        CALL FUNCTION 'CONVERSION_EXIT_CUNIT_OUTPUT'
+          EXPORTING
+            input          = iv_value
+            language       = iv_langu
+          IMPORTING
+            output         = ev_value
+          EXCEPTIONS
+            unit_not_found = 1
+            OTHERS         = 2.
+
+      WHEN OTHERS.
+        DATA(lv_function) = |CONVERSION_EXIT_{ iv_convexit }_OUTPUT|.
+        TRY.
+            CALL FUNCTION lv_function
+              EXPORTING
+                input  = iv_value
+              IMPORTING
+                output = ev_value.
+          CATCH cx_root.
+        ENDTRY.
+    ENDCASE.
+  ENDMETHOD.
+
+  METHOD apply_conv_exit_input.
+    CASE iv_convexit.
+      WHEN 'CUNIT'.
+        CALL FUNCTION 'CONVERSION_EXIT_CUNIT_INPUT'
+          EXPORTING
+            input          = iv_value
+            language       = iv_langu
+          IMPORTING
+            output         = ev_value
+          EXCEPTIONS
+            unit_not_found = 1
+            OTHERS         = 2.
+
+      WHEN OTHERS.
+        DATA(lv_function) = |CONVERSION_EXIT_{ iv_convexit }_INPUT|.
+        TRY.
+            CALL FUNCTION lv_function
+              EXPORTING
+                input  = iv_value
+              IMPORTING
+                output = ev_value.
+          CATCH cx_root.
+        ENDTRY.
+    ENDCASE.
+  ENDMETHOD.
+
+
+  METHOD exit_ui5_post_fill_f4_data.
+    DATA lv_metodo TYPE seocpdname.
+
+    IF mo_exit_class IS BOUND.
+
+      TRY.
+          CALL METHOD mo_exit_class->exit_ui5_post_fill_f4_data
+            EXPORTING
+              iv_fieldname  = iv_fieldname
+              iv_checktable = iv_checktable
+              iv_domain     = iv_domain
+            CHANGING
+              ct_data       = ct_data.
+        CATCH cx_root.
+      ENDTRY.
+
+    ENDIF.
   ENDMETHOD.
 
 ENDCLASS.

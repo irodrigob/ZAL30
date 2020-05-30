@@ -415,6 +415,11 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
       IMPORTING
         et_catalog = DATA(lt_catalog) ).
 
+    et_entityset = VALUE #( FOR <wa> IN lt_catalog ( fieldname = <wa>-fieldname
+                                                     view_name = lv_viewname
+                                                     label_field_code = <wa>-label_field_code
+                                                     label_field_description = <wa>-label_field_description ) ).
+
     et_entityset = CORRESPONDING #( lt_catalog ).
   ENDMETHOD.
 
@@ -460,12 +465,15 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
     mo_controller->get_f4_data(
       EXPORTING
         iv_view_name = lv_viewname
-        iv_field_name = lv_fieldname
+        iv_fieldname = lv_fieldname
         iv_langu  = lv_langu
       IMPORTING
         et_data = DATA(lt_data) ).
 
-    et_entityset = CORRESPONDING #( lt_data ).
+    et_entityset = VALUE #( FOR <wa> IN lt_data ( code = <wa>-code
+                                                  description = <wa>-description
+                                                  fieldname = lv_fieldname
+                                                  view_name = lv_viewname ) ).
 
   ENDMETHOD.
 

@@ -158,15 +158,15 @@ CLASS zcl_al30_gw_controller DEFINITION
     "!
     "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
     "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
-    "! @parameter iv_field_name | <p class="shorttext synchronized">Field name</p>
+    "! @parameter iv_fieldname | <p class="shorttext synchronized">Field name</p>
     "! @parameter et_data | <p class="shorttext synchronized">Data for the search help</p>
     METHODS get_f4_data
       IMPORTING
-        !iv_langu      TYPE sylangu DEFAULT sy-langu
-        !iv_view_name  TYPE tabname
-        !iv_field_name TYPE fieldname
+        !iv_langu     TYPE sylangu DEFAULT sy-langu
+        !iv_view_name TYPE tabname
+        !iv_fieldname TYPE fieldname
       EXPORTING
-        !et_data       TYPE zif_al30_ui5_data=>tt_f4_data.
+        !et_data      TYPE zif_al30_ui5_data=>tt_f4_data.
 
   PROTECTED SECTION.
     DATA mo_controller TYPE REF TO zcl_al30_controller.
@@ -918,30 +918,14 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
     LOOP AT it_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WHERE convexit IS NOT INITIAL.
       ASSIGN COMPONENT <ls_fields_ddic>-fieldname OF STRUCTURE cs_row TO FIELD-SYMBOL(<field>).
-      " Hay determinadas conversiones que no se pueden hacer dinámicas, como la de unidad que se pasa el idioma
-      CASE <ls_fields_ddic>-convexit.
-        WHEN 'CUNIT'.
-          CALL FUNCTION 'CONVERSION_EXIT_CUNIT_OUTPUT'
-            EXPORTING
-              input          = <field>
-              language       = iv_langu
-            IMPORTING
-              output         = <field>
-            EXCEPTIONS
-              unit_not_found = 1
-              OTHERS         = 2.
 
-        WHEN OTHERS.
-          DATA(lv_function) = |CONVERSION_EXIT_{ <ls_fields_ddic>-convexit }_OUTPUT|.
-          TRY.
-              CALL FUNCTION lv_function
-                EXPORTING
-                  input  = <field>
-                IMPORTING
-                  output = <field>.
-            CATCH cx_root.
-          ENDTRY.
-      ENDCASE.
+      zcl_al30_view_ui5=>apply_conv_exit_output(
+        EXPORTING
+          iv_convexit = <ls_fields_ddic>-convexit
+          iv_value    = <field>
+        IMPORTING
+          ev_value    = <field> ).
+
     ENDLOOP.
 
   ENDMETHOD.
@@ -1001,30 +985,13 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
   METHOD apply_conv_exit_input.
     LOOP AT it_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WHERE convexit IS NOT INITIAL.
       ASSIGN COMPONENT <ls_fields_ddic>-fieldname OF STRUCTURE cs_row TO FIELD-SYMBOL(<field>).
-      " Hay determinadas conversiones que no se pueden hacer dinámicas, como la de unidad que se pasa el idioma
-      CASE <ls_fields_ddic>-convexit.
-        WHEN 'CUNIT'.
-          CALL FUNCTION 'CONVERSION_EXIT_CUNIT_INPUT'
-            EXPORTING
-              input          = <field>
-              language       = iv_langu
-            IMPORTING
-              output         = <field>
-            EXCEPTIONS
-              unit_not_found = 1
-              OTHERS         = 2.
 
-        WHEN OTHERS.
-          DATA(lv_function) = |CONVERSION_EXIT_{ <ls_fields_ddic>-convexit }_INPUT|.
-          TRY.
-              CALL FUNCTION lv_function
-                EXPORTING
-                  input  = <field>
-                IMPORTING
-                  output = <field>.
-            CATCH cx_root.
-          ENDTRY.
-      ENDCASE.
+      zcl_al30_view_ui5=>apply_conv_exit_input(
+         EXPORTING
+           iv_convexit = <ls_fields_ddic>-convexit
+           iv_value    = <field>
+         IMPORTING
+           ev_value    = <field> ).
     ENDLOOP.
   ENDMETHOD.
 
@@ -1104,7 +1071,7 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
     mo_view->set_language( iv_langu ).
 
-    mo_view->get_f4_data( EXPORTING iv_field_name = iv_field_name
+    mo_view->get_f4_data( EXPORTING iv_fieldname = iv_fieldname
                           IMPORTING et_data = et_data ).
 
   ENDMETHOD.

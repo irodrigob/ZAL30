@@ -142,6 +142,29 @@ INTERFACE zif_al30_exit_class
     EXPORTING
       !ev_own_data   TYPE sap_bool
       !et_data       TYPE zif_al30_ui5_data=>tt_f4_data.
-
-
+  "! <p class="shorttext synchronized">Data filling from foreign key</p>
+  "! If data is returned, the ev_completed_data parameter must be returned to "X" so that they are not overwritten
+  "! @parameter io_foreign_key_data | <p class="shorttext synchronized">Data from foreign key</p>
+  "! @parameter ev_filled_data | <p class="shorttext synchronized">The data has been filled in</p>
+  "! @parameter et_data | <p class="shorttext synchronized">F4 Data</p>
+  METHODS exit_ui5_fill_f4_foreign_key
+    IMPORTING
+      it_foreign_key_data TYPE STANDARD TABLE
+      !iv_fieldname  TYPE fieldname
+    EXPORTING
+      ev_completed_data   TYPE sap_bool
+      et_data             TYPE zif_al30_ui5_data=>tt_f4_data.
+  "! <p class="shorttext synchronized">Exit UI5 for the post-filling process</p>
+  "!
+  "! @parameter iv_fieldname | <p class="shorttext synchronized">Fieldname</p>
+  "! @parameter iv_checktable | <p class="shorttext synchronized">checktable</p>
+  "! @parameter iv_domain | <p class="shorttext synchronized">Domain</p>
+  "! @parameter ct_data | <p class="shorttext synchronized">Values</p>
+  METHODS exit_ui5_post_fill_f4_data
+    IMPORTING
+      iv_fieldname  TYPE dd03p-fieldname
+      iv_checktable TYPE dd03p-checktable OPTIONAL
+      iv_domain     TYPE dd03p-domname OPTIONAL
+    CHANGING
+      ct_data       TYPE zif_al30_ui5_data=>tt_f4_data.
 ENDINTERFACE.

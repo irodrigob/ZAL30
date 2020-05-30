@@ -117,4 +117,33 @@ CLASS zcl_al30_ui5_test_exit IMPLEMENTATION.
 
   ENDMETHOD.
 
+  METHOD zif_al30_exit_class~exit_ui5_fill_f4_foreign_key.
+
+    IF iv_fieldname = 'FIELDWAERS'.
+      CLEAR et_data.
+      ev_completed_data = abap_true.
+
+      LOOP AT it_foreign_key_data ASSIGNING FIELD-SYMBOL(<ls_foreign_key_data>).
+        DATA(ls_data) = VALUE zif_al30_ui5_data=>ts_f4_data(  ).
+
+        ASSIGN COMPONENT iv_fieldname OF STRUCTURE <ls_foreign_key_data> TO FIELD-SYMBOL(<code>).
+        IF sy-subrc = 0.
+          ls_data-code = <code>.
+        ENDIF.
+        ASSIGN COMPONENT 'LTEXT' OF STRUCTURE <ls_foreign_key_data> TO FIELD-SYMBOL(<description>).
+        IF sy-subrc = 0.
+          ls_data-description = <description> .
+        ENDIF.
+
+        INSERT ls_data INTO TABLE et_data.
+
+      ENDLOOP.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD zif_al30_exit_class~exit_ui5_post_fill_f4_data.
+
+  ENDMETHOD.
+
 ENDCLASS.
