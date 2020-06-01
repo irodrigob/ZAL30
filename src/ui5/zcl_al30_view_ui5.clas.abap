@@ -367,37 +367,40 @@ CLASS zcl_al30_view_ui5 IMPLEMENTATION.
       " No debería ocurrir porque la método se llama si el campo tiene clave externa, pero aún así pongo el contro.
       IF <ls_fields_ddic>-domname IS NOT INITIAL.
 
-
         " Se ponen en field symbols los campos necesarios para poder validar y devolver los posibles mensajes de error
         ASSIGN COMPONENT <ls_fields_ddic>-fieldname OF STRUCTURE cs_row_data TO FIELD-SYMBOL(<value>).
         IF sy-subrc = 0.
-          ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status_msg OF STRUCTURE cs_row_data TO <lt_row_msg>.
-          IF sy-subrc = 0.
 
-            CALL FUNCTION 'DDUT_DOMVALUES_GET'
-              EXPORTING
-                name      = <ls_fields_ddic>-domname
-                langu     = ' '
-              TABLES
-                dd07v_tab = lt_dd07v[].
+          IF <value> IS NOT INITIAL. " Solo si hay valor se valida que sea correcto
 
-            IF lt_dd07v IS NOT INITIAL. " A de tener valores fijos
-              LOOP AT lt_dd07v TRANSPORTING NO FIELDS WHERE domvalue_l EQ <value>
-                                                            OR ( domvalue_l LE <value> AND
-                                                                 domvalue_h GE <value> AND NOT
-                                                                 domvalue_h IS INITIAL ).
-                EXIT.
-              ENDLOOP.
-              " Si no existe se informa del error. Se aprovecha el mismo mensaje que el usado en los ALV
-              IF sy-subrc NE 0.
-                INSERT VALUE #( type = zif_al30_data=>cs_msg_type-error
-                                             fieldname = <ls_fields_ddic>-fieldname ) INTO TABLE <lt_row_msg> ASSIGNING FIELD-SYMBOL(<ls_row_msg>).
+            ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status_msg OF STRUCTURE cs_row_data TO <lt_row_msg>.
+            IF sy-subrc = 0.
 
-                <ls_row_msg>-message = zcl_al30_util=>fill_return( EXPORTING iv_type = ls_msg-msgty
-                                                            iv_number = '002'
-                                                            iv_id = '00'
-                                                            iv_message_v1 = <ls_fields_ddic>-fieldname
-                                                            iv_langu = mv_langu )-message.
+              CALL FUNCTION 'DDUT_DOMVALUES_GET'
+                EXPORTING
+                  name      = <ls_fields_ddic>-domname
+                  langu     = ' '
+                TABLES
+                  dd07v_tab = lt_dd07v[].
+
+              IF lt_dd07v IS NOT INITIAL. " A de tener valores fijos
+                LOOP AT lt_dd07v TRANSPORTING NO FIELDS WHERE domvalue_l EQ <value>
+                                                              OR ( domvalue_l LE <value> AND
+                                                                   domvalue_h GE <value> AND NOT
+                                                                   domvalue_h IS INITIAL ).
+                  EXIT.
+                ENDLOOP.
+                " Si no existe se informa del error. Se aprovecha el mismo mensaje que el usado en los ALV
+                IF sy-subrc NE 0.
+                  INSERT VALUE #( type = zif_al30_data=>cs_msg_type-error
+                                  fieldname = <ls_fields_ddic>-fieldname ) INTO TABLE <lt_row_msg> ASSIGNING FIELD-SYMBOL(<ls_row_msg>).
+
+                  <ls_row_msg>-message = zcl_al30_util=>fill_return( EXPORTING iv_type = ls_msg-msgty
+                                                              iv_number = '002'
+                                                              iv_id = '00'
+                                                              iv_message_v1 = <ls_fields_ddic>-fieldname
+                                                              iv_langu = mv_langu )-message.
+                ENDIF.
               ENDIF.
             ENDIF.
           ENDIF.
@@ -421,74 +424,79 @@ CLASS zcl_al30_view_ui5 IMPLEMENTATION.
         " Se ponen en field symbols los campos necesarios para poder validar y devolver los posibles mensajes de error
         ASSIGN COMPONENT <ls_fields_ddic>-fieldname OF STRUCTURE cs_row_data TO FIELD-SYMBOL(<value>).
         IF sy-subrc = 0.
-          ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status_msg OF STRUCTURE cs_row_data TO <lt_row_msg>.
-          IF sy-subrc = 0.
-            " Se hace un prepaso en la validación que consiste en poner el valor por defecto a los campos de la clave, excluyendo el propio
-            " campo principal.
-            LOOP AT mt_foreign_key_ddic ASSIGNING FIELD-SYMBOL(<ls_foreign_key>) WHERE fieldname EQ <ls_fields_ddic>-fieldname
-                                                                                       AND forkey NE <ls_fields_ddic>-fieldname.
 
-              " Compruebo que el campo de la clave externa lo tenga como campo en la vista
-              READ TABLE mt_fields_ddic TRANSPORTING NO FIELDS
-                         WITH KEY fieldname = <ls_foreign_key>-forkey.
-              IF sy-subrc EQ 0.
-                " Si lo tenemos en los datos se informa el valor en un puntero para pasarlo a la estructura
-                ASSIGN COMPONENT <ls_foreign_key>-forkey OF STRUCTURE cs_row_data TO FIELD-SYMBOL(<value_forkey>).
+          IF <value> IS NOT INITIAL. " Solo si hay datos se valida que sea correcto.
+
+            ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status_msg OF STRUCTURE cs_row_data TO <lt_row_msg>.
+            IF sy-subrc = 0.
+              " Se hace un prepaso en la validación que consiste en poner el valor por defecto a los campos de la clave, excluyendo el propio
+              " campo principal.
+              LOOP AT mt_foreign_key_ddic ASSIGNING FIELD-SYMBOL(<ls_foreign_key>) WHERE fieldname EQ <ls_fields_ddic>-fieldname
+                                                                                         AND forkey NE <ls_fields_ddic>-fieldname.
+
+                " Compruebo que el campo de la clave externa lo tenga como campo en la vista
+                READ TABLE mt_fields_ddic TRANSPORTING NO FIELDS
+                           WITH KEY fieldname = <ls_foreign_key>-forkey.
                 IF sy-subrc EQ 0.
-                  GET REFERENCE OF <value_forkey> INTO DATA(lo_value_forkey).
-                  INSERT VALUE #( tabname = <ls_foreign_key>-fortable
-                                  fieldname = <ls_foreign_key>-forkey
-                                  found = abap_true
-                                  value = lo_value_forkey  ) INTO TABLE lt_additional_fields.
+                  " Si lo tenemos en los datos se informa el valor en un puntero para pasarlo a la estructura
+                  ASSIGN COMPONENT <ls_foreign_key>-forkey OF STRUCTURE cs_row_data TO FIELD-SYMBOL(<value_forkey>).
+                  IF sy-subrc EQ 0.
+                    GET REFERENCE OF <value_forkey> INTO DATA(lo_value_forkey).
+                    INSERT VALUE #( tabname = <ls_foreign_key>-fortable
+                                    fieldname = <ls_foreign_key>-forkey
+                                    found = abap_true
+                                    value = lo_value_forkey  ) INTO TABLE lt_additional_fields.
+                  ENDIF.
                 ENDIF.
-              ENDIF.
-            ENDLOOP.
+              ENDLOOP.
 
-            " Se lanza la validación estándar
-            DATA(lv_lfieldname) = CONV dfies-lfieldname( <ls_fields_ddic>-fieldname ).
-            CALL FUNCTION 'DDUT_INPUT_CHECK'
-              EXPORTING
-                tabname           = <ls_fields_ddic>-tabname
-                fieldname         = lv_lfieldname
-                value             = <value>
-              IMPORTING
-                msgid             = ls_msg-msgid
-                msgty             = ls_msg-msgty
-                msgno             = ls_msg-msgno
-                msgv1             = ls_msg-msgv1
-                msgv2             = ls_msg-msgv2
-                msgv3             = ls_msg-msgv3
-                msgv4             = ls_msg-msgv4
-              CHANGING
-                additional_fields = lt_additional_fields
-              EXCEPTIONS
-                no_ddic_field     = 1
-                illegal_move      = 2
-                OTHERS            = 3.
+              " Se lanza la validación estándar
+              DATA(lv_lfieldname) = CONV dfies-lfieldname( <ls_fields_ddic>-fieldname ).
+              CALL FUNCTION 'DDUT_INPUT_CHECK'
+                EXPORTING
+                  tabname           = <ls_fields_ddic>-tabname
+                  fieldname         = lv_lfieldname
+                  value             = <value>
+                IMPORTING
+                  msgid             = ls_msg-msgid
+                  msgty             = ls_msg-msgty
+                  msgno             = ls_msg-msgno
+                  msgv1             = ls_msg-msgv1
+                  msgv2             = ls_msg-msgv2
+                  msgv3             = ls_msg-msgv3
+                  msgv4             = ls_msg-msgv4
+                CHANGING
+                  additional_fields = lt_additional_fields
+                EXCEPTIONS
+                  no_ddic_field     = 1
+                  illegal_move      = 2
+                  OTHERS            = 3.
 
-            " Si la función devuelve un error o hay un mensaje de error se informará del problema en la línea
-            IF sy-subrc NE 0 OR ls_msg-msgty = zif_al30_data=>cs_msg_type-error.
-              INSERT VALUE #( type = zif_al30_data=>cs_msg_type-error
-                              fieldname = <ls_fields_ddic>-fieldname ) INTO TABLE <lt_row_msg> ASSIGNING FIELD-SYMBOL(<ls_row_msg>).
-
-
-              " Si hay un error se informa del mensaje exacto producido
-              IF ls_msg-msgty = zif_al30_data=>cs_msg_type-error.
-                <ls_row_msg>-message = zcl_al30_util=>fill_return( EXPORTING iv_type = ls_msg-msgty
-                                                                             iv_number = ls_msg-msgno
-                                                                             iv_id = ls_msg-msgid
-                                                                             iv_message_v1 = ls_msg-msgv1
-                                                                             iv_message_v2 = ls_msg-msgv2
-                                                                             iv_message_v3 = ls_msg-msgv3
-                                                                             iv_message_v4 = ls_msg-msgv4
-                                                                             iv_langu = mv_langu )-message.
+              " Si la función devuelve un error o hay un mensaje de error se informará del problema en la línea
+              IF sy-subrc NE 0 OR ls_msg-msgty = zif_al30_data=>cs_msg_type-error.
+                INSERT VALUE #( type = zif_al30_data=>cs_msg_type-error
+                                fieldname = <ls_fields_ddic>-fieldname ) INTO TABLE <lt_row_msg> ASSIGNING FIELD-SYMBOL(<ls_row_msg>).
 
 
-              ELSE. " Error de llamada a la función se informa un mensaje generico
-                <ls_row_msg>-message = zcl_al30_util=>fill_return( EXPORTING iv_type = zif_al30_data=>cs_msg_type-error
-                                                                              iv_number = '046'
-                                                                              iv_id = zif_al30_data=>cv_msg_id
-                                                                              iv_langu = mv_langu )-message.
+                " Si hay un error se informa del mensaje exacto producido
+                IF ls_msg-msgty = zif_al30_data=>cs_msg_type-error.
+                  <ls_row_msg>-message = zcl_al30_util=>fill_return( EXPORTING iv_type = ls_msg-msgty
+                                                                               iv_number = ls_msg-msgno
+                                                                               iv_id = ls_msg-msgid
+                                                                               iv_message_v1 = ls_msg-msgv1
+                                                                               iv_message_v2 = ls_msg-msgv2
+                                                                               iv_message_v3 = ls_msg-msgv3
+                                                                               iv_message_v4 = ls_msg-msgv4
+                                                                               iv_langu = mv_langu )-message.
+
+
+                ELSE. " Error de llamada a la función se informa un mensaje generico
+                  <ls_row_msg>-message = zcl_al30_util=>fill_return( EXPORTING iv_type = zif_al30_data=>cs_msg_type-error
+                                                                                iv_number = '046'
+                                                                                iv_id = zif_al30_data=>cv_msg_id
+                                                                                iv_langu = mv_langu )-message.
+                ENDIF.
+
               ENDIF.
 
             ENDIF.

@@ -121,7 +121,24 @@ CLASS zcl_al30_gw_controller DEFINITION
         !ev_data            TYPE string
         !ev_return          TYPE string
         !ev_order           TYPE trkorr.
+    "! <p class="shorttext synchronized">Transport data</p>
+    "!
+    "! @parameter iv_view_name | <p class="shorttext synchronized">View name</p>
+    "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
+    "! @parameter iv_data | <p class="shorttext synchronized">Data in JSON format</p>
+    "! @parameter iv_transport_order | <p class="shorttext synchronized">Transport order</p>
+    "! @parameter ev_return | <p class="shorttext synchronized">Return of process</p>
+    "! @parameter ev_order | <p class="shorttext synchronized">Order used for transport</p>
+    METHODS transport_data
+      IMPORTING
+        !iv_view_name       TYPE tabname
+        !iv_langu           TYPE sylangu DEFAULT sy-langu
+        !iv_data            TYPE string
+        !iv_transport_order TYPE trkorr OPTIONAL
+      EXPORTING
 
+        !ev_return          TYPE string
+        !ev_order           TYPE trkorr.
     "! <p class="shorttext synchronized">Get user orders</p>
     "! @parameter iv_user | <p class="shorttext synchronized">User</p>
     "! @parameter et_orders | <p class="shorttext synchronized">Orders of user</p>
@@ -1074,6 +1091,91 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     mo_view->get_f4_data( EXPORTING iv_fieldname = iv_fieldname
                           IMPORTING et_data = et_data ).
 
+  ENDMETHOD.
+
+  METHOD transport_data.
+    FIELD-SYMBOLS <data> TYPE STANDARD TABLE.
+    FIELD-SYMBOLS <data_ok> TYPE STANDARD TABLE.
+    FIELD-SYMBOLS <original_data> TYPE STANDARD TABLE.
+    FIELD-SYMBOLS <data_del> TYPE STANDARD TABLE.
+    FIELD-SYMBOLS <data_del_orig> TYPE STANDARD TABLE.
+    DATA lt_return_ui5 TYPE zif_al30_ui5_data=>tt_return.
+    DATA lo_data_del_orig TYPE REF TO data.
+
+
+    mo_view->set_language( iv_langu ). " Idioma del servicio
+
+    " Si hay orden se lanza el proceso de validación de la orden, el motivo es que la orden que se escoje en UI5 puede ser valida pero no tener tarea valida. Ese chequeo validará que
+    " tenga tarea y en caso de no tenerla añadirá una tarea valida
+
+    IF iv_transport_order IS NOT INITIAL.
+
+      check_transport_order(
+        EXPORTING
+          iv_langu  = iv_langu
+          iv_order  = iv_transport_order
+        IMPORTING
+          ev_order  = ev_order
+          es_return = DATA(ls_return_ui5) ).
+
+      IF ls_return_ui5 IS NOT INITIAL. " Si hay mensaje es que hay error y el proceso se cancela
+        INSERT ls_return_ui5 INTO TABLE lt_return_ui5.
+      ENDIF.
+    ENDIF.
+
+    IF lt_return_ui5 IS INITIAL.
+
+      "Para procesar el registro hay que crear una tabla interna del mismo tipo que la viene para guarda el valor pasado por parámetros
+
+      " Se llama al proceso que creará la tabla interna para poder leer los datos
+      create_it_data_view( EXPORTING iv_view_name = iv_view_name
+                                     iv_langu = iv_langu
+                                     iv_mode = zif_al30_data=>cv_mode_change
+                           IMPORTING eo_data = DATA(lo_data)
+                                     es_return = DATA(ls_return)
+                                     et_fields_ddic = DATA(lt_fields_ddic)
+                                     et_fields_view = DATA(lt_fields_view)
+                                     es_view = DATA(ls_view) ).
+
+      IF ls_return IS INITIAL AND lo_data IS BOUND.
+        " Se añade un registro en blanco para poder hace el mapeo
+        ASSIGN lo_data->* TO <data>.
+
+        " Se transforma el JSON al registro de la tabla
+        zcl_al30_ui5_json=>deserialize( EXPORTING json = iv_data
+                                                  pretty_name = /ui2/cl_json=>pretty_mode-none
+                                        CHANGING data = <data> ).
+
+        " Se adaptan los datos de UI5 al del ALV
+        adapt_ui5_data_2_alv( EXPORTING it_fields_ddic = lt_fields_ddic
+                                  iv_langu = iv_langu
+                         CHANGING co_data = lo_data ).
+
+        CLEAR ls_return.
+        ls_return = mo_view->transport_entries( EXPORTING it_data = <data>
+                                          CHANGING cv_order = ev_order ).
+        IF ls_return IS NOT INITIAL.
+          DATA(lt_return) = VALUE bapiret2_t( ( ls_return ) ).
+        ENDIF.
+
+
+      ENDIF.
+
+
+      " Si hay mennsajes se adaptan al formato de ui5
+      IF lt_return IS NOT INITIAL.
+        conv_return_2_return_ui5( EXPORTING it_return = lt_return
+                                            iv_langu = iv_langu
+                                  IMPORTING et_return_ui5 = lt_return_ui5 ).
+
+        ev_return = zcl_al30_ui5_json=>zserialize( data = lt_return_ui5 pretty_name = /ui2/cl_json=>pretty_mode-none ).
+      ENDIF.
+
+
+    ELSE.
+      " Se transforma el mensaje de error a JSON para devolverlo
+      ev_return = zcl_al30_ui5_json=>zserialize( data = lt_return_ui5 pretty_name = /ui2/cl_json=>pretty_mode-none ).
+    ENDIF.
   ENDMETHOD.
 
 ENDCLASS.

@@ -29,6 +29,7 @@ CLASS zcl_zal30_data_dpc_ext DEFINITION
     METHODS savedataset_create_entity REDEFINITION.
     METHODS getf4catalogset_get_entityset REDEFINITION.
     METHODS getsearchhelpdat_get_entityset REDEFINITION.
+    METHODS transportdataset_create_entity REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -475,6 +476,27 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
                                                   fieldname = lv_fieldname
                                                   view_name = lv_viewname ) ).
 
+  ENDMETHOD.
+
+  METHOD transportdataset_create_entity.
+
+    DATA ls_data TYPE zcl_zal30_data_mpc=>ts_transportdata.
+
+    " Lectura de los datos provenientes del body de la llamada
+    io_data_provider->read_entry_data( IMPORTING es_data = ls_data ).
+
+    " Si iguala los datos de salida a los de entrada.
+    er_entity = ls_data.
+
+    mo_controller->transport_data(
+      EXPORTING
+        iv_view_name       = ls_data-tabname
+        iv_langu           = ls_data-langu
+        iv_data            = ls_data-data
+        iv_transport_order = ls_data-transport_order
+      IMPORTING
+        ev_return          = er_entity-return
+        ev_order           = er_entity-transport_order ).
   ENDMETHOD.
 
 ENDCLASS.
