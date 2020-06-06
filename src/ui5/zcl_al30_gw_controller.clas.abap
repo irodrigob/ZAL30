@@ -184,7 +184,15 @@ CLASS zcl_al30_gw_controller DEFINITION
         !iv_fieldname TYPE fieldname
       EXPORTING
         !et_data      TYPE zif_al30_ui5_data=>tt_f4_data.
-
+    "! <p class="shorttext synchronized">Get user configuration</p>
+    "! Return the configuration for the date forma, decimal and thousand separator
+    "! @parameter iv_user | <p class="shorttext synchronized">Username</p>
+    "! @parameter es_configuration | <p class="shorttext synchronized">Configuration</p>
+    METHODS get_user_configuration
+      IMPORTING
+        !iv_user          TYPE string
+      EXPORTING
+        !es_configuration TYPE zcl_al30_ui5_user=>ts_user_configuration.
   PROTECTED SECTION.
     DATA mo_controller TYPE REF TO zcl_al30_controller.
     DATA mo_conf TYPE REF TO zcl_al30_conf.
@@ -327,7 +335,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_al30_gw_controller IMPLEMENTATION.
+CLASS ZCL_AL30_GW_CONTROLLER IMPLEMENTATION.
 
 
   METHOD adapt_alv_data_2_ui5.
@@ -346,6 +354,58 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
     ENDLOOP.
 
+  ENDMETHOD.
+
+
+  METHOD adapt_alv_field_style_2_ui5.
+    FIELD-SYMBOLS <lt_alv_style> TYPE lvc_t_styl.
+    FIELD-SYMBOLS <lt_ui5_style> TYPE zal30_i_ui5_fields_styles.
+
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-style OF STRUCTURE cs_row TO <lt_alv_style>.
+    IF sy-subrc = 0.
+      IF <lt_alv_style> IS NOT INITIAL.
+        ASSIGN COMPONENT zif_al30_ui5_data=>cs_control_fields_ui5_data-style OF STRUCTURE cs_row TO <lt_ui5_style>.
+        IF sy-subrc = 0.
+          LOOP AT <lt_alv_style> ASSIGNING FIELD-SYMBOL(<ls_alv_style>).
+            " Como puede ser que el estilo lo hayan metido en el estilo de ui5, lo  verifico antes de insertarlo
+            IF <ls_alv_style>-style = cl_gui_alv_grid=>mc_style_disabled.
+              READ TABLE <lt_ui5_style> TRANSPORTING NO FIELDS WITH KEY fieldname = <ls_alv_style>-fieldname
+                                                                        editable = zif_al30_ui5_data=>cs_javascript_boolean-false.
+              IF sy-subrc NE 0.
+                INSERT VALUE #( fieldname = <ls_alv_style>-fieldname editable = zif_al30_ui5_data=>cs_javascript_boolean-false ) INTO TABLE <lt_ui5_style>.
+              ENDIF.
+            ENDIF.
+            IF <ls_alv_style>-style = cl_gui_alv_grid=>mc_style_enabled.
+              READ TABLE <lt_ui5_style> TRANSPORTING NO FIELDS WITH KEY fieldname = <ls_alv_style>-fieldname
+                                                                        editable = zif_al30_ui5_data=>cs_javascript_boolean-true.
+              IF sy-subrc NE 0.
+                INSERT VALUE #( fieldname = <ls_alv_style>-fieldname editable = zif_al30_ui5_data=>cs_javascript_boolean-true ) INTO TABLE <lt_ui5_style>.
+              ENDIF.
+            ENDIF.
+          ENDLOOP.
+        ENDIF.
+
+        " Se limpia la tabla de estilos de ALV porque no es necesario que viaje y asi se reduce el tamaño de datos a enviar
+        CLEAR <lt_alv_style>.
+      ENDIF.
+    ENDIF.
+  ENDMETHOD.
+
+
+  METHOD adapt_ui5_data_2_alv.
+    FIELD-SYMBOLS <data> TYPE STANDARD TABLE.
+    ASSIGN co_data->* TO <data>.
+
+    LOOP AT <data> ASSIGNING FIELD-SYMBOL(<wa>).
+
+      " Aplico las rutinas de conversion a los campos que la tengan
+      apply_conv_exit_input( EXPORTING it_fields_ddic = it_fields_ddic
+                                        CHANGING cs_row = <wa> ).
+
+      " Se convierten los estilo del ALV a UI5.
+      adapt_ui5_field_style_2_alv( CHANGING cs_row = <wa> ).
+
+    ENDLOOP.
   ENDMETHOD.
 
 
@@ -374,6 +434,37 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD apply_conv_exit_input.
+    LOOP AT it_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WHERE convexit IS NOT INITIAL.
+      ASSIGN COMPONENT <ls_fields_ddic>-fieldname OF STRUCTURE cs_row TO FIELD-SYMBOL(<field>).
+
+      zcl_al30_view_ui5=>apply_conv_exit_input(
+         EXPORTING
+           iv_convexit = <ls_fields_ddic>-convexit
+           iv_value    = <field>
+         IMPORTING
+           ev_value    = <field> ).
+    ENDLOOP.
+  ENDMETHOD.
+
+
+  METHOD apply_conv_exit_output.
+
+    LOOP AT it_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WHERE convexit IS NOT INITIAL.
+      ASSIGN COMPONENT <ls_fields_ddic>-fieldname OF STRUCTURE cs_row TO FIELD-SYMBOL(<field>).
+
+      zcl_al30_view_ui5=>apply_conv_exit_output(
+        EXPORTING
+          iv_convexit = <ls_fields_ddic>-convexit
+          iv_value    = <field>
+        IMPORTING
+          ev_value    = <field> ).
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
   METHOD check_authorization_view.
 
     rv_level_auth = mo_controller->check_authorization_view(
@@ -381,6 +472,44 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
          iv_view_name   = iv_view_name
          iv_view_action = COND #( WHEN iv_view_action IS INITIAL THEN  zif_al30_data=>cs_action_auth-update ELSE iv_view_action )
          iv_user        = COND #( WHEN iv_user IS INITIAL THEN sy-uname ELSE iv_user ) ).
+
+  ENDMETHOD.
+
+
+  METHOD check_transport_order.
+
+    CLEAR: ev_order, es_return.
+
+    ev_order = iv_order.
+
+    " Se valida la orden, este método si la tarea no es valida añade una nueva.
+    zcl_al30_util=>check_transport_order(
+      EXPORTING
+        iv_category = zif_al30_data=>cs_order_category-workbench
+      IMPORTING
+        es_return   = DATA(ls_return)
+      CHANGING
+        cv_order    = ev_order ).
+
+    " Solo se devuelven mensaje de error. Si la orden es correcta no se devuelve nada.
+    IF ls_return-type = zif_al30_data=>cs_msg_type-error.
+      es_return-type = ls_return-type.
+
+      IF ls_return-message IS INITIAL.
+        ls_return-message = zcl_al30_util=>fill_return( EXPORTING iv_type = ls_return-type
+                                                                            iv_number = ls_return-number
+                                                                            iv_id = ls_return-id
+                                                                            iv_message_v1 = ls_return-message_v1
+                                                                            iv_message_v2 = ls_return-message_v2
+                                                                            iv_message_v3 = ls_return-message_v3
+                                                                            iv_message_v4 = ls_return-message_v4
+                                                                            iv_langu = iv_langu )-message.
+      ELSE.
+        es_return-message = ls_return-message.
+      ENDIF.
+
+    ENDIF.
+
 
   ENDMETHOD.
 
@@ -400,7 +529,7 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     READ TABLE it_fields_view ASSIGNING FIELD-SYMBOL(<ls_fields_view>) WITH KEY field_texttable = abap_true
                                                                                     lang_texttable = abap_true.
     IF sy-subrc = 0.
-      ASSIGN COMPONENT <ls_fields_ddic>-fieldname OF STRUCTURE cs_data TO <field>.
+      ASSIGN COMPONENT <ls_fields_view>-fieldname OF STRUCTURE cs_data TO <field>.
       IF sy-subrc = 0.
         <field> = iv_langu.
       ENDIF.
@@ -415,6 +544,27 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     " Se instancias las clases encargadas de gestionar la configuración y la vista
     mo_conf = NEW zcl_al30_conf( ).
     mo_view = NEW zcl_al30_view_ui5( ).
+
+  ENDMETHOD.
+
+
+  METHOD conv_return_2_return_ui5.
+    CLEAR: et_return_ui5.
+
+    LOOP AT it_return ASSIGNING FIELD-SYMBOL(<ls_return>).
+      INSERT VALUE #( type = <ls_return>-type ) INTO TABLE et_return_ui5 ASSIGNING FIELD-SYMBOL(<ls_return_ui5>).
+
+      " El mensaje aunque este informado lo fuerzo en el idioma del parámetro. El motivo es que no se en que idioma puede estar debido a las exit.
+      <ls_return_ui5>-message = zcl_al30_util=>fill_return( EXPORTING iv_type = <ls_return>-type
+                                                                     iv_number = <ls_return>-number
+                                                                     iv_id = <ls_return>-id
+                                                                     iv_message_v1 = <ls_return>-message_v1
+                                                                     iv_message_v2 = <ls_return>-message_v2
+                                                                     iv_message_v3 = <ls_return>-message_v3
+                                                                     iv_message_v4 = <ls_return>-message_v4
+                                                                     iv_langu = iv_langu )-message.
+
+    ENDLOOP.
 
   ENDMETHOD.
 
@@ -443,6 +593,60 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
     ENDIF.
 
+  ENDMETHOD.
+
+
+  METHOD get_allowed_transport.
+    mo_view->get_allowed_transport( EXPORTING it_r_views = VALUE #( ( sign = 'I' option = 'EQ' low = iv_view_name ) )
+                                    IMPORTING et_allowed_transport = DATA(lt_allowed) ).
+
+    READ TABLE lt_allowed ASSIGNING FIELD-SYMBOL(<ls_allowed>) INDEX 1.
+    IF sy-subrc = 0.
+      rv_allowed = <ls_allowed>-allowed.
+    ENDIF.
+  ENDMETHOD.
+
+
+  METHOD get_f4_catalog.
+
+    " Se lee los datos de la vista
+    read_view_conf_for_data( EXPORTING iv_view_name        = iv_view_name
+                                       iv_langu            = iv_langu ).
+
+    mo_view->set_language( iv_langu ).
+
+    " Se obtiene el catalogo de campos con ayuda para búsqueda
+    mo_view->get_f4_catalog( IMPORTING et_catalog = et_catalog ).
+
+  ENDMETHOD.
+
+
+  METHOD get_f4_data.
+
+    " Se lee los datos de la vista
+    read_view_conf_for_data( EXPORTING iv_view_name        = iv_view_name
+                                       iv_langu            = iv_langu ).
+
+    mo_view->set_language( iv_langu ).
+
+    mo_view->get_f4_data( EXPORTING iv_fieldname = iv_fieldname
+                          IMPORTING et_data = et_data ).
+
+  ENDMETHOD.
+
+
+  METHOD get_user_configuration.
+    NEW zcl_al30_ui5_user(  )->get_user_configuration( EXPORTING iv_user = iv_user
+                                                       IMPORTING es_configuration = es_configuration ).
+  ENDMETHOD.
+
+
+  METHOD get_user_orders.
+    NEW zcl_al30_ui5_transport_order( iv_langu )->get_user_orders(
+      EXPORTING
+        iv_user   = iv_user
+      IMPORTING
+        et_orders = et_orders ).
   ENDMETHOD.
 
 
@@ -699,44 +903,6 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD verify_field_data.
-    " hay que leer la vista par para poder llamar al proceso de verificación de campo
-    read_view_conf_for_data(
-      EXPORTING
-        iv_view_name        = iv_view_name
-        iv_langu            = iv_langu
-      IMPORTING
-        et_fields_view      = DATA(lt_fields_view)
-        et_fields_text_view = DATA(lt_fields_text_view) ).
-
-    mo_view->verify_field_data(
-      EXPORTING
-        iv_fieldname = iv_fieldname
-        iv_value     = iv_value
-      IMPORTING
-        es_return    = DATA(ls_return) ).
-
-    " Si hay mensaje de retorno se devuelve a los parámetros de salida
-    IF ls_return IS NOT INITIAL.
-      ev_message_type = ls_return-type.
-      " Se rellena el mensaje si no lo estuve.
-      IF ls_return-message IS INITIAL.
-        ev_message = zcl_al30_util=>fill_return( EXPORTING iv_type = ls_return-type
-                                                            iv_number = ls_return-number
-                                                            iv_message_v1 = ls_return-message_v1
-                                                            iv_message_v2 = ls_return-message_v2
-                                                            iv_message_v3 = ls_return-message_v3
-                                                            iv_message_v4 = ls_return-message_v4
-                                                            iv_langu = iv_langu )-message.
-      ELSE.
-        ev_message = ls_return-message.
-      ENDIF.
-
-    ELSE.
-      CLEAR: ev_message, ev_message_type.
-    ENDIF.
-
-  ENDMETHOD.
   METHOD save_data.
 
     FIELD-SYMBOLS <data> TYPE STANDARD TABLE.
@@ -910,189 +1076,6 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD conv_return_2_return_ui5.
-    CLEAR: et_return_ui5.
-
-    LOOP AT it_return ASSIGNING FIELD-SYMBOL(<ls_return>).
-      INSERT VALUE #( type = <ls_return>-type ) INTO TABLE et_return_ui5 ASSIGNING FIELD-SYMBOL(<ls_return_ui5>).
-
-      " El mensaje aunque este informado lo fuerzo en el idioma del parámetro. El motivo es que no se en que idioma puede estar debido a las exit.
-      <ls_return_ui5>-message = zcl_al30_util=>fill_return( EXPORTING iv_type = <ls_return>-type
-                                                                     iv_number = <ls_return>-number
-                                                                     iv_id = <ls_return>-id
-                                                                     iv_message_v1 = <ls_return>-message_v1
-                                                                     iv_message_v2 = <ls_return>-message_v2
-                                                                     iv_message_v3 = <ls_return>-message_v3
-                                                                     iv_message_v4 = <ls_return>-message_v4
-                                                                     iv_langu = iv_langu )-message.
-
-    ENDLOOP.
-
-  ENDMETHOD.
-
-
-  METHOD apply_conv_exit_output.
-
-    LOOP AT it_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WHERE convexit IS NOT INITIAL.
-      ASSIGN COMPONENT <ls_fields_ddic>-fieldname OF STRUCTURE cs_row TO FIELD-SYMBOL(<field>).
-
-      zcl_al30_view_ui5=>apply_conv_exit_output(
-        EXPORTING
-          iv_convexit = <ls_fields_ddic>-convexit
-          iv_value    = <field>
-        IMPORTING
-          ev_value    = <field> ).
-
-    ENDLOOP.
-
-  ENDMETHOD.
-
-
-  METHOD adapt_alv_field_style_2_ui5.
-    FIELD-SYMBOLS <lt_alv_style> TYPE lvc_t_styl.
-    FIELD-SYMBOLS <lt_ui5_style> TYPE zal30_i_ui5_fields_styles.
-
-    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-style OF STRUCTURE cs_row TO <lt_alv_style>.
-    IF sy-subrc = 0.
-      IF <lt_alv_style> IS NOT INITIAL.
-        ASSIGN COMPONENT zif_al30_ui5_data=>cs_control_fields_ui5_data-style OF STRUCTURE cs_row TO <lt_ui5_style>.
-        IF sy-subrc = 0.
-          LOOP AT <lt_alv_style> ASSIGNING FIELD-SYMBOL(<ls_alv_style>).
-            " Como puede ser que el estilo lo hayan metido en el estilo de ui5, lo  verifico antes de insertarlo
-            IF <ls_alv_style>-style = cl_gui_alv_grid=>mc_style_disabled.
-              READ TABLE <lt_ui5_style> TRANSPORTING NO FIELDS WITH KEY fieldname = <ls_alv_style>-fieldname
-                                                                        editable = zif_al30_ui5_data=>cs_javascript_boolean-false.
-              IF sy-subrc NE 0.
-                INSERT VALUE #( fieldname = <ls_alv_style>-fieldname editable = zif_al30_ui5_data=>cs_javascript_boolean-false ) INTO TABLE <lt_ui5_style>.
-              ENDIF.
-            ENDIF.
-            IF <ls_alv_style>-style = cl_gui_alv_grid=>mc_style_enabled.
-              READ TABLE <lt_ui5_style> TRANSPORTING NO FIELDS WITH KEY fieldname = <ls_alv_style>-fieldname
-                                                                        editable = zif_al30_ui5_data=>cs_javascript_boolean-true.
-              IF sy-subrc NE 0.
-                INSERT VALUE #( fieldname = <ls_alv_style>-fieldname editable = zif_al30_ui5_data=>cs_javascript_boolean-true ) INTO TABLE <lt_ui5_style>.
-              ENDIF.
-            ENDIF.
-          ENDLOOP.
-        ENDIF.
-
-        " Se limpia la tabla de estilos de ALV porque no es necesario que viaje y asi se reduce el tamaño de datos a enviar
-        CLEAR <lt_alv_style>.
-      ENDIF.
-    ENDIF.
-  ENDMETHOD.
-
-  METHOD adapt_ui5_data_2_alv.
-    FIELD-SYMBOLS <data> TYPE STANDARD TABLE.
-    ASSIGN co_data->* TO <data>.
-
-    LOOP AT <data> ASSIGNING FIELD-SYMBOL(<wa>).
-
-      " Aplico las rutinas de conversion a los campos que la tengan
-      apply_conv_exit_input( EXPORTING it_fields_ddic = it_fields_ddic
-                                        CHANGING cs_row = <wa> ).
-
-      " Se convierten los estilo del ALV a UI5.
-      adapt_ui5_field_style_2_alv( CHANGING cs_row = <wa> ).
-
-    ENDLOOP.
-  ENDMETHOD.
-
-
-  METHOD apply_conv_exit_input.
-    LOOP AT it_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WHERE convexit IS NOT INITIAL.
-      ASSIGN COMPONENT <ls_fields_ddic>-fieldname OF STRUCTURE cs_row TO FIELD-SYMBOL(<field>).
-
-      zcl_al30_view_ui5=>apply_conv_exit_input(
-         EXPORTING
-           iv_convexit = <ls_fields_ddic>-convexit
-           iv_value    = <field>
-         IMPORTING
-           ev_value    = <field> ).
-    ENDLOOP.
-  ENDMETHOD.
-
-  METHOD get_user_orders.
-    NEW zcl_al30_ui5_transport_order( iv_langu )->get_user_orders(
-      EXPORTING
-        iv_user   = iv_user
-      IMPORTING
-        et_orders = et_orders ).
-  ENDMETHOD.
-
-  METHOD get_allowed_transport.
-    mo_view->get_allowed_transport( EXPORTING it_r_views = VALUE #( ( sign = 'I' option = 'EQ' low = iv_view_name ) )
-                                    IMPORTING et_allowed_transport = DATA(lt_allowed) ).
-
-    READ TABLE lt_allowed ASSIGNING FIELD-SYMBOL(<ls_allowed>) INDEX 1.
-    IF sy-subrc = 0.
-      rv_allowed = <ls_allowed>-allowed.
-    ENDIF.
-  ENDMETHOD.
-
-  METHOD check_transport_order.
-
-    CLEAR: ev_order, es_return.
-
-    ev_order = iv_order.
-
-    " Se valida la orden, este método si la tarea no es valida añade una nueva.
-    zcl_al30_util=>check_transport_order(
-      EXPORTING
-        iv_category = zif_al30_data=>cs_order_category-workbench
-      IMPORTING
-        es_return   = DATA(ls_return)
-      CHANGING
-        cv_order    = ev_order ).
-
-    " Solo se devuelven mensaje de error. Si la orden es correcta no se devuelve nada.
-    IF ls_return-type = zif_al30_data=>cs_msg_type-error.
-      es_return-type = ls_return-type.
-
-      IF ls_return-message IS INITIAL.
-        ls_return-message = zcl_al30_util=>fill_return( EXPORTING iv_type = ls_return-type
-                                                                            iv_number = ls_return-number
-                                                                            iv_id = ls_return-id
-                                                                            iv_message_v1 = ls_return-message_v1
-                                                                            iv_message_v2 = ls_return-message_v2
-                                                                            iv_message_v3 = ls_return-message_v3
-                                                                            iv_message_v4 = ls_return-message_v4
-                                                                            iv_langu = iv_langu )-message.
-      ELSE.
-        es_return-message = ls_return-message.
-      ENDIF.
-
-    ENDIF.
-
-
-  ENDMETHOD.
-
-  METHOD get_f4_catalog.
-
-    " Se lee los datos de la vista
-    read_view_conf_for_data( EXPORTING iv_view_name        = iv_view_name
-                                       iv_langu            = iv_langu ).
-
-    mo_view->set_language( iv_langu ).
-
-    " Se obtiene el catalogo de campos con ayuda para búsqueda
-    mo_view->get_f4_catalog( IMPORTING et_catalog = et_catalog ).
-
-  ENDMETHOD.
-
-  METHOD get_f4_data.
-
-    " Se lee los datos de la vista
-    read_view_conf_for_data( EXPORTING iv_view_name        = iv_view_name
-                                       iv_langu            = iv_langu ).
-
-    mo_view->set_language( iv_langu ).
-
-    mo_view->get_f4_data( EXPORTING iv_fieldname = iv_fieldname
-                          IMPORTING et_data = et_data ).
-
-  ENDMETHOD.
-
   METHOD transport_data.
     FIELD-SYMBOLS <data> TYPE STANDARD TABLE.
     FIELD-SYMBOLS <data_ok> TYPE STANDARD TABLE.
@@ -1178,4 +1161,43 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
+
+  METHOD verify_field_data.
+    " hay que leer la vista par para poder llamar al proceso de verificación de campo
+    read_view_conf_for_data(
+      EXPORTING
+        iv_view_name        = iv_view_name
+        iv_langu            = iv_langu
+      IMPORTING
+        et_fields_view      = DATA(lt_fields_view)
+        et_fields_text_view = DATA(lt_fields_text_view) ).
+
+    mo_view->verify_field_data(
+      EXPORTING
+        iv_fieldname = iv_fieldname
+        iv_value     = iv_value
+      IMPORTING
+        es_return    = DATA(ls_return) ).
+
+    " Si hay mensaje de retorno se devuelve a los parámetros de salida
+    IF ls_return IS NOT INITIAL.
+      ev_message_type = ls_return-type.
+      " Se rellena el mensaje si no lo estuve.
+      IF ls_return-message IS INITIAL.
+        ev_message = zcl_al30_util=>fill_return( EXPORTING iv_type = ls_return-type
+                                                            iv_number = ls_return-number
+                                                            iv_message_v1 = ls_return-message_v1
+                                                            iv_message_v2 = ls_return-message_v2
+                                                            iv_message_v3 = ls_return-message_v3
+                                                            iv_message_v4 = ls_return-message_v4
+                                                            iv_langu = iv_langu )-message.
+      ELSE.
+        ev_message = ls_return-message.
+      ENDIF.
+
+    ELSE.
+      CLEAR: ev_message, ev_message_type.
+    ENDIF.
+
+  ENDMETHOD.
 ENDCLASS.

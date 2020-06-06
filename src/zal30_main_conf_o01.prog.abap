@@ -263,6 +263,10 @@ MODULE alv_text OUTPUT.
 * Catalogo de campos
       PERFORM alv_fieldcat_text.
 
+* Campos con dropdown
+      mo_alv_text->set_drop_down_table(
+        it_drop_down_alias = mt_dropdown_text ).
+
 * Layout
       ms_layout_text-stylefname = 'CELLTAB'.
 

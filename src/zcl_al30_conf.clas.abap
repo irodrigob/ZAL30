@@ -257,6 +257,9 @@ CLASS zcl_al30_conf IMPLEMENTATION.
 
     LOOP AT ct_fields ASSIGNING FIELD-SYMBOL(<ls_fields>).
 
+    " Este campo al ser añadido el 06/05/2020 puede ser que en configuraciones previas no exista, en en ese caso se le pone el valor por defecto
+    <ls_fields>-lbl_type_header = cond #( when <ls_fields>-lbl_type_header is initial then zif_al30_data=>cs_label_type_col_header-default else <ls_fields>-lbl_type_header  ).
+
       " Si el texto se introduce manual solo tendré que actualizar la posición donde debe salir, que será la misma que la del campo
       CASE <ls_fields>-source_text.
         WHEN zif_al30_data=>cs_source_text-manual.

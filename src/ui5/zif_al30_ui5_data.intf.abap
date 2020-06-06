@@ -47,4 +47,11 @@ INTERFACE zif_al30_ui5_data
                true  TYPE zal30_e_ui5_js_boolean VALUE 'true' ##NO_TEXT,
                false TYPE zal30_e_ui5_js_boolean VALUE 'false' ##NO_TEXT,
              END OF cs_javascript_boolean.
+  CONSTANTS: BEGIN OF cs_user,
+               BEGIN OF default_configuration,
+                 date_format        TYPE usr01-datfm VALUE '1',
+                 decimal_separator  TYPE c LENGTH 1 VALUE ',',
+                 thousand_separator TYPE c LENGTH 1 VALUE '.',
+               END OF default_configuration,
+             END OF cs_user.
 ENDINTERFACE.

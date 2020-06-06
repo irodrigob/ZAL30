@@ -8,6 +8,54 @@
    </INCLUDES>
    <FUNCTIONS>
     <item>
+     <FUNCNAME>CONVERSION_EXIT_ZLTCT_INPUT</FUNCNAME>
+     <SHORT_TEXT>AL30 - Conversion exit for label type for column header text</SHORT_TEXT>
+     <IMPORT>
+      <RSIMP>
+       <PARAMETER>INPUT</PARAMETER>
+      </RSIMP>
+     </IMPORT>
+     <EXPORT>
+      <RSEXP>
+       <PARAMETER>OUTPUT</PARAMETER>
+      </RSEXP>
+     </EXPORT>
+     <DOCUMENTATION>
+      <RSFDO>
+       <PARAMETER>INPUT</PARAMETER>
+       <KIND>P</KIND>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>OUTPUT</PARAMETER>
+       <KIND>P</KIND>
+      </RSFDO>
+     </DOCUMENTATION>
+    </item>
+    <item>
+     <FUNCNAME>CONVERSION_EXIT_ZLTCT_OUTPUT</FUNCNAME>
+     <SHORT_TEXT>AL30 - Conversion exit for label type for column header text</SHORT_TEXT>
+     <IMPORT>
+      <RSIMP>
+       <PARAMETER>INPUT</PARAMETER>
+      </RSIMP>
+     </IMPORT>
+     <EXPORT>
+      <RSEXP>
+       <PARAMETER>OUTPUT</PARAMETER>
+      </RSEXP>
+     </EXPORT>
+     <DOCUMENTATION>
+      <RSFDO>
+       <PARAMETER>INPUT</PARAMETER>
+       <KIND>P</KIND>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>OUTPUT</PARAMETER>
+       <KIND>P</KIND>
+      </RSFDO>
+     </DOCUMENTATION>
+    </item>
+    <item>
      <FUNCNAME>CONVERSION_EXIT_ZSRCT_INPUT</FUNCNAME>
      <SHORT_TEXT>AL30 - Conversion exit for source text</SHORT_TEXT>
      <IMPORT>

@@ -536,12 +536,30 @@ FORM load_dropdown_source_text .
 
   zcl_al30_util=>get_key_value_domain(
     EXPORTING
-      iv_domain = zif_al30_data=>cv_domain_source_text
+      iv_domain = zif_al30_data=>cs_domain-source_text
     IMPORTING
       et_values = DATA(lt_values) ).
 
   LOOP AT lt_values ASSIGNING FIELD-SYMBOL(<ls_values>).
     APPEND VALUE #( handle = mc_hndl_source_text int_value = <ls_values>-key value = <ls_values>-value ) TO mt_dropdown_gen.
+  ENDLOOP.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  LOAD_DROPDOWN_LBL_TYPE_HEADER
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM load_dropdown_lbl_type_header .
+
+  zcl_al30_util=>get_key_value_domain(
+    EXPORTING
+      iv_domain = zif_al30_data=>cs_domain-label_type_header
+    IMPORTING
+      et_values = DATA(lt_values) ).
+
+  LOOP AT lt_values ASSIGNING FIELD-SYMBOL(<ls_values>).
+    APPEND VALUE #( handle = mc_hndl_lbl_type_header int_value = <ls_values>-key value = <ls_values>-value ) TO mt_dropdown_text.
   ENDLOOP.
 
 ENDFORM.
@@ -660,7 +678,18 @@ FORM text_heading_fields .
                                     spras = mv_lang_vis.
 
     IF sy-subrc = 0.
-      <ls_fields>-reptext = <ls_fields_text>-reptext.
+      " El texto de la cabecera dependerá del seleccionado en la pestaña de textos, aunque siempre hay un valor por defecto
+      CASE <ls_fields>-lbl_type_header.
+        WHEN zif_al30_data=>cs_label_type_col_header-header.
+          <ls_fields>-reptext = <ls_fields_text>-reptext.
+        WHEN zif_al30_data=>cs_label_type_col_header-short.
+          <ls_fields>-reptext = <ls_fields_text>-scrtext_s.
+        WHEN zif_al30_data=>cs_label_type_col_header-medium.
+          <ls_fields>-reptext = <ls_fields_text>-scrtext_m.
+        WHEN zif_al30_data=>cs_label_type_col_header-long.
+          <ls_fields>-reptext = <ls_fields_text>-scrtext_l.
+      ENDCASE.
+
     ENDIF.
 
   ENDLOOP.
@@ -895,6 +924,17 @@ FORM alv_fieldcat_text .
         <ls_fieldcat>-col_opt = abap_true.
         ls_fieldcat_text = <ls_fieldcat>.
         ls_fieldcat_text-edit = 'X'.
+
+      WHEN 'LBL_TYPE_HEADER'.  " Tipo de texto que se usará en la cabecera de las columnas
+        <ls_fieldcat>-col_opt = abap_true.
+        ls_fieldcat_text = <ls_fieldcat>.
+        ls_fieldcat_text-edit = abap_true.
+        ls_fieldcat_text-drdn_hndl = mc_hndl_lbl_type_header. " Handle del dropdown
+        ls_fieldcat_text-drdn_alias = abap_true.
+        ls_fieldcat_text-convexit = 'ZLTCT'.
+
+        " Se carga los valores para el dropdown
+        PERFORM load_dropdown_lbl_type_header.
 
     ENDCASE.
 

@@ -1174,17 +1174,13 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD exit_verify_row_data.
-    DATA ld_metodo TYPE seocpdname.
 
     CLEAR: et_return.
 
     IF mo_exit_class IS BOUND.
 
-* Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_VERIFY_ROW_DATA' INTO ld_metodo.
-
       TRY.
-          CALL METHOD mo_exit_class->(ld_metodo)
+          CALL METHOD mo_exit_class->exit_verify_row_data
             EXPORTING
               iv_row          = iv_row
               is_row_data     = cs_row_data

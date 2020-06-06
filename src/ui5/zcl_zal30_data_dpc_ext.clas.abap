@@ -30,6 +30,7 @@ CLASS zcl_zal30_data_dpc_ext DEFINITION
     METHODS getf4catalogset_get_entityset REDEFINITION.
     METHODS getsearchhelpdat_get_entityset REDEFINITION.
     METHODS transportdataset_create_entity REDEFINITION.
+    METHODS getuserconfset_get_entity REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -80,6 +81,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
     DATA lv_langu TYPE sylangu.
     DATA lv_user TYPE string.
     DATA lt_r_views TYPE zif_al30_data=>tt_r_tabname.
+
 
     CLEAR et_entityset.
 
@@ -133,6 +135,20 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
                                                    level_auth = <wa>-level_auth
                                                    allowed_transport = <wa>-allowed_transport ) ).
 
+*    DATA(lo_message_container) = mo_context->get_message_container( ).
+*
+*    lo_message_container->add_message(
+*      EXPORTING
+*        iv_msg_type               = 'E'
+*        iv_msg_id                 = '00'
+*        iv_msg_number             = '002'
+*        iv_msg_text = 'Mensaje 1'
+*        iv_error_category         = /iwbep/if_message_container=>gcs_error_category-processing ).
+*
+*    RAISE EXCEPTION TYPE /iwbep/cx_mgw_busi_exception
+*      EXPORTING
+*        message_container = lo_message_container
+*        http_status_code  = /iwbep/cx_mgw_busi_exception=>gcs_http_status_codes-bad_request.
 
   ENDMETHOD.
 
@@ -175,18 +191,6 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
           unknown_language = 1
           OTHERS           = 2.
     ENDIF.
-
-    " Nombre de la vista
-*    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'VIEWNAME'.
-*    IF sy-subrc = 0.
-*      lv_viewname = <ls_key_tab>-value.
-*    ENDIF.
-*
-*    " Modo de edición
-*    READ TABLE it_key_tab ASSIGNING <ls_key_tab> WITH KEY name = 'MODE'.
-*    IF sy-subrc = 0.
-*      lv_mode = <ls_key_tab>-value.
-*    ENDIF.
 
     " Se llama al controlador para leer los datos
     mo_controller->read_data(
@@ -259,6 +263,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
 
 
   METHOD rowvalidationdet_create_entity.
+
     DATA ls_data TYPE zcl_zal30_data_mpc=>ts_rowvalidationdetermination.
 
     " Lectura de los datos provenientes del body de la llamada
@@ -267,6 +272,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
     " Si iguala los datos de salida a los de entrada.
     er_entity = ls_data.
 
+
     mo_controller->row_validation_determination(
       EXPORTING
         iv_view_name =  ls_data-tabname
@@ -274,7 +280,6 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
         iv_row       = ls_data-row
       IMPORTING
         ev_row       = er_entity-row ).
-
 
   ENDMETHOD.
 
@@ -480,6 +485,7 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
 
   METHOD transportdataset_create_entity.
 
+
     DATA ls_data TYPE zcl_zal30_data_mpc=>ts_transportdata.
 
     " Lectura de los datos provenientes del body de la llamada
@@ -497,6 +503,20 @@ CLASS zcl_zal30_data_dpc_ext IMPLEMENTATION.
       IMPORTING
         ev_return          = er_entity-return
         ev_order           = er_entity-transport_order ).
+  ENDMETHOD.
+
+  METHOD getuserconfset_get_entity.
+
+    DATA(lv_username) = CONV string( it_key_tab[ name = 'USERNAME' ]-value ).
+    " Si hay usuario se le informa el usuario SAP
+    lv_username = COND #( WHEN lv_username IS INITIAL THEN sy-uname ELSE lv_username ).
+
+    mo_controller->get_user_configuration( EXPORTING iv_user = lv_username
+                                           IMPORTING es_configuration = DATA(ls_configuration) ).
+
+    er_entity-username = lv_username.
+    er_entity = CORRESPONDING #( BASE ( er_entity ) ls_configuration ).
+
   ENDMETHOD.
 
 ENDCLASS.

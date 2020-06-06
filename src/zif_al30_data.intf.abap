@@ -120,7 +120,10 @@ INTERFACE zif_al30_data
       dictionary TYPE zal30_e_source_text VALUE 'D',
       manual     TYPE zal30_e_source_text VALUE 'M',
     END OF cs_source_text .
-  CONSTANTS cv_domain_source_text TYPE domname VALUE 'ZAL30_D_SOURCE_TEXT' ##NO_TEXT.
+  CONSTANTS: BEGIN OF cs_domain,
+               source_text       TYPE domname VALUE 'ZAL30_D_SOURCE_TEXT' ##NO_TEXT,
+               label_type_header TYPE domname VALUE 'ZAL30_D_LABEL_TYPE_FOR_HEADER',
+             END OF cs_domain.
   CONSTANTS:
     BEGIN OF cs_order_category,
       workbench   TYPE e070-korrdev VALUE 'SYST',
@@ -158,14 +161,15 @@ INTERFACE zif_al30_data
       view          TYPE sytcode VALUE 'ZAL30_MAIN_VIEW',
     END OF cs_prog_tcode .
   CONSTANTS: BEGIN OF cs_fix_field_conf,
-               sel_screen   TYPE fieldname VALUE 'SEL_SCREEN',
-               source_text  TYPE fieldname VALUE 'SOURCE_TEXT',
-               tech         TYPE fieldname VALUE 'TECH',
-               mandatory    TYPE fieldname VALUE 'MANDATORY',
-               no_output    TYPE fieldname VALUE 'NO_OUTPUT',
-               checkbox     TYPE fieldname VALUE 'CHECKBOX',
-               virtual      TYPE fieldname VALUE 'VIRTUAL',
-               virtual_dtel TYPE fieldname VALUE 'VIRTUAL_DTEL',
+               sel_screen        TYPE fieldname VALUE 'SEL_SCREEN',
+               source_text       TYPE fieldname VALUE 'SOURCE_TEXT',
+               tech              TYPE fieldname VALUE 'TECH',
+               mandatory         TYPE fieldname VALUE 'MANDATORY',
+               no_output         TYPE fieldname VALUE 'NO_OUTPUT',
+               checkbox          TYPE fieldname VALUE 'CHECKBOX',
+               virtual           TYPE fieldname VALUE 'VIRTUAL',
+               virtual_dtel      TYPE fieldname VALUE 'VIRTUAL_DTEL',
+               label_type_header TYPE fieldname VALUE 'LBL_TYPE_HEADER',
              END OF cs_fix_field_conf.
   CONSTANTS: BEGIN OF cs_selection_screen_view,
                data_element_text_field TYPE string VALUE 'RSDSTEXTS-TEXT',
@@ -186,4 +190,11 @@ INTERFACE zif_al30_data
                error TYPE string VALUE 'ERROR',
                valid TYPE string VALUE 'VALID',
              END OF cs_row_status.
+  CONSTANTS: BEGIN OF cs_label_type_col_header,
+               short   TYPE zal30_e_label_type_for_header VALUE 'S',
+               medium  TYPE zal30_e_label_type_for_header VALUE 'M',
+               long    TYPE zal30_e_label_type_for_header VALUE 'L',
+               header  TYPE zal30_e_label_type_for_header VALUE 'H',
+               default TYPE zal30_e_label_type_for_header VALUE 'H',
+             END OF cs_label_type_col_header.
 ENDINTERFACE.

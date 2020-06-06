@@ -24,6 +24,7 @@ DATA mt_fields_text_orig TYPE zif_al30_data=>tt_fields_text_view_alv.
 * Constantes
 *----------------------------------------------------------------------*
 DATA mc_hndl_source_text TYPE int4 VALUE '1'.
+DATA mc_hndl_lbl_type_header TYPE int4 VALUE '1'.
 
 CONSTANTS: BEGIN OF cs_toolbar_functions,
              " Submenu de idiomas
@@ -125,6 +126,7 @@ DATA ms_layout_text TYPE lvc_s_layo.
 DATA mo_alv_text TYPE REF TO cl_gui_alv_grid.
 DATA mo_container_text TYPE REF TO cl_gui_custom_container.
 DATA mt_fieldcat_text TYPE lvc_t_fcat.
+DATA mt_dropdown_text TYPE lvc_t_dral.
 CLASS lcl_event_text DEFINITION DEFERRED.
 DATA mo_event_receiver_text TYPE REF TO lcl_event_text.
 * <- Atributos de textos

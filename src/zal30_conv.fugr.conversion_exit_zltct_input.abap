@@ -1,4 +1,4 @@
-FUNCTION conversion_exit_zsrct_input .
+FUNCTION CONVERSION_EXIT_ZLTCT_INPUT .
 *"----------------------------------------------------------------------
 *"*"Local Interface:
 *"  IMPORTING
@@ -12,7 +12,7 @@ FUNCTION conversion_exit_zsrct_input .
 
   CALL FUNCTION 'DDIF_DOMA_GET'
     EXPORTING
-      name      = zif_al30_data=>cs_domain-source_text
+      name      = zif_al30_data=>cs_domain-label_type_header
       langu     = sy-langu
     TABLES
       dd07v_tab = lt_dd07v.

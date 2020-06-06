@@ -12,7 +12,7 @@ FUNCTION conversion_exit_zsrct_output .
 
   CALL FUNCTION 'DDIF_DOMA_GET'
     EXPORTING
-      name      = zif_al30_data=>cv_domain_source_text
+      name      = zif_al30_data=>cs_domain-source_text
       langu     = sy-langu
     TABLES
       dd07v_tab = lt_dd07v.
