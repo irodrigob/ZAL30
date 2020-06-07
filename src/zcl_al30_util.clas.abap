@@ -98,13 +98,34 @@ CLASS zcl_al30_util DEFINITION
 
     "! <p class="shorttext synchronized" lang="en">Check if exist the data element</p>
     "!
-    "! @parameter iv_dtel | <p class="shorttext synchronized" lang="en">Data element</p>
-    "! @parameter rv_exist | <p class="shorttext synchronized" lang="en">Exist or not</p>
+    "! @parameter iv_dtel | <p class="shorttext synchronized">Data element</p>
+    "! @parameter rv_exist | <p class="shorttext synchronized">Exist or not</p>
     CLASS-METHODS exist_data_element
       IMPORTING
                 !iv_dtel        TYPE rollname
       RETURNING VALUE(rv_exist) TYPE sap_bool.
+
+    "! <p class="shorttext synchronized" lang="en">Returns the most optimal text for a header</p>
+    "!
+    "! @parameter iv_reptext | <p class="shorttext synchronized">Header text</p>
+    "! @parameter iv_scrtext_s | <p class="shorttext synchronized">Short text</p>
+    "! @parameter iv_scrtext_l | <p class="shorttext synchronized">Long text</p>
+    "! @parameter iv_scrtext_m | <p class="shorttext synchronized">Medium text</p>
+    "! @parameter ev_text | <p class="shorttext synchronized">Optimal text</p>
+    CLASS-METHODS get_optime_text_header
+      IMPORTING
+        !iv_reptext   TYPE any
+        !iv_scrtext_s TYPE any
+        !iv_scrtext_m TYPE any
+        !iv_scrtext_l TYPE any
+      EXPORTING
+        !ev_text      TYPE any.
   PROTECTED SECTION.
+    TYPES: BEGIN OF ts_optimal_field_text,
+             text TYPE string,
+             len  TYPE i,
+           END OF ts_optimal_field_text.
+    TYPES: tt_optimal_field_text TYPE STANDARD TABLE OF ts_optimal_field_text WITH EMPTY KEY.
 
     CLASS-METHODS conv_data_2_keys_trkorr
       IMPORTING
@@ -670,6 +691,37 @@ CLASS zcl_al30_util IMPLEMENTATION.
       rv_exist = abap_true.
     ELSE.
       rv_exist = abap_false.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD get_optime_text_header.
+    DATA lt_opt_text TYPE tt_optimal_field_text.
+
+    CLEAR ev_text.
+
+    " Se informan todos los textos en una tabla junto a su longitud, el que sea más largo y no supere el tamaño del campo ese será el escogido.
+    " El motivo es simple, ya que cada uno puede tener el texto que quiera en elemento de datos o de manera manual. Y no siempre el texto más largo
+    " estará en el campo donde debería. Ejemplo el elemento de datos XUBNAME tiene el mejor texto en la cabecera.
+    CLEAR lt_opt_text.
+    IF iv_scrtext_l IS NOT INITIAL.
+      INSERT VALUE #( text = iv_scrtext_l len = strlen( iv_scrtext_l ) ) INTO TABLE lt_opt_text.
+    ENDIF.
+    IF iv_scrtext_m IS NOT INITIAL.
+      INSERT VALUE #( text = iv_scrtext_m len = strlen( iv_scrtext_m ) ) INTO TABLE lt_opt_text.
+    ENDIF.
+    IF iv_scrtext_s IS NOT INITIAL.
+      INSERT VALUE #( text = iv_scrtext_s len = strlen( iv_scrtext_s ) ) INTO TABLE lt_opt_text.
+    ENDIF.
+    IF iv_reptext IS NOT INITIAL.
+      INSERT VALUE #( text = iv_reptext len = strlen( iv_reptext ) ) INTO TABLE lt_opt_text.
+    ENDIF.
+    " Debería haber textos porque sino el campo saldrá sin texto
+    IF lt_opt_text IS NOT INITIAL.
+      SORT lt_opt_text BY len DESCENDING. " Me quedo con la longitud más alta
+      READ TABLE lt_opt_text ASSIGNING FIELD-SYMBOL(<ls_opt_text>) INDEX 1.
+
+      ev_text = <ls_opt_text>-text.
+
     ENDIF.
   ENDMETHOD.
 

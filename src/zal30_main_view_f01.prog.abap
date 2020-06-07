@@ -1078,9 +1078,6 @@ FORM read_view .
       et_fields_text_view_alv = mt_fields_text
       et_fields_ddic          = mt_fields_ddic.
 
-  " Se ajuste el texto de cabecera de la tabla de campos por el valor de la tabla de textos
-  PERFORM text_heading_fields.
-
 ENDFORM.
 *&---------------------------------------------------------------------*
 *&      Form  LOCK_VIEW
@@ -1161,8 +1158,14 @@ FORM selection_screen .
         INSERT VALUE #( tablename = lv_tabname fieldname = <ls_fields>-fieldname
                         type = 'S' ) INTO TABLE <ls_sel_screen>-fields.
 
-        " El texto se informa el del campo que ya viene preconfigurado con el texto seleccionado. O en caso contrario, con el texto más optimo.
-          INSERT VALUE #( tablename = lv_tabname fieldname = <ls_fields>-fieldname text = <ls_fields>-reptext ) INTO TABLE <ls_sel_screen>-fields_text.
+        " El texto se informa según lo que se vaya a mostrar en el ALV.
+        READ TABLE mt_fieldcat ASSIGNING FIELD-SYMBOL(<ls_fieldcat>) WITH KEY fieldname = <ls_fields>-fieldname.
+        IF sy-subrc = 0.
+          INSERT VALUE #( tablename = lv_tabname fieldname = <ls_fields>-fieldname text = COND #( WHEN <ls_fieldcat>-coltext IS NOT INITIAL THEN <ls_fieldcat>-coltext ELSE <ls_fieldcat>-reptext ) )
+                 INTO TABLE <ls_sel_screen>-fields_text.
+        ELSE.
+          INSERT VALUE #( tablename = lv_tabname fieldname = <ls_fields>-fieldname text = <ls_fields>-fieldname ) INTO TABLE <ls_sel_screen>-fields_text.
+        ENDIF.
 
       ENDLOOP.
 
@@ -1243,68 +1246,6 @@ FORM process_load_view_dynpro .
 * Creacion de objetos de la vista
   PERFORM create_data_view.
 
-ENDFORM.
-*&---------------------------------------------------------------------*
-*& Form TEXT_HEADING_FIELDS
-*&---------------------------------------------------------------------*
-*& text
-*&---------------------------------------------------------------------*
-FORM text_heading_fields .
-  DATA lt_opt_text TYPE tt_opt_selscreen_field_text.
-
-  " Actualizo el texto del campo segun el origen del texto del campo
-  LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>).
-
-    READ TABLE mt_fields_text ASSIGNING FIELD-SYMBOL(<ls_fields_text>)
-                           WITH KEY fieldname = <ls_fields>-fieldname
-                                    spras = mv_lang_vis.
-
-    IF sy-subrc = 0.
-      CASE <ls_fields>-lbl_type_header.
-        WHEN zif_al30_data=>cs_label_type_col_header-header.
-          <ls_fields>-reptext = <ls_fields_text>-reptext.
-        WHEN zif_al30_data=>cs_label_type_col_header-short.
-          <ls_fields>-reptext = <ls_fields_text>-scrtext_s.
-        WHEN zif_al30_data=>cs_label_type_col_header-medium.
-          <ls_fields>-reptext = <ls_fields_text>-scrtext_m.
-        WHEN zif_al30_data=>cs_label_type_col_header-long.
-          <ls_fields>-reptext = <ls_fields_text>-scrtext_l.
-        WHEN zif_al30_data=>cs_label_type_col_header-auto.
-
-          " Se informan todos los textos en una tabla junto a su longitud, el que sea más largo y no supere el tamaño del campo ese será el escogido.
-          " El motivo es simple, ya que cada uno puede tener el texto que quiera en elemento de datos o de manera manual. Y no siempre el texto más largo
-          " estará en el campo donde debería. Ejemplo el elemento de datos XUBNAME tiene el mejor texto en la cabecera.
-          CLEAR lt_opt_text.
-          IF <ls_fields_text>-scrtext_l IS NOT INITIAL.
-            INSERT VALUE #( text = <ls_fields_text>-scrtext_l len = strlen( <ls_fields_text>-scrtext_l ) ) INTO TABLE lt_opt_text.
-          ENDIF.
-          IF <ls_fields_text>-scrtext_m IS NOT INITIAL.
-            INSERT VALUE #( text = <ls_fields_text>-scrtext_m len = strlen( <ls_fields_text>-scrtext_m ) ) INTO TABLE lt_opt_text.
-          ENDIF.
-          IF <ls_fields_text>-scrtext_s IS NOT INITIAL.
-            INSERT VALUE #( text = <ls_fields_text>-scrtext_s len = strlen( <ls_fields_text>-scrtext_s ) ) INTO TABLE lt_opt_text.
-          ENDIF.
-          IF <ls_fields_text>-reptext IS NOT INITIAL.
-            INSERT VALUE #( text = <ls_fields_text>-reptext len = strlen( <ls_fields_text>-reptext ) ) INTO TABLE lt_opt_text.
-          ENDIF.
-          " Debería haber textos porque sino el campo saldrá sin texto
-          IF lt_opt_text IS NOT INITIAL.
-            SORT lt_opt_text BY len DESCENDING. " Me quedo con la longitud más alta
-            READ TABLE lt_opt_text ASSIGNING FIELD-SYMBOL(<ls_opt_text>) INDEX 1.
-
-            <ls_fields>-reptext = <ls_opt_text>-text.
-
-          ENDIF.
-      ENDCASE.
-
-    ENDIF.
-
-    " Si no hay texto, se pone el nombre del campo
-    IF <ls_fields>-reptext IS INITIAL.
-      <ls_fields>-reptext = <ls_fields>-fieldname.
-    ENDIF.
-
-  ENDLOOP.
 ENDFORM.
 *&---------------------------------------------------------------------*
 *& Form SHOW_MESSAGES

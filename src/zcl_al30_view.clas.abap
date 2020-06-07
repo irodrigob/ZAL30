@@ -216,6 +216,8 @@ CLASS zcl_al30_view DEFINITION
     TYPES:
       tt_main_change_log TYPE STANDARD TABLE OF ts_main_change_log .
 
+
+
     DATA mo_exit_class TYPE REF TO zif_al30_exit_class .
     DATA mt_fields TYPE zif_al30_data=>tt_fields_view .
     DATA mt_fields_text TYPE zif_al30_data=>tt_fields_text_view .
@@ -469,7 +471,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_AL30_VIEW IMPLEMENTATION.
+CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD add_edit_fields.
@@ -1440,7 +1442,16 @@ CLASS ZCL_AL30_VIEW IMPLEMENTATION.
             WHEN zif_al30_data=>cs_label_type_col_header-long.
               <ls_fieldcat>-coltext = <ls_fields_text>-scrtext_l.
             WHEN zif_al30_data=>cs_label_type_col_header-auto.
-              " En el auto no se hace nada, se deja la selección por defecto
+              " En el auto no se hace nada, se deja la selección por defecto menos el campo REPTEXT que se calcula el texto más optimo
+              zcl_al30_util=>get_optime_text_header(
+                EXPORTING
+                  iv_reptext   = <ls_fields_text>-reptext
+                  iv_scrtext_s = <ls_fields_text>-scrtext_s
+                  iv_scrtext_m = <ls_fields_text>-scrtext_m
+                  iv_scrtext_l = <ls_fields_text>-scrtext_l
+                IMPORTING
+                  ev_text      = <ls_fieldcat>-reptext ).
+
           ENDCASE.
 
         ENDIF.

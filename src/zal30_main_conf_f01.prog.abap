@@ -689,7 +689,14 @@ FORM text_heading_fields .
         WHEN zif_al30_data=>cs_label_type_col_header-long.
           <ls_fields>-reptext = <ls_fields_text>-scrtext_l.
         WHEN zif_al30_data=>cs_label_type_col_header-auto.
-          <ls_fields>-reptext = <ls_fields_text>-reptext.
+          zcl_al30_util=>get_optime_text_header(
+          EXPORTING
+            iv_reptext   = <ls_fields_text>-reptext
+            iv_scrtext_s = <ls_fields_text>-scrtext_s
+            iv_scrtext_m = <ls_fields_text>-scrtext_m
+            iv_scrtext_l = <ls_fields_text>-scrtext_l
+          IMPORTING
+            ev_text      = <ls_fields>-reptext ).
       ENDCASE.
 
     ENDIF.

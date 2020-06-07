@@ -197,6 +197,6 @@ INTERFACE zif_al30_data
                long    TYPE zal30_e_label_type_for_header VALUE 'L',
                header  TYPE zal30_e_label_type_for_header VALUE 'H',
                auto    TYPE zal30_e_label_type_for_header VALUE 'A',
-               default TYPE zal30_e_label_type_for_header VALUE 'H',
+               default TYPE zal30_e_label_type_for_header VALUE 'A',
              END OF cs_label_type_col_header.
 ENDINTERFACE.

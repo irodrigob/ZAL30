@@ -24,6 +24,12 @@
      <LANGU>E</LANGU>
      <DESCRIPT>Check if exist the data element</DESCRIPT>
     </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_UTIL</CLSNAME>
+     <CMPNAME>GET_OPTIME_TEXT_HEADER</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Returns the most optimal text for a header</DESCRIPT>
+    </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>
  </asx:abap>
