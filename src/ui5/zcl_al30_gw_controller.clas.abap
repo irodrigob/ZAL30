@@ -335,7 +335,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_AL30_GW_CONTROLLER IMPLEMENTATION.
+CLASS zcl_al30_gw_controller IMPLEMENTATION.
 
 
   METHOD adapt_alv_data_2_ui5.
@@ -799,6 +799,13 @@ CLASS ZCL_AL30_GW_CONTROLLER IMPLEMENTATION.
           ls_fields-key_ddic = <ls_fields>-key_ddic.
           ls_fields-mandatory = <ls_fields>-mandatory.
         ENDIF.
+
+        " El texto calculado por defecto esta en la columna automática. Si no esta se toma el valor de la cabecera y si no esta el nombre del campo
+        ls_fields-header_text = COND #( WHEN <ls_fieldcat>-coltext IS NOT INITIAL
+                                        THEN <ls_fieldcat>-coltext
+                                        ELSE COND #( WHEN <ls_fieldcat>-reptext IS NOT INITIAL
+                                                     THEN <ls_fieldcat>-reptext
+                                                     ELSE <ls_fieldcat>-fieldname ) ).
 
         INSERT ls_fields INTO TABLE et_fields.
       ENDLOOP.

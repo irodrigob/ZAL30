@@ -24,7 +24,7 @@ DATA mt_fields_text_orig TYPE zif_al30_data=>tt_fields_text_view_alv.
 * Constantes
 *----------------------------------------------------------------------*
 DATA mc_hndl_source_text TYPE int4 VALUE '1'.
-DATA mc_hndl_lbl_type_header TYPE int4 VALUE '1'.
+DATA mc_hndl_lbl_type_header TYPE int4 VALUE '2'.
 
 CONSTANTS: BEGIN OF cs_toolbar_functions,
              " Submenu de idiomas

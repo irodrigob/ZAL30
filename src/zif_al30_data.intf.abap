@@ -56,7 +56,8 @@ INTERFACE zif_al30_data
     BEGIN OF ts_fields_text_view_alv.
       INCLUDE TYPE ts_fields_text_view.
   TYPES:
-    celltab TYPE lvc_t_styl,
+    lbl_type_header TYPE zal30_e_label_type_for_header,
+    celltab         TYPE lvc_t_styl,
     END OF ts_fields_text_view_alv .
   TYPES:
     tt_fields_text_view_alv TYPE STANDARD TABLE OF ts_fields_text_view_alv .
@@ -195,6 +196,7 @@ INTERFACE zif_al30_data
                medium  TYPE zal30_e_label_type_for_header VALUE 'M',
                long    TYPE zal30_e_label_type_for_header VALUE 'L',
                header  TYPE zal30_e_label_type_for_header VALUE 'H',
+               auto    TYPE zal30_e_label_type_for_header VALUE 'A',
                default TYPE zal30_e_label_type_for_header VALUE 'H',
              END OF cs_label_type_col_header.
 ENDINTERFACE.

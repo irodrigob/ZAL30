@@ -6,7 +6,7 @@ CLASS lcl_event_text DEFINITION.
   PUBLIC SECTION.
     METHODS:
       handle_data_changed
-                  FOR EVENT data_changed OF cl_gui_alv_grid
+                    FOR EVENT data_changed OF cl_gui_alv_grid
         IMPORTING er_data_changed.
 ENDCLASS.                    "lcl_event_text DEFINITION
 
@@ -101,12 +101,12 @@ CLASS lcl_event_gen DEFINITION.
   PUBLIC SECTION.
     METHODS:
       handle_data_changed
-                  FOR EVENT data_changed OF cl_gui_alv_grid
+                    FOR EVENT data_changed OF cl_gui_alv_grid
         IMPORTING er_data_changed.
 
     METHODS:
       handle_toolbar
-                  FOR EVENT toolbar OF cl_gui_alv_grid
+                    FOR EVENT toolbar OF cl_gui_alv_grid
         IMPORTING e_object e_interactive.
 ENDCLASS.                    "lcl_event_text DEFINITION
 
@@ -170,6 +170,11 @@ CLASS lcl_event_gen IMPLEMENTATION.
         DATA(lv_tech_change) = abap_true.
       ENDIF.
 
+      " Si se modifica el que tipo de texto se va usar para las cabeceras los textos se tiene que sincronizar
+      IF <ls_mod_cells>-fieldname = zif_al30_data=>cs_fix_field_conf-label_type_header.
+        DATA(lv_lbl_type_header) = abap_true.
+      ENDIF.
+
       " Si el campo modificado es el elemento de datos virtual hay que chequear que sea valido
       IF <ls_mod_cells>-fieldname = zif_al30_data=>cs_fix_field_conf-virtual_dtel.
         IF zcl_al30_util=>exist_data_element( CONV #( <ls_mod_cells>-value ) ) = abap_false.
@@ -193,8 +198,14 @@ CLASS lcl_event_gen IMPLEMENTATION.
     " Si el origen del texto cambio lanzo el proceso que actualiza los campos editables de texto y
     " sincronizar el textos segun el diccionario, solo para campos cuyo origen de texto es el diccionario.
     IF lv_source_text_change = abap_true.
-      PERFORM enabled_field_texts_source IN PROGRAM (sy-cprog).
-      PERFORM syncro_field_texts_source  IN PROGRAM (sy-cprog).
+      PERFORM enabled_field_texts_source." IN PROGRAM (sy-cprog).
+      PERFORM syncro_field_texts_source. " IN PROGRAM (sy-cprog).
+    ENDIF.
+
+    " Si hay cambio de la fuente de textos, como el tipo de texto que se selecciona en la cabecera, ajusto
+    " el texto que aparece al lado del campo
+    IF lv_source_text_change = abap_true OR lv_lbl_type_header = abap_true.
+      PERFORM text_heading_fields.
     ENDIF.
 
 

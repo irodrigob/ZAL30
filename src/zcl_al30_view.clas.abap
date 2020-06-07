@@ -469,7 +469,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_al30_view IMPLEMENTATION.
+CLASS ZCL_AL30_VIEW IMPLEMENTATION.
 
 
   METHOD add_edit_fields.
@@ -1365,6 +1365,27 @@ CLASS zcl_al30_view IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD get_allowed_transport.
+
+    CLEAR et_allowed_transport.
+
+    " Devuelve si se puede transportar a nivel de sistema.
+    DATA(lv_allowed_general) = zcl_al30_util=>allowed_transport( ).
+
+    " Se busca a nivel de vista
+    SELECT tabname, transport INTO TABLE @DATA(lt_views)
+           FROM zal30_t_view
+           WHERE tabname IN @it_r_views.
+
+    IF sy-subrc = 0.
+      " Si a nivel de sistema se puede transportar entonces se informa el valor configurado a nivel de vista. En caso contrario, no se podra transportar.
+      et_allowed_transport = VALUE #( FOR <wa> IN lt_views ( view_name = <wa>-tabname
+                                                             allowed = COND #( WHEN lv_allowed_general = abap_true THEN <wa>-transport ELSE abap_false ) ) ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
   METHOD get_fieldcat_view.
 
 
@@ -1401,10 +1422,27 @@ CLASS zcl_al30_view IMPLEMENTATION.
 * Pongo la configuración segun los campos de la configuración de la vista
         READ TABLE mt_fields_text ASSIGNING FIELD-SYMBOL(<ls_fields_text>) WITH KEY fieldname = <ls_fieldcat>-fieldname.
         IF sy-subrc = 0.
+
+          " Se ponen los textos pero según el valor escogido en el texto del tipo de columna se forzará que sea otro.
+          " Pero dejo aquí los textos para los tooltip del ALV
           <ls_fieldcat>-scrtext_s = <ls_fields_text>-scrtext_s.
           <ls_fieldcat>-scrtext_m = <ls_fields_text>-scrtext_m.
           <ls_fieldcat>-scrtext_l = <ls_fields_text>-scrtext_l.
           <ls_fieldcat>-reptext = <ls_fields_text>-reptext.
+
+          CASE <ls_fields>-lbl_type_header.
+            WHEN zif_al30_data=>cs_label_type_col_header-header.
+              <ls_fieldcat>-coltext = <ls_fields_text>-reptext.
+            WHEN zif_al30_data=>cs_label_type_col_header-short.
+              <ls_fieldcat>-coltext = <ls_fields_text>-scrtext_s.
+            WHEN zif_al30_data=>cs_label_type_col_header-medium.
+              <ls_fieldcat>-coltext = <ls_fields_text>-scrtext_m.
+            WHEN zif_al30_data=>cs_label_type_col_header-long.
+              <ls_fieldcat>-coltext = <ls_fields_text>-scrtext_l.
+            WHEN zif_al30_data=>cs_label_type_col_header-auto.
+              " En el auto no se hace nada, se deja la selección por defecto
+          ENDCASE.
+
         ENDIF.
 
 * Exit para poder cambiar el catalogo de campos
@@ -2145,6 +2183,11 @@ CLASS zcl_al30_view IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD set_language.
+    mv_langu = iv_langu.
+  ENDMETHOD.
+
+
   METHOD transport_entries.
     FIELD-SYMBOLS <lt_view> TYPE STANDARD TABLE.
     FIELD-SYMBOLS <lt_view_texttable> TYPE STANDARD TABLE.
@@ -2386,28 +2429,4 @@ CLASS zcl_al30_view IMPLEMENTATION.
                 WHERE a~tabname IN it_r_views.
 
   ENDMETHOD.
-  METHOD get_allowed_transport.
-
-    CLEAR et_allowed_transport.
-
-    " Devuelve si se puede transportar a nivel de sistema.
-    DATA(lv_allowed_general) = zcl_al30_util=>allowed_transport( ).
-
-    " Se busca a nivel de vista
-    SELECT tabname, transport INTO TABLE @DATA(lt_views)
-           FROM zal30_t_view
-           WHERE tabname IN @it_r_views.
-
-    IF sy-subrc = 0.
-      " Si a nivel de sistema se puede transportar entonces se informa el valor configurado a nivel de vista. En caso contrario, no se podra transportar.
-      et_allowed_transport = VALUE #( FOR <wa> IN lt_views ( view_name = <wa>-tabname
-                                                             allowed = COND #( WHEN lv_allowed_general = abap_true THEN <wa>-transport ELSE abap_false ) ) ).
-    ENDIF.
-
-  ENDMETHOD.
-
-  METHOD set_language.
-    mv_langu = iv_langu.
-  ENDMETHOD.
-
 ENDCLASS.

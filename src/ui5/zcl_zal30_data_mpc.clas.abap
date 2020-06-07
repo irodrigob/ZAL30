@@ -46,10 +46,7 @@ public section.
      FIELD_TEXTTABLE type FLAG,
      LANG_TEXTTABLE type FLAG,
      LANGU type string,
-     SCRTEXT_S type SCRTEXT_S,
-     SCRTEXT_M type SCRTEXT_M,
-     SCRTEXT_L type string,
-     REPTEXT type string,
+     HEADER_TEXT type string,
      MODE type C length 1,
      EDIT type LVC_EDIT,
      TYPE type INTTYPE,
@@ -1187,40 +1184,7 @@ lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
       EXPORTING
         iv_key      = 'unicode'
         iv_value    = 'false' ).
-lo_property = lo_entity_type->create_property( iv_property_name = 'SHORTEXT' iv_abap_fieldname = 'SCRTEXT_S' ). "#EC NOTEXT
-lo_property->set_type_edm_string( ).
-lo_property->set_creatable( abap_false ).
-lo_property->set_updatable( abap_false ).
-lo_property->set_sortable( abap_false ).
-lo_property->set_nullable( abap_false ).
-lo_property->set_filterable( abap_false ).
-lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
-      EXPORTING
-        iv_key      = 'unicode'
-        iv_value    = 'false' ).
-lo_property = lo_entity_type->create_property( iv_property_name = 'MEDIUMTEXT' iv_abap_fieldname = 'SCRTEXT_M' ). "#EC NOTEXT
-lo_property->set_type_edm_string( ).
-lo_property->set_creatable( abap_false ).
-lo_property->set_updatable( abap_false ).
-lo_property->set_sortable( abap_false ).
-lo_property->set_nullable( abap_false ).
-lo_property->set_filterable( abap_false ).
-lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
-      EXPORTING
-        iv_key      = 'unicode'
-        iv_value    = 'false' ).
-lo_property = lo_entity_type->create_property( iv_property_name = 'LONGTEXT' iv_abap_fieldname = 'SCRTEXT_L' ). "#EC NOTEXT
-lo_property->set_type_edm_string( ).
-lo_property->set_creatable( abap_false ).
-lo_property->set_updatable( abap_false ).
-lo_property->set_sortable( abap_false ).
-lo_property->set_nullable( abap_false ).
-lo_property->set_filterable( abap_false ).
-lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
-      EXPORTING
-        iv_key      = 'unicode'
-        iv_value    = 'false' ).
-lo_property = lo_entity_type->create_property( iv_property_name = 'HEADERTEXT' iv_abap_fieldname = 'REPTEXT' ). "#EC NOTEXT
+lo_property = lo_entity_type->create_property( iv_property_name = 'HEADERTEXT' iv_abap_fieldname = 'HEADER_TEXT' ). "#EC NOTEXT
 lo_property->set_type_edm_string( ).
 lo_property->set_creatable( abap_false ).
 lo_property->set_updatable( abap_false ).
@@ -1872,7 +1836,7 @@ lo_entity_set->set_filter_required( abap_false ).
 *&---------------------------------------------------------------------*
 
 
-  CONSTANTS: lc_gen_date_time TYPE timestamp VALUE '20200606112752'.                  "#EC NOTEXT
+  CONSTANTS: lc_gen_date_time TYPE timestamp VALUE '20200607112459'.                  "#EC NOTEXT
   rv_last_modified = super->get_last_modified( ).
   IF rv_last_modified LT lc_gen_date_time.
     rv_last_modified = lc_gen_date_time.

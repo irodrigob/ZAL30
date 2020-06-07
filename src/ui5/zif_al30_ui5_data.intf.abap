@@ -9,13 +9,13 @@ INTERFACE zif_al30_ui5_data
   TYPES: tt_view_list TYPE STANDARD TABLE OF ts_view_list WITH EMPTY KEY.
   TYPES: BEGIN OF ts_view_fields.
       INCLUDE TYPE zif_al30_data=>ts_fields_view.
-      INCLUDE TYPE zal30_s_fields_attr_text.
-  TYPES: edit      TYPE lvc_edit,
-         type      TYPE inttype,
-         len       TYPE intlen,
-         decimals  TYPE decimals,
-         lowercase TYPE lowercase,
-         datatype  TYPE datatype_d,
+  TYPES: header_text TYPE string,
+         edit        TYPE lvc_edit,
+         type        TYPE inttype,
+         len         TYPE intlen,
+         decimals    TYPE decimals,
+         lowercase   TYPE lowercase,
+         datatype    TYPE datatype_d,
          END OF ts_view_fields.
   TYPES: tt_view_fields TYPE STANDARD TABLE OF ts_view_fields WITH EMPTY KEY.
   TYPES: BEGIN OF ts_return,

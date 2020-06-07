@@ -40,6 +40,13 @@
      <DOMVALUE_L>H</DOMVALUE_L>
      <DDTEXT>Header</DDTEXT>
     </DD07V>
+    <DD07V>
+     <DOMNAME>ZAL30_D_LABEL_TYPE_FOR_HEADER</DOMNAME>
+     <VALPOS>0005</VALPOS>
+     <DDLANGUAGE>E</DDLANGUAGE>
+     <DOMVALUE_L>A</DOMVALUE_L>
+     <DDTEXT>Auto</DDTEXT>
+    </DD07V>
    </DD07V_TAB>
   </asx:values>
  </asx:abap>

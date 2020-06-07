@@ -559,7 +559,7 @@ FORM load_dropdown_lbl_type_header .
       et_values = DATA(lt_values) ).
 
   LOOP AT lt_values ASSIGNING FIELD-SYMBOL(<ls_values>).
-    APPEND VALUE #( handle = mc_hndl_lbl_type_header int_value = <ls_values>-key value = <ls_values>-value ) TO mt_dropdown_text.
+    APPEND VALUE #( handle = mc_hndl_lbl_type_header int_value = <ls_values>-key value = <ls_values>-value ) TO mt_dropdown_gen.
   ENDLOOP.
 
 ENDFORM.
@@ -688,6 +688,8 @@ FORM text_heading_fields .
           <ls_fields>-reptext = <ls_fields_text>-scrtext_m.
         WHEN zif_al30_data=>cs_label_type_col_header-long.
           <ls_fields>-reptext = <ls_fields_text>-scrtext_l.
+        WHEN zif_al30_data=>cs_label_type_col_header-auto.
+          <ls_fields>-reptext = <ls_fields_text>-reptext.
       ENDCASE.
 
     ENDIF.
@@ -833,8 +835,6 @@ FORM alv_fieldcat_gen .
         ls_fieldcat_gen-col_pos = 11.
         ls_fieldcat_gen-edit = abap_true.
 
-
-
       WHEN 'ADD_DESC'. " Añadir de la descripción
         ls_fieldcat_gen = <ls_fieldcat>.
         ls_fieldcat_gen-edit = abap_false.
@@ -872,7 +872,16 @@ FORM alv_fieldcat_gen .
         ls_fieldcat_gen-checkbox = abap_true.
         ls_fieldcat_gen-col_pos = 120.
 
+      WHEN 'LBL_TYPE_HEADER'.  " Tipo de texto que se usará en la cabecera de las columnas
+        <ls_fieldcat>-col_opt = abap_true.
+        ls_fieldcat_gen = <ls_fieldcat>.
+        ls_fieldcat_gen-edit = abap_true.
+        ls_fieldcat_gen-drdn_hndl = mc_hndl_lbl_type_header. " Handle del dropdown
+        ls_fieldcat_gen-drdn_alias = abap_true.
+        ls_fieldcat_gen-convexit = 'ZLTCT'.
 
+        " Se carga los valores para el dropdown
+        PERFORM load_dropdown_lbl_type_header.
     ENDCASE.
 
     IF ls_fieldcat_gen IS NOT INITIAL.
@@ -924,17 +933,6 @@ FORM alv_fieldcat_text .
         <ls_fieldcat>-col_opt = abap_true.
         ls_fieldcat_text = <ls_fieldcat>.
         ls_fieldcat_text-edit = 'X'.
-
-      WHEN 'LBL_TYPE_HEADER'.  " Tipo de texto que se usará en la cabecera de las columnas
-        <ls_fieldcat>-col_opt = abap_true.
-        ls_fieldcat_text = <ls_fieldcat>.
-        ls_fieldcat_text-edit = abap_true.
-        ls_fieldcat_text-drdn_hndl = mc_hndl_lbl_type_header. " Handle del dropdown
-        ls_fieldcat_text-drdn_alias = abap_true.
-        ls_fieldcat_text-convexit = 'ZLTCT'.
-
-        " Se carga los valores para el dropdown
-        PERFORM load_dropdown_lbl_type_header.
 
     ENDCASE.
 
@@ -1030,7 +1028,7 @@ FORM syncro_field_texts_source .
                                      WITH KEY fieldname = <ls_fields>-fieldname
                                               spras = <ls_fields_text>-spras.
       IF sy-subrc = 0.
-        <ls_fields>-reptext = <ls_fields_text>-reptext = <ls_fields_text_orig>-reptext.
+        <ls_fields_text>-reptext = <ls_fields_text_orig>-reptext.
         <ls_fields_text>-scrtext_l = <ls_fields_text_orig>-scrtext_l.
         <ls_fields_text>-scrtext_s = <ls_fields_text_orig>-scrtext_s.
         <ls_fields_text>-scrtext_m = <ls_fields_text_orig>-scrtext_m.
