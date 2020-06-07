@@ -10,8 +10,6 @@ CLASS zcl_al30_util DEFINITION
 *"* do not include other source files here!!!
       tt_keys TYPE STANDARD TABLE OF trobj_name .
 
-
-
     CLASS-METHODS fill_return
       IMPORTING
         !iv_type         TYPE any
@@ -120,6 +118,18 @@ CLASS zcl_al30_util DEFINITION
         !iv_scrtext_l TYPE any
       EXPORTING
         !ev_text      TYPE any.
+    "! <p class="shorttext synchronized">Read info of a data element</p>
+    "!
+    "! @parameter iv_rollname | <p class="shorttext synchronized">Data element</p>
+    "! @parameter es_info | <p class="shorttext synchronized">info</p>
+    CLASS-METHODS read_single_data_element
+      IMPORTING
+        !iv_rollname TYPE rollname
+        !iv_langu    TYPE sylangu DEFAULT sy-langu
+      EXPORTING
+        !es_info     TYPE dfies
+      RAISING
+        zcx_al30 .
   PROTECTED SECTION.
     TYPES: BEGIN OF ts_optimal_field_text,
              text TYPE string,
@@ -721,6 +731,31 @@ CLASS zcl_al30_util IMPLEMENTATION.
       READ TABLE lt_opt_text ASSIGNING FIELD-SYMBOL(<ls_opt_text>) INDEX 1.
 
       ev_text = <ls_opt_text>-text.
+
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD read_single_data_element.
+    CLEAR: es_info.
+
+
+    CALL METHOD cl_abap_typedescr=>describe_by_name(
+      EXPORTING
+        p_name         = iv_rollname
+      RECEIVING
+        p_descr_ref    = DATA(lo_ref)
+      EXCEPTIONS
+        type_not_found = 1
+        OTHERS         = 2 ).
+    IF sy-subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_al30
+        EXPORTING
+          textid = zcx_al30=>data_element_not_exist.
+    ELSE.
+      DATA(lo_rollname) = CAST cl_abap_elemdescr( lo_ref  ).
+
+      es_info = lo_rollname->get_ddic_field( p_langu = iv_langu ).
+      es_info-langu = iv_langu.
 
     ENDIF.
   ENDMETHOD.

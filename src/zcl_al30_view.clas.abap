@@ -48,12 +48,14 @@ CLASS zcl_al30_view DEFINITION
     "! <p class="shorttext synchronized">Create the internal table for display data of the view</p>
     "! @parameter iv_mode | <p class="shorttext synchronized">Edit mode:Edit or View</p>
     "! @parameter et_data | <p class="shorttext synchronized">Internal table for the values</p>
+    "! @parameter es_data | <p class="shorttext synchronized">work area of table for the values</p>
     "! @parameter es_return | <p class="shorttext synchronized">Result of the process</p>
     METHODS create_it_data_view
       IMPORTING
         !iv_mode   TYPE char1
       EXPORTING
         !et_data   TYPE REF TO data
+        !es_data type ref to data
         !es_return TYPE bapiret2 .
     "! <p class="shorttext synchronized">Save the data in the view.</p>
     METHODS save_data
@@ -617,7 +619,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
     DATA lt_fcat_control TYPE lvc_t_fcat.
     DATA ls_fcat TYPE LINE OF lvc_t_fcat.
 
-    CLEAR: et_data, es_return.
+    CLEAR: et_data, es_return, es_data.
 
     " Creo la estructura en base a la vista/tabla indicada
     CALL METHOD zcl_ca_dynamic_tables=>create_wa_from_struc
@@ -647,7 +649,8 @@ CLASS zcl_al30_view IMPLEMENTATION.
           i_base_fields = lo_wa_view
           i_new_fields  = lt_fcat
         IMPORTING
-          e_table       = et_data.
+          e_table       = et_data
+          e_wa = es_data.
 
       IF et_data IS NOT BOUND.
         es_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error iv_number = '018' iv_message_v1 = ms_view-tabname ).
@@ -1533,7 +1536,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
       DATA(lo_conf) = NEW zcl_al30_conf(  ).
       LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WHERE virtual = abap_true.
         TRY.
-            lo_conf->read_single_data_element( EXPORTING iv_rollname = <ls_fields>-virtual_dtel
+            zcl_al30_util=>read_single_data_element( EXPORTING iv_rollname = <ls_fields>-virtual_dtel
                                                          iv_langu    = sy-langu
                                                IMPORTING es_info     = DATA(ls_info) ).
 
@@ -1588,7 +1591,6 @@ CLASS zcl_al30_view IMPLEMENTATION.
                                                                iv_number = '034'
                                                                iv_field = lo_fields->fieldname
                                                                iv_langu = mv_langu ) INTO TABLE et_return.
-
         ENDIF.
       ENDIF.
     ENDLOOP.

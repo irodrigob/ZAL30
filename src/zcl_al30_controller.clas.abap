@@ -103,7 +103,8 @@ public section.
       !IV_MODE type CHAR1
     exporting
       !ET_DATA type ref to DATA
-      !ES_RETURN type BAPIRET2 .
+      !ES_RETURN type BAPIRET2
+      !ES_DATA type ref to DATA .
   methods SAVE_DATA
     importing
       !IV_ALLOW_REQUEST type SAP_BOOL default ABAP_FALSE
@@ -565,7 +566,8 @@ CLASS ZCL_AL30_CONTROLLER IMPLEMENTATION.
         iv_mode   = iv_mode
       IMPORTING
         es_return = es_return
-        et_data   = et_data.
+        et_data   = et_data
+        es_data   = es_data.
 
   ENDMETHOD.
 

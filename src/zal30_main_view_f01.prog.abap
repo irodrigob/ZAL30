@@ -175,8 +175,25 @@ FORM catalogo_campos_alv .
       es_return   = ls_return
       et_fieldcat = mt_fieldcat.
 
+  IF ls_return-type IS INITIAL.
+
+    " En modo de edición se añade el campo de acciones
+    IF mv_mode = zif_al30_data=>cv_mode_change.
+      zcl_al30_util=>read_single_data_element( EXPORTING iv_rollname = zif_al30_data=>cs_data_element-actions
+                                                            iv_langu    = sy-langu
+                                                  IMPORTING es_info     = DATA(ls_info) ).
+
+      DATA(ls_fieldcat) = CORRESPONDING lvc_s_fcat( ls_info ).
+      ls_fieldcat-fieldname = zif_al30_data=>cs_control_fields_alv_data-actions.
+      ls_fieldcat-col_pos = 1.
+      ls_fieldcat-icon = abap_true.
+      ls_fieldcat-fix_column = abap_true.
+      INSERT ls_fieldcat INTO TABLE mt_fieldcat.
+
+    ENDIF.
+
+  ELSE.
 * Si hay mensaje lo saco tal cual, aunque sea de error.
-  IF ls_return-type IS NOT INITIAL.
     MESSAGE ID ls_return-id TYPE ls_return-type
                 NUMBER ls_return-number
                 WITH ls_return-message_v1 ls_return-message_v2 ls_return-message_v3 ls_return-message_v4.
@@ -260,35 +277,53 @@ ENDFORM.                    " CLEAN_DATA
 *----------------------------------------------------------------------*
 FORM create_it_data_view .
 
+  " Se lanza la creación de la tabla principal de datos, aunque la tabla es temporal porque lo que interesa
+  " es su estructura. Esta estructura servirá como base, en caso de edicicón, para añadir nuevos campos para
+  " construir la tabla definitiva. En caso de visualización se pasa la temporal a la definitiva.
   CALL METHOD mo_controller->create_it_data_view
     EXPORTING
       iv_mode   = mv_mode
     IMPORTING
-      et_data   = mo_datos
+      et_data   = DATA(lo_data)
+      es_data   = DATA(lo_wa_data)
       es_return = DATA(ls_return).
 
-* Si no hay error al crear la tabla de datos y estoy en modo edicion, creo una
-* replica que será la que guarde los registros que se borren
-  IF ls_return-type NE zif_al30_data=>cs_msg_type-error AND mv_mode = zif_al30_data=>cv_mode_change.
-    CALL METHOD mo_controller->create_it_data_view
-      EXPORTING
-        iv_mode   = mv_mode
-      IMPORTING
-        et_data   = mo_datos_del
-        es_return = ls_return.
-    IF ls_return-type NE zif_al30_data=>cs_msg_type-error.
-      ASSIGN mo_datos_del->* TO <it_datos_del>.
+  IF ls_return-type IS INITIAL.
+    " En modo edición se añade el campo de acciones que sacará los semaforos si la línea tiene errores.
+    IF mv_mode = zif_al30_data=>cv_mode_change..
+
+      DATA(lt_fcat) = VALUE lvc_t_fcat( ( fieldname = zif_al30_data=>cs_control_fields_alv_data-actions
+                                         rollname = zif_al30_data=>cs_data_element-actions ) ).
+
+      zcl_ca_dynamic_tables=>create_it_fields_base_ref(
+        EXPORTING
+          i_base_fields = lo_wa_data
+          i_new_fields  = lt_fcat
+        IMPORTING
+          e_table       = mo_datos ).
+    ELSE.
+      " En modo visualización se pasa la tabla generada a la global
+      mo_datos = lo_data.
     ENDIF.
-  ENDIF.
 
+    ASSIGN mo_datos->* TO <it_datos>.
 
-  IF ls_return-type IS NOT INITIAL.
+* Si se esta en modo edicion, creo una replica que será la que guarde los registros que se borren
+    IF mv_mode = zif_al30_data=>cv_mode_change.
+      CALL METHOD mo_controller->create_it_data_view
+        EXPORTING
+          iv_mode = mv_mode
+        IMPORTING
+          et_data = mo_datos_del.
+
+      ASSIGN mo_datos_del->* TO <it_datos_del>.
+
+    ENDIF.
+
+  ELSE.
     MESSAGE ID ls_return-id TYPE ls_return-type
                 NUMBER ls_return-number
                 WITH ls_return-message_v1 ls_return-message_v2 ls_return-message_v3 ls_return-message_v4.
-  ELSE.
-
-    ASSIGN mo_datos->* TO <it_datos>.
 
   ENDIF.
 
@@ -509,6 +544,13 @@ FORM row_insert_modify  CHANGING ps_data_changed TYPE REF TO cl_alv_changed_data
 ** Por ello tengo un contador propio para saber el registros en la tabla de datos
       AT NEW row_id.
 *        ADD 1 TO ld_count.
+
+        " Se resetea el campo de acciones al inicio del proceso
+        CALL METHOD ps_data_changed->modify_cell
+          EXPORTING
+            i_row_id    = <ls_modif>-row_id
+            i_fieldname = zif_al30_data=>cs_control_fields_alv_data-actions
+            i_value     = space.
 
 * Leo el registro modificado/insertado
         READ TABLE <lt_datos_im> ASSIGNING <ls_datos_im> INDEX <ls_modif>-tabix.
@@ -1032,6 +1074,26 @@ FORM verify_change_row_data USING  pe_modif TYPE lvc_s_modi
             i_style     = <style>-style.
       ENDLOOP.
     ENDIF.
+
+
+    " Se informa el icono de acciones según el valor de row_status
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-actions OF STRUCTURE <ls_row_data> TO FIELD-SYMBOL(<actions>).
+    IF sy-subrc = 0.
+      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status OF STRUCTURE <ls_row_data> TO FIELD-SYMBOL(<row_status>).
+      IF sy-subrc = 0.
+        IF <row_status> = zif_al30_data=>cs_msg_type-error.
+          <actions> = 1.
+          CALL METHOD ps_data_changed->modify_cell
+            EXPORTING
+              i_row_id    = pe_modif-row_id
+              i_fieldname = zif_al30_data=>cs_control_fields_alv_data-actions
+              i_value     = icon_led_red.
+*        ELSE.
+
+        ENDIF.
+      ENDIF.
+    ENDIF.
+
   ENDIF.
 
 ENDFORM.                    " VERIFY_CHANGE_ROW_DATA
