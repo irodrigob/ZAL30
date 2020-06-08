@@ -9,7 +9,7 @@
 FORM initializacion .
 
 * Creo el objeto que orquestará todas las operaciones
-  CREATE OBJECT mo_controller.
+  CREATE OBJECT mo_cnt_al30.
 
 * Funciones que se excluirán de los ALV
   PERFORM func_excluding_alv.
@@ -33,7 +33,7 @@ FORM initializacion .
   mv_diff_dict = abap_false.
 
 * Se recupera si se podra grabar la configuración
-  mv_pedir_orden = mo_controller->allowed_transport( ).
+  mv_pedir_orden = mo_cnt_al30->allowed_transport( ).
 
 * Variable donde se guarda la orden de transporte donde se guarda la
 * configuración
@@ -94,7 +94,7 @@ FORM change_view .
     mv_mode = zif_al30_data=>cv_mode_change.
 
 * Chequeo si hay diferencias entre la configuracion guardada y la tabla del diccionario
-    mo_controller->check_changes_dict_view( EXPORTING is_view   = zal30_t_view
+    mo_cnt_al30->check_changes_dict_view( EXPORTING is_view   = zal30_t_view
 *                                                      it_fields_view_alv = mt_fields
 *                                                      it_fields_text_view_alv = mt_fields_text
                                             IMPORTING ev_diff_fields = DATA(lv_diff_fields)
@@ -102,8 +102,8 @@ FORM change_view .
 
     IF lv_diff_fields = abap_true OR lv_diff_text = abap_true.
       " Si las hay se mira si tiene la opción de autoajuste. Si la tiene se ejecuta el ajuste de manera automática
-      IF mo_controller->view_have_auto_adjust( zal30_t_view-tabname  ) = abap_true.
-        mo_controller->auto_adjust_view_ddic(
+      IF mo_cnt_al30->view_have_auto_adjust( zal30_t_view-tabname  ) = abap_true.
+        mo_cnt_al30->auto_adjust_view_ddic(
           EXPORTING
             iv_name_view = zal30_t_view-tabname
           IMPORTING
@@ -145,7 +145,7 @@ FORM check_view_insert .
   DATA ls_return TYPE bapiret2.
 
 * Verifico que la vista/tabla sea correcta
-  CALL METHOD mo_controller->check_view
+  CALL METHOD mo_cnt_al30->check_view
     EXPORTING
       iv_name_view = zal30_t_view-tabname
       iv_operation = zif_al30_data=>cv_operation_insert
@@ -170,7 +170,7 @@ FORM create_view .
   DATA ls_return_read TYPE bapiret2.
   DATA ld_name_view TYPE tabname.
 
-  CALL METHOD mo_controller->create_view
+  CALL METHOD mo_cnt_al30->create_view
     EXPORTING
       iv_name_view            = zal30_t_view-tabname
     IMPORTING
@@ -232,7 +232,7 @@ FORM delete_view .
 
   IF ld_answer = '1'.
 
-    ls_return = mo_controller->delete_view( zal30_t_view-tabname ).
+    ls_return = mo_cnt_al30->delete_view( zal30_t_view-tabname ).
 
 * Saco el mensaje devuelto tal cual se produce.
     MESSAGE ID ls_return-id TYPE ls_return-type
@@ -362,7 +362,7 @@ FORM save_view .
 
   IF mv_datos_validos = abap_true.
 
-    ls_return = mo_controller->save_view_alv( is_view = zal30_t_view
+    ls_return = mo_cnt_al30->save_view_alv( is_view = zal30_t_view
                                               it_fields_view_alv = mt_fields
                                               it_fields_text_view_alv = mt_fields_text ).
 
@@ -387,7 +387,7 @@ FORM read_view  USING    pe_name_view
 
 * Debido a que en la creacion se pueden inicializar valores lo que hago es
 * leer la vista y así tengo los datos exactos,
-  CALL METHOD mo_controller->read_view_alv
+  CALL METHOD mo_cnt_al30->read_view_alv
     EXPORTING
       iv_name_view            = pe_name_view
       iv_all_language         = abap_true
@@ -480,7 +480,7 @@ FORM sync_dictionary .
     ld_keep_text = abap_false.
   ENDIF.
 
-  CALL METHOD mo_controller->adjust_view_dictionary
+  CALL METHOD mo_cnt_al30->adjust_view_dictionary
     EXPORTING
       iv_keep_text            = ld_keep_text
     IMPORTING
@@ -514,7 +514,7 @@ ENDFORM.                    " SYNC_DICTIONARY
 *----------------------------------------------------------------------*
 FORM check_dictionary .
 
-  mo_controller->check_changes_dict_view( EXPORTING is_view   = zal30_t_view
+  mo_cnt_al30->check_changes_dict_view( EXPORTING is_view   = zal30_t_view
                                           IMPORTING ev_diff_fields = DATA(lv_diff_fields)
                                                     ev_diff_text = DATA(lv_diff_text) ).
 
@@ -719,7 +719,7 @@ FORM submenu_languages  USING pe_posx pe_posy.
   CREATE OBJECT lo_menu.
 
 * Recupero los idiomas instalados en el sistema
-  mo_controller->get_logon_languages( IMPORTING et_lang = DATA(lt_languages) ).
+  mo_cnt_al30->get_logon_languages( IMPORTING et_lang = DATA(lt_languages) ).
 
   LOOP AT lt_languages ASSIGNING FIELD-SYMBOL(<ls_logon_lang>).
     CONCATENATE cs_toolbar_functions-id_lang_button <ls_logon_lang>-lang INTO lv_fcode.
@@ -995,14 +995,14 @@ FORM transport_entries  USING pe_objfunc TYPE objfunc.
 
     " Si lanza el proceso que lo que hará es validar y/o solicitar la orden de transporte
     " para guardar las entradas.
-    mo_controller->check_select_transport_order( EXPORTING iv_category = zif_al30_data=>cs_order_category-workbench
+    mo_cnt_al30->check_select_transport_order( EXPORTING iv_category = zif_al30_data=>cs_order_category-workbench
                                                  IMPORTING es_return = ls_return
                                                  CHANGING cv_order = mv_orden_transporte ).
 
 
 
     IF mv_orden_transporte IS NOT INITIAL.
-      mo_controller->transport_view_alv( EXPORTING is_view = zal30_t_view
+      mo_cnt_al30->transport_view_alv( EXPORTING is_view = zal30_t_view
                                                    it_fields_view_alv = mt_fields
                                                    it_fields_text_view_alv = mt_fields_text
                                                    iv_spras = mv_lang_vis
@@ -1260,7 +1260,7 @@ FORM add_text_of_dtel USING pe_dtel
                       CHANGING ps_field_line  TYPE zif_al30_data=>ts_fields_view_alv.
 
   TRY.
-      mo_controller->read_data_element_all_lang( EXPORTING iv_dtel = CONV #( pe_dtel )
+      mo_cnt_al30->read_data_element_all_lang( EXPORTING iv_dtel = CONV #( pe_dtel )
                                                   IMPORTING et_info = DATA(lt_info_dtel) ).
 
       LOOP AT lt_info_dtel ASSIGNING FIELD-SYMBOL(<ls_info_dtel>).

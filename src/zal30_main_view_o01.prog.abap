@@ -69,8 +69,8 @@ MODULE alv_view OUTPUT.
     ms_layout-stylefname = zif_al30_data=>cs_control_fields_alv_data-style.
 
 * Activo el evento de validación de datos
-    CREATE OBJECT mo_event_receiver_alv.
-    SET HANDLER mo_event_receiver_alv->handle_data_changed FOR mo_alv.
+    SET HANDLER mo_controller->on_data_changed FOR mo_alv.
+    SET HANDLER mo_controller->on_hotspot_click FOR mo_alv.
 
 * La verificación cuando se haga enter
     CALL METHOD mo_alv->register_edit_event

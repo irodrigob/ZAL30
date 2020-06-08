@@ -34,7 +34,7 @@ FORM chequeo_vista.
 
 
 * Verifico que la vista/tabla sea correcta
-  CALL METHOD mo_controller->check_view
+  CALL METHOD mo_cnt_al30->check_view
     EXPORTING
       iv_name_view = zal30_t_view-tabname
       iv_operation = zif_al30_data=>cv_operation_read
@@ -71,12 +71,12 @@ FORM chequeo_vista.
 
 * Miro que no existan diferencias entre la configuracion de la vista y el diccionario.
 * Si la vista no tiene el autoajuste automático no se puede continuar con la edición
-  mo_controller->check_changes_dict_view( EXPORTING is_view = ms_view
+  mo_cnt_al30->check_changes_dict_view( EXPORTING is_view = ms_view
                                           IMPORTING ev_diff_fields = DATA(lv_diff_fields)
                                                     ev_diff_text = DATA(lv_diff_text) ).
   IF lv_diff_fields = abap_true OR lv_diff_text = abap_true.
-    IF mo_controller->view_have_auto_adjust( ms_view-tabname ) = abap_true.
-      mo_controller->auto_adjust_view_ddic(
+    IF mo_cnt_al30->view_have_auto_adjust( ms_view-tabname ) = abap_true.
+      mo_cnt_al30->auto_adjust_view_ddic(
         EXPORTING
           iv_name_view = ms_view-tabname
         IMPORTING
@@ -99,11 +99,11 @@ FORM chequeo_vista.
 
 * Se instancia la clase que gestionará las exit
   IF ms_view-exit_class IS NOT INITIAL.
-    mo_controller->instance_exit_class( iv_exit_class = ms_view-exit_class ).
+    mo_cnt_al30->instance_exit_class( iv_exit_class = ms_view-exit_class ).
   ENDIF.
 
 * Se pasan los campos y vista a la clase de la vista para que los use
-  mo_controller->set_data_conf_view(
+  mo_cnt_al30->set_data_conf_view(
     EXPORTING
       it_fields_view_alv      = mt_fields
       it_fields_text_view_alv =  mt_fields_text
@@ -133,7 +133,12 @@ ENDFORM.                    " INICIALIZACION_DATOS
 *       text
 *----------------------------------------------------------------------*
 FORM inicializacion_prog .
-* Creo el objeto que orquestará todas las operaciones
+  " Creo el objeto que orquestará todas las operaciones dentro de los procesos de la AL30
+  IF mo_cnt_al30 IS NOT BOUND.
+    CREATE OBJECT mo_cnt_al30.
+  ENDIF.
+
+  " Se crea el controlador intenro del programa
   IF mo_controller IS NOT BOUND.
     CREATE OBJECT mo_controller.
   ENDIF.
@@ -168,7 +173,7 @@ FORM catalogo_campos_alv .
 
 * El catalogo de campos como la tabla interna de datos tendrá campos adicionales
 * para la edicion.
-  CALL METHOD mo_controller->get_fieldcat_view
+  CALL METHOD mo_cnt_al30->get_fieldcat_view
     EXPORTING
       iv_mode     = mv_mode
     IMPORTING
@@ -188,6 +193,7 @@ FORM catalogo_campos_alv .
       ls_fieldcat-col_pos = 1.
       ls_fieldcat-icon = abap_true.
       ls_fieldcat-fix_column = abap_true.
+      ls_fieldcat-hotspot = abap_true.
       INSERT ls_fieldcat INTO TABLE mt_fieldcat.
 
     ENDIF.
@@ -222,7 +228,7 @@ FORM read_data_view .
     ls_filter-expressions = <ls_sel_screen>-expressions.
   ENDIF.
 
-  CALL METHOD mo_controller->read_data
+  CALL METHOD mo_cnt_al30->read_data
     EXPORTING
       is_filters = ls_filter
     IMPORTING
@@ -280,7 +286,7 @@ FORM create_it_data_view .
   " Se lanza la creación de la tabla principal de datos, aunque la tabla es temporal porque lo que interesa
   " es su estructura. Esta estructura servirá como base, en caso de edicicón, para añadir nuevos campos para
   " construir la tabla definitiva. En caso de visualización se pasa la temporal a la definitiva.
-  CALL METHOD mo_controller->create_it_data_view
+  CALL METHOD mo_cnt_al30->create_it_data_view
     EXPORTING
       iv_mode   = mv_mode
     IMPORTING
@@ -310,7 +316,7 @@ FORM create_it_data_view .
 
 * Si se esta en modo edicion, creo una replica que será la que guarde los registros que se borren
     IF mv_mode = zif_al30_data=>cv_mode_change.
-      CALL METHOD mo_controller->create_it_data_view
+      CALL METHOD mo_cnt_al30->create_it_data_view
         EXPORTING
           iv_mode = mv_mode
         IMPORTING
@@ -337,7 +343,7 @@ FORM create_data_view .
 
 * Si la tabla tiene la opcion de grabar de entradas y el sistema permite transportar
 * entonces se solicitará orden de tranporte.
-  IF ms_view-transport = abap_true AND mo_controller->allowed_transport( ) = abap_true.
+  IF ms_view-transport = abap_true AND mo_cnt_al30->allowed_transport( ) = abap_true.
     mv_pedir_orden = abap_true.
   ELSE.
     mv_pedir_orden = abap_false.
@@ -580,6 +586,26 @@ FORM row_insert_modify  CHANGING ps_data_changed TYPE REF TO cl_alv_changed_data
                                       <ls_datos_im>
                                 CHANGING ps_data_changed
                                          ps_datos_validos.
+
+        " Si en la fila tiene un error, lo que se hará es añadir los errores del propio ALV al campo donde se acumula los mensajes de la fila
+        IF <ls_modif>-error = abap_true.
+          mo_controller->trans_alv_error_2_row( EXPORTING io_data_changed = ps_data_changed
+                                                CHANGING cs_row_data = <ls_datos_im> ).
+        ENDIF.
+
+        " Una vez procesado todo la fila se informa el icono de acciones según el valor de row_status
+        ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status OF STRUCTURE <ls_datos_im> TO FIELD-SYMBOL(<row_status>).
+        IF sy-subrc = 0.
+          IF <row_status> = zif_al30_data=>cs_msg_type-error.
+            CALL METHOD ps_data_changed->modify_cell
+              EXPORTING
+                i_row_id    = <ls_modif>-row_id
+                i_fieldname = zif_al30_data=>cs_control_fields_alv_data-actions
+                i_value     = icon_led_red.
+
+          ENDIF.
+        ENDIF.
+
       ENDAT.
 
     ENDLOOP.
@@ -734,7 +760,7 @@ FORM grabar_datos .
 
   " Si se puede pedir orden de transporte se llama al método que validar y/o seleccionará la orden de transporter
   IF mv_pedir_orden = abap_true.
-    mo_controller->check_select_transport_order( EXPORTING iv_category = zif_al30_data=>cs_order_category-workbench
+    mo_cnt_al30->check_select_transport_order( EXPORTING iv_category = zif_al30_data=>cs_order_category-workbench
                                                IMPORTING es_return = DATA(ls_return)
                                                CHANGING cv_order = mv_orden_transporte ).
   ENDIF.
@@ -742,7 +768,7 @@ FORM grabar_datos .
   " Si no hay errores y hay orden de transporte, se hace la grabación
   IF ls_return IS INITIAL AND ( mv_pedir_orden = abap_false OR ( mv_orden_transporte IS NOT INITIAL AND mv_pedir_orden = abap_true ) ) .
 
-    CALL METHOD mo_controller->save_data
+    CALL METHOD mo_cnt_al30->save_data
       EXPORTING
         iv_allow_request = mv_pedir_orden
       IMPORTING
@@ -790,7 +816,7 @@ FORM verify_content_fields  USING  pe_modif TYPE lvc_s_modi
                                    ps_datos_validos TYPE sap_bool.
   DATA ls_return TYPE bapiret2.
 
-  mo_controller->verify_field_data( EXPORTING iv_fieldname  = pe_modif-fieldname
+  mo_cnt_al30->verify_field_data( EXPORTING iv_fieldname  = pe_modif-fieldname
                                               iv_value      = pe_modif-value
                                     IMPORTING es_return = ls_return ).
 
@@ -824,7 +850,7 @@ FORM check_autorization CHANGING ps_auth TYPE sap_bool
   ps_auth = abap_true. " Por defecto se tiene autorizacion
   ps_mode = zif_al30_data=>cv_mode_change. " Puede modificar
 
-  DATA(lv_level_auth) = mo_controller->check_authorization_view( iv_view_name   = zal30_t_view-tabname
+  DATA(lv_level_auth) = mo_cnt_al30->check_authorization_view( iv_view_name   = zal30_t_view-tabname
                                            iv_view_action = COND #( WHEN ps_mode = zif_al30_data=>cv_mode_change THEN zif_al30_data=>cs_action_auth-update ELSE zif_al30_data=>cs_action_auth-show )
                                            iv_user        = sy-uname ).
 
@@ -889,7 +915,7 @@ FORM edit_mode_alv .
 
         lv_mode = 1.
 
-        mo_controller->set_edit_mode_alv_data( EXPORTING it_data = <it_datos>
+        mo_cnt_al30->set_edit_mode_alv_data( EXPORTING it_data = <it_datos>
                                                IMPORTING ev_edit_mode = DATA(lv_edit_mode) ).
 
         " Si el modo de edición es visualizar se cambia el modo que se pasará al ALV. En caso contrario se indica el determinado
@@ -945,7 +971,7 @@ FORM transportar_datos .
     IF lv_answer = '1'.
 
       " Se pide la orden a transportar, o se valida la última utilizada
-      mo_controller->check_select_transport_order( EXPORTING iv_category = zif_al30_data=>cs_order_category-workbench
+      mo_cnt_al30->check_select_transport_order( EXPORTING iv_category = zif_al30_data=>cs_order_category-workbench
                                                    IMPORTING es_return = ls_return
                                                    CHANGING cv_order = mv_orden_transporte ).
 
@@ -965,7 +991,7 @@ FORM transportar_datos .
         ENDLOOP.
 
 * Llamo al proceso encargado que añadira las entradas a la tabla
-        ls_return = mo_controller->transport_data_entries( EXPORTING it_data = <lt_datos>
+        ls_return = mo_cnt_al30->transport_data_entries( EXPORTING it_data = <lt_datos>
                                                             CHANGING cv_order = mv_orden_transporte ).
         IF ls_return IS NOT INITIAL.
           MESSAGE ID ls_return-id TYPE ls_return-type
@@ -1007,7 +1033,7 @@ FORM verify_change_row_data USING  pe_modif TYPE lvc_s_modi
 * Paso los datos
     MOVE-CORRESPONDING ps_row_data TO <ls_row_data>.
 
-    CALL METHOD mo_controller->verify_change_row_data
+    CALL METHOD mo_cnt_al30->verify_change_row_data
       EXPORTING
         iv_row      = pe_modif-row_id
       IMPORTING
@@ -1075,25 +1101,6 @@ FORM verify_change_row_data USING  pe_modif TYPE lvc_s_modi
       ENDLOOP.
     ENDIF.
 
-
-    " Se informa el icono de acciones según el valor de row_status
-    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-actions OF STRUCTURE <ls_row_data> TO FIELD-SYMBOL(<actions>).
-    IF sy-subrc = 0.
-      ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status OF STRUCTURE <ls_row_data> TO FIELD-SYMBOL(<row_status>).
-      IF sy-subrc = 0.
-        IF <row_status> = zif_al30_data=>cs_msg_type-error.
-          <actions> = 1.
-          CALL METHOD ps_data_changed->modify_cell
-            EXPORTING
-              i_row_id    = pe_modif-row_id
-              i_fieldname = zif_al30_data=>cs_control_fields_alv_data-actions
-              i_value     = icon_led_red.
-*        ELSE.
-
-        ENDIF.
-      ENDIF.
-    ENDIF.
-
   ENDIF.
 
 ENDFORM.                    " VERIFY_CHANGE_ROW_DATA
@@ -1105,7 +1112,7 @@ FORM create_view_user_auth CHANGING ps_return TYPE bapiret2.
 
   DATA(ls_default_values) = VALUE zif_al30_data=>ts_default_values_create( auth_user = abap_false  change_log = abap_true auto_adjust = abap_true ).
 
-  mo_controller->create_view(
+  mo_cnt_al30->create_view(
     EXPORTING
       iv_name_view            = ms_view-tabname
       iv_use_default_values   = abap_true
@@ -1129,7 +1136,7 @@ FORM read_view .
   CLEAR: ms_view, mt_fields, mt_fields_text.
 
 * Leo los datos de la vista
-  CALL METHOD mo_controller->read_view_alv
+  CALL METHOD mo_cnt_al30->read_view_alv
     EXPORTING
       iv_name_view            = zal30_t_view-tabname
       iv_all_language         = abap_false
@@ -1152,7 +1159,7 @@ FORM lock_view .
   IF mv_mode = zif_al30_data=>cv_mode_change.
     TRY.
 
-        mo_controller->lock_view( ).
+        mo_cnt_al30->lock_view( ).
 
       CATCH zcx_al30 INTO DATA(lx_excep).
         mv_mode = zif_al30_data=>cv_mode_view.

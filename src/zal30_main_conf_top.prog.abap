@@ -82,7 +82,7 @@ DATA mv_perm_modif_datos TYPE sap_bool.
 *----------------------------------------------------------------------*
 * Class
 *----------------------------------------------------------------------*
-DATA mo_controller TYPE REF TO zcl_al30_controller.
+DATA mo_cnt_al30 TYPE REF TO zcl_al30_controller.
 
 *----------------------------------------------------------------------*
 * Declaración objetos para las pestañas.

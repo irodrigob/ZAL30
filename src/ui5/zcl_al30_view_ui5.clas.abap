@@ -231,61 +231,82 @@ CLASS zcl_al30_view_ui5 IMPLEMENTATION.
     LOOP AT mt_fields_ddic ASSIGNING FIELD-SYMBOL(<ls_fields_ddic>) WHERE checktable IS NOT INITIAL
                                                                          OR domname IS NOT INITIAL.
 
+      READ TABLE mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WITH KEY fieldname = <ls_fields_ddic>-fieldname.
+      IF sy-subrc = 0.
 
-      " Por defecto el campo entrará en el catalogo
-      DATA(lv_add) = abap_true.
+        " Por defecto el campo entrará en el catalogo
+        DATA(lv_add) = abap_true.
 
-      DATA(ls_f4_catalog) = VALUE zif_al30_ui5_data=>ts_f4_catalog( fieldname = <ls_fields_ddic>-fieldname ).
+        DATA(ls_f4_catalog) = VALUE zif_al30_ui5_data=>ts_f4_catalog( fieldname = <ls_fields_ddic>-fieldname ).
 
-      " Si no tiene clave externa hay que comprobar si el dominio tiene datos
-      IF <ls_fields_ddic>-checktable IS INITIAL.
-        READ TABLE lt_dom_values TRANSPORTING NO FIELDS WITH KEY domname = <ls_fields_ddic>-domname.
-        IF sy-subrc NE 0 .
-          lv_add = abap_false.
-        ELSE.
-          " Se mira el el campo es un checkbox. En caso afirmativo tampoco se añade
-          READ TABLE mt_fields TRANSPORTING NO FIELDS
-                               WITH KEY fieldname = <ls_fields_ddic>-fieldname
-                                        checkbox = abap_true.
-          IF sy-subrc = 0.
+        " Si no tiene clave externa hay que comprobar si el dominio tiene datos
+        IF <ls_fields_ddic>-checktable IS INITIAL.
+          READ TABLE lt_dom_values TRANSPORTING NO FIELDS WITH KEY domname = <ls_fields_ddic>-domname.
+          IF sy-subrc NE 0 .
             lv_add = abap_false.
+          ELSE.
+            " Se mira el el campo es un checkbox. En caso afirmativo tampoco se añade
+            IF <ls_fields>-checkbox = abap_true.
+              lv_add = abap_false.
+            ENDIF.
           ENDIF.
         ENDIF.
-      ENDIF.
 
-      IF lv_add = abap_true.
-        " El texto para el campo donde se verá el código será el header text
-        READ TABLE mt_fields_text ASSIGNING FIELD-SYMBOL(<ls_fields_text>)
-                                  WITH KEY fieldname = <ls_fields_ddic>-fieldname
-                                           spras = mv_langu.
-        IF sy-subrc = 0.
-          ls_f4_catalog-label_field_code = <ls_fields_text>-reptext.
-        ENDIF.
+        IF lv_add = abap_true.
+          " El texto para el campo donde se verá el código será el header text
+          READ TABLE mt_fields_text ASSIGNING FIELD-SYMBOL(<ls_fields_text>)
+                                    WITH KEY fieldname = <ls_fields_ddic>-fieldname
+                                             spras = mv_langu.
+          IF sy-subrc = 0.
+            CASE <ls_fields>-lbl_type_header.
+              WHEN zif_al30_data=>cs_label_type_col_header-header.
+                ls_f4_catalog-label_field_code = <ls_fields_text>-reptext.
+              WHEN zif_al30_data=>cs_label_type_col_header-short.
+                ls_f4_catalog-label_field_code = <ls_fields_text>-scrtext_s.
+              WHEN zif_al30_data=>cs_label_type_col_header-medium.
+                ls_f4_catalog-label_field_code = <ls_fields_text>-scrtext_m.
+              WHEN zif_al30_data=>cs_label_type_col_header-long.
+                ls_f4_catalog-label_field_code = <ls_fields_text>-scrtext_l.
+              WHEN zif_al30_data=>cs_label_type_col_header-auto.
+                " En el auto no se hace nada, se deja la selección por defecto menos el campo REPTEXT que se calcula el texto más optimo
+                zcl_al30_util=>get_optime_text_header(
+                  EXPORTING
+                    iv_reptext   = <ls_fields_text>-reptext
+                    iv_scrtext_s = <ls_fields_text>-scrtext_s
+                    iv_scrtext_m = <ls_fields_text>-scrtext_m
+                    iv_scrtext_l = <ls_fields_text>-scrtext_l
+                  IMPORTING
+                    ev_text      =  ls_f4_catalog-label_field_code ).
 
-        " Para el campo de descripción del código será el texto "description"
-        ls_f4_catalog-label_field_description = 'Description'(t01).
+            ENDCASE.
 
-        " Se llama al exit para poder cambiar textos y si se incluye o no
+          ENDIF.
 
-        DATA(ls_f4_catalog_exit) = ls_f4_catalog.
-        exit_ui5_change_f4_catalog(
-          EXPORTING
-            it_fields_text = VALUE #( FOR <wa> IN mt_fields_text WHERE ( fieldname = <ls_fields_ddic>-fieldname ) ( <wa> ) )
-            is_field_ddic  = <ls_fields_ddic>
-            iv_langu       = mv_langu
-          IMPORTING
-            ev_no_include  =  DATA(lv_no_include) " Posibilidad de indicar que no se incluya el campo
-          CHANGING
-            cs_f4_catalog  = ls_f4_catalog_exit ).
+          " Para el campo de descripción del código será el texto "description"
+          ls_f4_catalog-label_field_description = 'Description'(t01).
 
-        IF lv_no_include = abap_false.
+          " Se llama al exit para poder cambiar textos y si se incluye o no
 
-          " Se transfieren los campos de texto
-          ls_f4_catalog-label_field_code = ls_f4_catalog_exit-label_field_code.
-          ls_f4_catalog-label_field_description = ls_f4_catalog_exit-label_field_description.
+          DATA(ls_f4_catalog_exit) = ls_f4_catalog.
+          exit_ui5_change_f4_catalog(
+            EXPORTING
+              it_fields_text = VALUE #( FOR <wa> IN mt_fields_text WHERE ( fieldname = <ls_fields_ddic>-fieldname ) ( <wa> ) )
+              is_field_ddic  = <ls_fields_ddic>
+              iv_langu       = mv_langu
+            IMPORTING
+              ev_no_include  =  DATA(lv_no_include) " Posibilidad de indicar que no se incluya el campo
+            CHANGING
+              cs_f4_catalog  = ls_f4_catalog_exit ).
 
-          INSERT ls_f4_catalog INTO TABLE et_catalog.
+          IF lv_no_include = abap_false.
 
+            " Se transfieren los campos de texto
+            ls_f4_catalog-label_field_code = ls_f4_catalog_exit-label_field_code.
+            ls_f4_catalog-label_field_description = ls_f4_catalog_exit-label_field_description.
+
+            INSERT ls_f4_catalog INTO TABLE et_catalog.
+
+          ENDIF.
         ENDIF.
       ENDIF.
 
