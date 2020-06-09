@@ -49,7 +49,8 @@ MODULE user_command_9001 INPUT.
     CALL METHOD mo_alv->check_changed_data( ).
   ENDIF.
 
-  IF mv_datos_validos = abap_true.
+  " Se mira si hay errores en alguno de los registros de la tabla
+  IF mo_controller->data_with_error( ) = abap_false.
 
     CASE mv_okcode_9001.
       WHEN 'SAVE'.
@@ -58,7 +59,7 @@ MODULE user_command_9001 INPUT.
         PERFORM transportar_datos.
     ENDCASE.
   ELSE.
-    MESSAGE s000 WITH 'Correct the problem before any action.'.
+    MESSAGE s047.
 
   ENDIF.
 ENDMODULE.

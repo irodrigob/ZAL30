@@ -195,6 +195,19 @@ FORM catalogo_campos_alv .
       ls_fieldcat-fix_column = abap_true.
       ls_fieldcat-hotspot = abap_true.
       INSERT ls_fieldcat INTO TABLE mt_fieldcat.
+      CLEAR ls_fieldcat.
+
+      ls_fieldcat-fieldname = zif_al30_data=>cs_control_fields_alv_data-row_status_msg.
+      ls_fieldcat-col_pos = 999.
+      ls_fieldcat-tech = abap_true.
+      INSERT ls_fieldcat INTO TABLE mt_fieldcat.
+
+      ls_fieldcat-fieldname = zif_al30_data=>cs_control_fields_alv_data-row_status.
+      ls_fieldcat-col_pos = 999.
+      ls_fieldcat-tech = abap_true.
+      INSERT ls_fieldcat INTO TABLE mt_fieldcat.
+
+
 
     ENDIF.
 
@@ -593,18 +606,11 @@ FORM row_insert_modify  CHANGING ps_data_changed TYPE REF TO cl_alv_changed_data
                                                 CHANGING cs_row_data = <ls_datos_im> ).
         ENDIF.
 
-        " Una vez procesado todo la fila se informa el icono de acciones según el valor de row_status
-        ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status OF STRUCTURE <ls_datos_im> TO FIELD-SYMBOL(<row_status>).
-        IF sy-subrc = 0.
-          IF <row_status> = zif_al30_data=>cs_msg_type-error.
-            CALL METHOD ps_data_changed->modify_cell
-              EXPORTING
-                i_row_id    = <ls_modif>-row_id
-                i_fieldname = zif_al30_data=>cs_control_fields_alv_data-actions
-                i_value     = icon_led_red.
+        " Se sincronizan los valores de la fila modificados durante el proceso a la tabla interna global.
+        mo_controller->upd_values_from_data_changed( EXPORTING is_mod_cell = <ls_modif>
+                                                     CHANGING cs_row_data = <ls_datos_im>
+                                                              co_data_changed = ps_data_changed ).
 
-          ENDIF.
-        ENDIF.
 
       ENDAT.
 
@@ -790,7 +796,7 @@ FORM grabar_datos .
                     WITH lo_return->message_v1 lo_return->message_v2 lo_return->message_v3 lo_return->message_v4
                     DISPLAY LIKE lo_return->type.
       ELSE.
-        PERFORM show_messages USING lt_return.
+        mo_controller->show_messages( it_messages =  VALUE #( FOR <wa> IN lt_return ( type = <wa>-type message = <wa>-message ) ) ).
       ENDIF.
     ENDIF.
 
@@ -1063,32 +1069,6 @@ FORM verify_change_row_data USING  pe_modif TYPE lvc_s_modi
       ENDLOOP.
     ENDIF.
 
-* Paso los datos al listado
-    LOOP AT mt_fieldcat ASSIGNING <ls_fieldcat>.
-
-      ASSIGN COMPONENT <ls_fieldcat>-fieldname OF STRUCTURE <ls_row_data> TO <field>.
-      IF sy-subrc = 0.
-        " Si el campo de idioma de la tabla de texto esta vacio lo informo. Aunque en principio no debería suceder porque al
-        " insertar registros se inserta de manera automática.
-        IF <ls_fieldcat>-fieldname = mv_field_lang_textable AND mv_field_lang_textable IS NOT INITIAL AND <field> IS NOT INITIAL.
-          CALL METHOD ps_data_changed->modify_cell
-            EXPORTING
-              i_row_id    = pe_modif-row_id
-              i_fieldname = <ls_fieldcat>-fieldname
-              i_value     = sy-langu.
-
-        ELSE.
-          CALL METHOD ps_data_changed->modify_cell
-            EXPORTING
-              i_row_id    = pe_modif-row_id
-              i_fieldname = <ls_fieldcat>-fieldname
-              i_value     = <field>.
-        ENDIF.
-
-      ENDIF.
-
-    ENDLOOP.
-
 * Ahora se actualiza los estilos por si se hubiesen modificado en la exit
     ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-style OF STRUCTURE <ls_row_data> TO <styles>.
     IF sy-subrc = 0.
@@ -1314,47 +1294,5 @@ FORM process_load_view_dynpro .
 
 * Creacion de objetos de la vista
   PERFORM create_data_view.
-
-ENDFORM.
-*&---------------------------------------------------------------------*
-*& Form SHOW_MESSAGES
-*&---------------------------------------------------------------------*
-*& text
-*&---------------------------------------------------------------------*
-FORM show_messages  USING pe_return TYPE bapiret2_t.
-  TYPES: BEGIN OF ts_message_list,
-           semaphor TYPE c,
-           message  TYPE bapi_msg,
-         END OF ts_message_list.
-  TYPES: tt_message_list TYPE STANDARD TABLE OF ts_message_list WITH EMPTY KEY.
-
-  DATA(lt_message_list) = VALUE tt_message_list( FOR <wa> IN pe_return ( message = <wa>-message
-                                                     semaphor = COND #( WHEN <wa>-type = zif_al30_data=>cs_msg_type-error
-                                                                        THEN zif_al30_data=>cs_semaphor_alv_excep-error
-                                                                        ELSE COND #( WHEN <wa>-type = zif_al30_data=>cs_msg_type-success
-                                                                                     THEN zif_al30_data=>cs_semaphor_alv_excep-ok
-                                                                                     ELSE COND #( WHEN <wa>-type = zif_al30_data=>cs_msg_type-warning
-                                                                                                  THEN zif_al30_data=>cs_semaphor_alv_excep-warning ) ) ) ) ).
-
-  TRY.
-      cl_salv_table=>factory( IMPORTING r_salv_table = DATA(lo_salv_table)
-                              CHANGING  t_table      = lt_message_list ).
-
-      IF lo_salv_table IS BOUND.
-
-        lo_salv_table->get_columns( )->set_optimize( abap_true ).
-
-        lo_salv_table->get_columns( )->set_exception_column( 'SEMAPHOR' ).
-
-        lo_salv_table->set_screen_popup( start_column = '5'
-                                         end_column   = '100'
-                                         start_line   = '5'
-                                         end_line     = '10' ).
-        lo_salv_table->display( ).
-      ENDIF.
-
-    CATCH cx_salv_msg ##NO_HANDLER.
-    CATCH cx_salv_not_found ##NO_HANDLER.
-  ENDTRY.
 
 ENDFORM.
