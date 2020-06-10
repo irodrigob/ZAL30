@@ -161,18 +161,6 @@
      <LANGU>E</LANGU>
      <DESCRIPT>Exit verify row data</DESCRIPT>
     </SEOCOMPOTX>
-    <SEOCOMPOTX>
-     <CLSNAME>ZIF_AL30_EXIT_CLASS</CLSNAME>
-     <CMPNAME>EXIT_VERIFY_SAVE_DATA</CMPNAME>
-     <LANGU>E</LANGU>
-     <DESCRIPT>Exit for verify the data to be save</DESCRIPT>
-    </SEOCOMPOTX>
-    <SEOCOMPOTX>
-     <CLSNAME>ZIF_AL30_EXIT_CLASS</CLSNAME>
-     <CMPNAME>EXIT_VERIFY_SAVE_DATA</CMPNAME>
-     <LANGU>S</LANGU>
-     <DESCRIPT>Exit for verify the data to be save</DESCRIPT>
-    </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>
  </asx:abap>

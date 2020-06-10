@@ -106,7 +106,7 @@ CLASS zcl_al30_view DEFINITION
     "! @parameter it_data_del | <p class="shorttext synchronized">Data deleted</p>
     "! @parameter iv_save_process | <p class="shorttext synchronized">Enter in save process</p>
     "! @parameter et_return | <p class="shorttext synchronized">return</p>
-    METHODS verify_save_data
+    METHODS verify_data
       IMPORTING
                 it_data_del      TYPE STANDARD TABLE
                 !iv_save_process TYPE sap_bool DEFAULT abap_false
@@ -426,17 +426,7 @@ CLASS zcl_al30_view DEFINITION
         et_return   TYPE bapiret2_t
       CHANGING
         cs_row_data TYPE any  .
-    "! <p class="shorttext synchronized">Exit for verify the data to be save</p>
-    "! It allows the data to be recorded or deleted before performing the recording process
-    "! @parameter it_data | <p class="shorttext synchronized">Data to be update or insert</p>
-    "! @parameter it_data_del | <p class="shorttext synchronized">Data to be delete</p>
-    "! @parameter et_return | <p class="shorttext synchronized">return</p>
-    METHODS exit_verify_save_data
-      IMPORTING
-        it_data     TYPE STANDARD TABLE
-        it_data_del TYPE STANDARD TABLE
-      EXPORTING
-        et_return   TYPE bapiret2_t.
+
     "! <p class="shorttext synchronized">Exit to set editable mode the ALV Data</p>
     "!
     "! @parameter it_data | <p class="shorttext synchronized">Data</p>
@@ -1217,30 +1207,6 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
     ENDIF.
   ENDMETHOD.
-
-
-  METHOD exit_verify_save_data.
-    DATA ld_metodo TYPE seocpdname.
-
-    IF mo_exit_class IS BOUND.
-
-* Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_VERIFY_SAVE_DATA' INTO ld_metodo.
-
-      TRY.
-          CALL METHOD mo_exit_class->(ld_metodo)
-            EXPORTING
-              it_data     = it_data
-              it_data_del = it_data_del
-            IMPORTING
-              et_return   = et_return.
-
-        CATCH cx_root.
-      ENDTRY.
-
-    ENDIF.
-  ENDMETHOD.
-
 
   METHOD field_value_adjust_sql.
     FIELD-SYMBOLS: <field> TYPE any.
@@ -2367,7 +2333,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD verify_save_data.
+  METHOD verify_data.
     FIELD-SYMBOLS: <lt_datos> TYPE STANDARD TABLE.
     DATA lo_datos TYPE REF TO data.
     CLEAR et_return.
@@ -2397,12 +2363,6 @@ CLASS zcl_al30_view IMPLEMENTATION.
       INSERT <ls_data> INTO TABLE <lt_datos>.
 
     ENDLOOP.
-
-    " Exit para la verificación de los datos a grabar
-    exit_verify_save_data( EXPORTING it_data = <lt_datos>
-                                      it_data_del = it_data_del
-                           IMPORTING et_return = lt_return ).
-    INSERT LINES OF lt_return INTO TABLE et_return.
 
   ENDMETHOD.
 

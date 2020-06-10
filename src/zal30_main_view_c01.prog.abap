@@ -29,10 +29,13 @@ CLASS lcl_controller DEFINITION.
         !it_messages TYPE zal30_i_row_status_msg.
     METHODS data_with_error
       RETURNING VALUE(rv_have) TYPE sap_bool.
+    METHODS clear_row_status_fields
+      CHANGING cs_row_data TYPE any.
   PROTECTED SECTION.
     TYPES: BEGIN OF ts_message_list,
-             semaphor TYPE c LENGTH 1,
-             message  TYPE bapi_msg,
+             fieldname TYPE string,
+             semaphor  TYPE c LENGTH 1,
+             message   TYPE bapi_msg,
            END OF ts_message_list.
     TYPES: tt_message_list TYPE STANDARD TABLE OF ts_message_list WITH EMPTY KEY.
 
@@ -116,16 +119,15 @@ CLASS lcl_controller IMPLEMENTATION.
 * Paso los datos al listado
     LOOP AT mt_fieldcat ASSIGNING FIELD-SYMBOL(<ls_fieldcat>).
       CASE <ls_fieldcat>-fieldname.
+          " El campo de acciones depende del valor del campo ROW_STATUS
         WHEN zif_al30_data=>cs_control_fields_alv_data-actions.
           ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status OF STRUCTURE cs_row_data TO FIELD-SYMBOL(<row_status>).
           IF sy-subrc = 0.
-            IF <row_status> = zif_al30_data=>cs_msg_type-error.
-              CALL METHOD co_data_changed->modify_cell
-                EXPORTING
-                  i_row_id    = is_mod_cell-row_id
-                  i_fieldname = zif_al30_data=>cs_control_fields_alv_data-actions
-                  i_value     = icon_led_red.
-            ENDIF.
+            CALL METHOD co_data_changed->modify_cell
+              EXPORTING
+                i_row_id    = is_mod_cell-row_id
+                i_fieldname = zif_al30_data=>cs_control_fields_alv_data-actions
+                i_value     = COND #( WHEN <row_status> = zif_al30_data=>cs_msg_type-error THEN icon_led_red ELSE space ).
           ENDIF.
         WHEN OTHERS.
           ASSIGN COMPONENT <ls_fieldcat>-fieldname OF STRUCTURE cs_row_data TO FIELD-SYMBOL(<field>).
@@ -155,13 +157,24 @@ CLASS lcl_controller IMPLEMENTATION.
 
   METHOD show_messages.
 
-    DATA(lt_message_list) = VALUE tt_message_list( FOR <wa> IN it_messages ( message = <wa>-message
-                                                       semaphor = COND #( WHEN <wa>-type = zif_al30_data=>cs_msg_type-error
-                                                                          THEN zif_al30_data=>cs_semaphor_alv_excep-error
-                                                                          ELSE COND #( WHEN <wa>-type = zif_al30_data=>cs_msg_type-success
-                                                                                       THEN zif_al30_data=>cs_semaphor_alv_excep-ok
-                                                                                       ELSE COND #( WHEN <wa>-type = zif_al30_data=>cs_msg_type-warning
-                                                                                                    THEN zif_al30_data=>cs_semaphor_alv_excep-warning ) ) ) ) ).
+    DATA(lt_message_list) = VALUE tt_message_list( ).
+    LOOP AT it_messages ASSIGNING FIELD-SYMBOL(<ls_messages>).
+      " Se informan los valores fijos
+      INSERT VALUE #( message = <ls_messages>-message
+                      semaphor = COND #( WHEN <ls_messages>-type = zif_al30_data=>cs_msg_type-error
+                                         THEN zif_al30_data=>cs_semaphor_alv_excep-error
+                                         ELSE COND #( WHEN <ls_messages>-type = zif_al30_data=>cs_msg_type-success
+                                              THEN zif_al30_data=>cs_semaphor_alv_excep-ok
+                                              ELSE COND #( WHEN <ls_messages>-type = zif_al30_data=>cs_msg_type-warning
+                                                           THEN zif_al30_data=>cs_semaphor_alv_excep-warning ) ) ) )
+           INTO TABLE lt_message_list ASSIGNING FIELD-SYMBOL(<ls_message_list>).
+
+      " Se busca la descripción del campo afectado
+      READ TABLE mt_fieldcat ASSIGNING FIELD-SYMBOL(<ls_fieldcat>) WITH KEY fieldname = <ls_messages>-fieldname.
+      IF sy-subrc = 0.
+        <ls_message_list>-fieldname = COND #( WHEN <ls_fieldcat>-coltext IS NOT INITIAL THEN <ls_fieldcat>-coltext ELSE <ls_fieldcat>-reptext ).
+      ENDIF.
+    ENDLOOP.
 
     TRY.
         cl_salv_table=>factory( IMPORTING r_salv_table = DATA(lo_salv_table)
@@ -172,6 +185,9 @@ CLASS lcl_controller IMPLEMENTATION.
           lo_salv_table->get_columns( )->set_optimize( abap_true ).
 
           lo_salv_table->get_columns( )->set_exception_column( 'SEMAPHOR' ).
+
+          DATA(lo_column) = lo_salv_table->get_columns(  )->get_column( 'FIELDNAME' ).
+          lo_column->set_medium_text( TEXT-c01 ).
 
           lo_salv_table->set_screen_popup( start_column = '5'
                                            end_column   = '100'
@@ -193,6 +209,19 @@ CLASS lcl_controller IMPLEMENTATION.
       rv_have = abap_true.
     ELSE.
       rv_have = abap_false.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD clear_row_status_fields.
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status OF STRUCTURE cs_row_data TO FIELD-SYMBOL(<field>).
+    IF sy-subrc = 0.
+      CLEAR <field>.
+    ENDIF.
+
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status_msg OF STRUCTURE cs_row_data TO <field>.
+    IF sy-subrc = 0.
+      CLEAR <field>.
     ENDIF.
 
   ENDMETHOD.

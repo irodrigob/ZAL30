@@ -88,19 +88,6 @@ INTERFACE zif_al30_exit_class
   METHODS exit_process_catalog_of_field
     CHANGING
       !cs_fieldcat TYPE lvc_s_fcat .
-  "! <p class="shorttext synchronized">Exit for verify the data to be save</p>
-  "! It allows the data to be recorded or deleted before performing the recording process
-  "! @parameter it_data | <p class="shorttext synchronized">Data to be update or insert</p>
-  "! @parameter it_data_del | <p class="shorttext synchronized">Data to be delete</p>
-  "! @parameter iv_langu | <p class="shorttext synchronized">Language</p>
-  "! @parameter et_return | <p class="shorttext synchronized">return</p>
-  METHODS exit_verify_save_data
-    IMPORTING
-      !it_data     TYPE STANDARD TABLE
-      !it_data_del TYPE STANDARD TABLE
-      !iv_langu    TYPE sylangu DEFAULT sy-langu
-    EXPORTING
-      et_return    TYPE bapiret2_t.
   "! <p class="shorttext synchronized">Set editable mode the ALV Data</p>
   "! The ev_edit_mode parameter can be returned with two values:
   "! @parameter it_data | <p class="shorttext synchronized">Data</p>

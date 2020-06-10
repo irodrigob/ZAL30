@@ -564,15 +564,13 @@ FORM row_insert_modify  CHANGING ps_data_changed TYPE REF TO cl_alv_changed_data
       AT NEW row_id.
 *        ADD 1 TO ld_count.
 
-        " Se resetea el campo de acciones al inicio del proceso
-        CALL METHOD ps_data_changed->modify_cell
-          EXPORTING
-            i_row_id    = <ls_modif>-row_id
-            i_fieldname = zif_al30_data=>cs_control_fields_alv_data-actions
-            i_value     = space.
 
-* Leo el registro modificado/insertado
+" Leo el registro modificado/insertado
         READ TABLE <lt_datos_im> ASSIGNING <ls_datos_im> INDEX <ls_modif>-tabix.
+
+        " Se resetea el campo de status
+        mo_controller->clear_row_status_fields( CHANGING cs_row_data = <ls_datos_im> ).
+
 
 * Trato la linea para ver si se ha modificado o insertado
         PERFORM trat_new_row_id USING
