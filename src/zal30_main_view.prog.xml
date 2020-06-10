@@ -775,6 +775,11 @@
    </CUA>
    <TPOOL>
     <item>
+     <ID>R</ID>
+     <ENTRY>AL30 - Mantenimiento tablas</ENTRY>
+     <LENGTH>70</LENGTH>
+    </item>
+    <item>
      <ID>I</ID>
      <KEY>001</KEY>
      <ENTRY>Transport table entries</ENTRY>
@@ -787,9 +792,10 @@
      <LENGTH>104</LENGTH>
     </item>
     <item>
-     <ID>R</ID>
-     <ENTRY>AL30 - Mantenimiento tablas</ENTRY>
-     <LENGTH>70</LENGTH>
+     <ID>I</ID>
+     <KEY>C01</KEY>
+     <ENTRY>Fieldname</ENTRY>
+     <LENGTH>19</LENGTH>
     </item>
     <item>
      <ID>S</ID>

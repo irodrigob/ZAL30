@@ -30,6 +30,12 @@
      <LANGU>E</LANGU>
      <DESCRIPT>Returns the most optimal text for a header</DESCRIPT>
     </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_AL30_UTIL</CLSNAME>
+     <CMPNAME>READ_SINGLE_DATA_ELEMENT</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Read info of a data element</DESCRIPT>
+    </SEOCOMPOTX>
    </DESCRIPTIONS>
   </asx:values>
  </asx:abap>

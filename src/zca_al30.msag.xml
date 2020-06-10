@@ -293,6 +293,12 @@
     <T100>
      <SPRSL>E</SPRSL>
      <ARBGB>ZCA_AL30</ARBGB>
+     <MSGNR>047</MSGNR>
+     <TEXT>Correct the problem before any action</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZCA_AL30</ARBGB>
      <MSGNR>063</MSGNR>
      <TEXT>No fields selected</TEXT>
     </T100>

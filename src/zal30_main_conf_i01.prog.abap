@@ -148,7 +148,7 @@ MODULE check_class_exit INPUT.
   DATA ls_return TYPE bapiret2.
 
   IF zal30_t_view-exit_class IS NOT INITIAL.
-    ls_return = mo_controller->check_exit_class( zal30_t_view-exit_class ).
+    ls_return = mo_cnt_al30->check_exit_class( zal30_t_view-exit_class ).
 
     IF ls_return-type = zif_al30_data=>cs_msg_type-error.
       MESSAGE ID ls_return-id TYPE ls_return-type

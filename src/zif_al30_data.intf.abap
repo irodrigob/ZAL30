@@ -98,6 +98,7 @@ INTERFACE zif_al30_data
                is_dict        TYPE fieldname VALUE 'ZAL30_IS_DICT',
                row_status     TYPE fieldname VALUE 'ZAL30_ROW_STATUS',
                row_status_msg TYPE fieldname VALUE 'ZAL30_ROW_STATUS_MSG',
+               actions        TYPE fieldname VALUE 'ZAL30_ACTIONS',
              END OF cs_control_fields_alv_data.
 
   CONSTANTS cv_intf_exit TYPE seoclsname VALUE 'ZIF_AL30_EXIT_CLASS' ##NO_TEXT.
@@ -125,6 +126,9 @@ INTERFACE zif_al30_data
                source_text       TYPE domname VALUE 'ZAL30_D_SOURCE_TEXT' ##NO_TEXT,
                label_type_header TYPE domname VALUE 'ZAL30_D_LABEL_TYPE_FOR_HEADER',
              END OF cs_domain.
+  CONSTANTS: BEGIN OF cs_data_element,
+               actions TYPE rollname VALUE 'ZAL30_E_ACTIONS',
+             END OF cs_data_element.
   CONSTANTS:
     BEGIN OF cs_order_category,
       workbench   TYPE e070-korrdev VALUE 'SYST',

@@ -48,12 +48,14 @@ CLASS zcl_al30_view DEFINITION
     "! <p class="shorttext synchronized">Create the internal table for display data of the view</p>
     "! @parameter iv_mode | <p class="shorttext synchronized">Edit mode:Edit or View</p>
     "! @parameter et_data | <p class="shorttext synchronized">Internal table for the values</p>
+    "! @parameter es_data | <p class="shorttext synchronized">work area of table for the values</p>
     "! @parameter es_return | <p class="shorttext synchronized">Result of the process</p>
     METHODS create_it_data_view
       IMPORTING
         !iv_mode   TYPE char1
       EXPORTING
         !et_data   TYPE REF TO data
+        !es_data type ref to data
         !es_return TYPE bapiret2 .
     "! <p class="shorttext synchronized">Save the data in the view.</p>
     METHODS save_data
@@ -104,7 +106,7 @@ CLASS zcl_al30_view DEFINITION
     "! @parameter it_data_del | <p class="shorttext synchronized">Data deleted</p>
     "! @parameter iv_save_process | <p class="shorttext synchronized">Enter in save process</p>
     "! @parameter et_return | <p class="shorttext synchronized">return</p>
-    METHODS verify_save_data
+    METHODS verify_data
       IMPORTING
                 it_data_del      TYPE STANDARD TABLE
                 !iv_save_process TYPE sap_bool DEFAULT abap_false
@@ -424,17 +426,7 @@ CLASS zcl_al30_view DEFINITION
         et_return   TYPE bapiret2_t
       CHANGING
         cs_row_data TYPE any  .
-    "! <p class="shorttext synchronized">Exit for verify the data to be save</p>
-    "! It allows the data to be recorded or deleted before performing the recording process
-    "! @parameter it_data | <p class="shorttext synchronized">Data to be update or insert</p>
-    "! @parameter it_data_del | <p class="shorttext synchronized">Data to be delete</p>
-    "! @parameter et_return | <p class="shorttext synchronized">return</p>
-    METHODS exit_verify_save_data
-      IMPORTING
-        it_data     TYPE STANDARD TABLE
-        it_data_del TYPE STANDARD TABLE
-      EXPORTING
-        et_return   TYPE bapiret2_t.
+
     "! <p class="shorttext synchronized">Exit to set editable mode the ALV Data</p>
     "!
     "! @parameter it_data | <p class="shorttext synchronized">Data</p>
@@ -617,7 +609,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
     DATA lt_fcat_control TYPE lvc_t_fcat.
     DATA ls_fcat TYPE LINE OF lvc_t_fcat.
 
-    CLEAR: et_data, es_return.
+    CLEAR: et_data, es_return, es_data.
 
     " Creo la estructura en base a la vista/tabla indicada
     CALL METHOD zcl_ca_dynamic_tables=>create_wa_from_struc
@@ -647,7 +639,8 @@ CLASS zcl_al30_view IMPLEMENTATION.
           i_base_fields = lo_wa_view
           i_new_fields  = lt_fcat
         IMPORTING
-          e_table       = et_data.
+          e_table       = et_data
+          e_wa = es_data.
 
       IF et_data IS NOT BOUND.
         es_return = zcl_al30_util=>fill_return( iv_type = zif_al30_data=>cs_msg_type-error iv_number = '018' iv_message_v1 = ms_view-tabname ).
@@ -1215,30 +1208,6 @@ CLASS zcl_al30_view IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-
-  METHOD exit_verify_save_data.
-    DATA ld_metodo TYPE seocpdname.
-
-    IF mo_exit_class IS BOUND.
-
-* Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_VERIFY_SAVE_DATA' INTO ld_metodo.
-
-      TRY.
-          CALL METHOD mo_exit_class->(ld_metodo)
-            EXPORTING
-              it_data     = it_data
-              it_data_del = it_data_del
-            IMPORTING
-              et_return   = et_return.
-
-        CATCH cx_root.
-      ENDTRY.
-
-    ENDIF.
-  ENDMETHOD.
-
-
   METHOD field_value_adjust_sql.
     FIELD-SYMBOLS: <field> TYPE any.
     DATA lo_field TYPE REF TO data.
@@ -1533,7 +1502,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
       DATA(lo_conf) = NEW zcl_al30_conf(  ).
       LOOP AT mt_fields ASSIGNING FIELD-SYMBOL(<ls_fields>) WHERE virtual = abap_true.
         TRY.
-            lo_conf->read_single_data_element( EXPORTING iv_rollname = <ls_fields>-virtual_dtel
+            zcl_al30_util=>read_single_data_element( EXPORTING iv_rollname = <ls_fields>-virtual_dtel
                                                          iv_langu    = sy-langu
                                                IMPORTING es_info     = DATA(ls_info) ).
 
@@ -1588,7 +1557,6 @@ CLASS zcl_al30_view IMPLEMENTATION.
                                                                iv_number = '034'
                                                                iv_field = lo_fields->fieldname
                                                                iv_langu = mv_langu ) INTO TABLE et_return.
-
         ENDIF.
       ENDIF.
     ENDLOOP.
@@ -2365,7 +2333,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD verify_save_data.
+  METHOD verify_data.
     FIELD-SYMBOLS: <lt_datos> TYPE STANDARD TABLE.
     DATA lo_datos TYPE REF TO data.
     CLEAR et_return.
@@ -2395,12 +2363,6 @@ CLASS zcl_al30_view IMPLEMENTATION.
       INSERT <ls_data> INTO TABLE <lt_datos>.
 
     ENDLOOP.
-
-    " Exit para la verificación de los datos a grabar
-    exit_verify_save_data( EXPORTING it_data = <lt_datos>
-                                      it_data_del = it_data_del
-                           IMPORTING et_return = lt_return ).
-    INSERT LINES OF lt_return INTO TABLE et_return.
 
   ENDMETHOD.
 

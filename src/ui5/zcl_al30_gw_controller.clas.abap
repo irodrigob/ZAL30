@@ -1000,8 +1000,8 @@ CLASS zcl_al30_gw_controller IMPLEMENTATION.
         ASSIGN lo_data_del_orig->* TO <data_del_orig>.
         INSERT LINES OF <data_del> INTO TABLE <data_del_orig>.
 
-
-        mo_view->verify_save_data(
+        " Se validan que los datos que se van a grabar sean correctos
+        mo_view->verify_data(
           EXPORTING
             it_data_del = <data_del>
             iv_save_process = abap_true

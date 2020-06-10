@@ -112,7 +112,7 @@ DATA mv_read_data_view TYPE sap_bool.
 *----------------------------------------------------------------------*
 * Class
 *----------------------------------------------------------------------*
-DATA mo_controller TYPE REF TO zcl_al30_controller.
+DATA mo_cnt_al30 TYPE REF TO zcl_al30_controller.
 
 *----------------------------------------------------------------------*
 * Declaración para los ALV
@@ -128,5 +128,5 @@ DATA ms_layout TYPE lvc_s_layo.
 DATA mt_filters TYPE lvc_t_filt.
 DATA mo_alv TYPE REF TO cl_gui_alv_grid.
 DATA mo_container TYPE REF TO cl_gui_docking_container.
-CLASS lcl_event_alv DEFINITION DEFERRED.
-DATA mo_event_receiver_alv TYPE REF TO lcl_event_alv.
+CLASS lcl_controller DEFINITION DEFERRED.
+DATA mo_controller TYPE REF TO lcl_controller.
