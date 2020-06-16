@@ -463,7 +463,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_al30_view IMPLEMENTATION.
+CLASS ZCL_AL30_VIEW IMPLEMENTATION.
 
 
   METHOD add_edit_fields.
@@ -899,15 +899,10 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD exit_after_read_data.
-    DATA ld_metodo TYPE seocpdname.
 
     IF mo_exit_class IS BOUND.
-
-* Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_AFTER_READ_DATA' INTO ld_metodo.
-
       TRY.
-          CALL METHOD mo_exit_class->(ld_metodo)
+          CALL METHOD mo_exit_class->exit_after_read_data
             CHANGING
               ct_data = ct_data.
 
@@ -921,15 +916,10 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
   METHOD exit_after_save_data.
 
-    DATA ld_metodo TYPE seocpdname.
-
     IF mo_exit_class IS BOUND.
 
-* Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_AFTER_SAVE_DATA' INTO ld_metodo.
-
       TRY.
-          CALL METHOD mo_exit_class->(ld_metodo)
+          CALL METHOD mo_exit_class->exit_after_save_data
             EXPORTING
               it_data       = it_data
               it_data_del   = it_data_del
@@ -944,15 +934,11 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD exit_before_read_data.
-    DATA ld_metodo TYPE seocpdname.
 
     IF mo_exit_class IS BOUND.
 
-* Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_BEFORE_READ_DATA' INTO ld_metodo.
-
       TRY.
-          CALL METHOD mo_exit_class->(ld_metodo)
+          CALL METHOD mo_exit_class->exit_before_read_data
             CHANGING
               ct_data = ct_data.
 
@@ -966,22 +952,18 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
   METHOD exit_before_save_data.
 
-    DATA ld_metodo TYPE seocpdname.
-
     CLEAR: et_return,
            ev_abort_save.
 
     IF mo_exit_class IS BOUND.
 
-* Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_BEFORE_SAVE_DATA' INTO ld_metodo.
-
       TRY.
-          CALL METHOD mo_exit_class->(ld_metodo)
+          CALL METHOD mo_exit_class->exit_before_save_data
+            EXPORTING
+              iv_langu      = mv_langu
             IMPORTING
               ev_abort_save = ev_abort_save
               et_return     = et_return
-              iv_langu      = mv_langu
             CHANGING
               ct_data       = ct_data
               ct_data_del   = ct_data_del.
@@ -1006,20 +988,14 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD exit_check_auth_data_read.
-    DATA ld_metodo TYPE seocpdname.
 
 * Por defecto tiene autorizacion
     rv_auth = abap_true.
 
     IF mo_exit_class IS BOUND.
 
-* Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_CHECK_AUTH_DATA_READ' INTO ld_metodo.
-
-
       TRY.
-
-          CALL METHOD mo_exit_class->(ld_metodo)
+          CALL METHOD mo_exit_class->exit_check_auth_data_read
             EXPORTING
               is_row_data      = is_row_data
             EXCEPTIONS
@@ -1037,15 +1013,11 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD exit_in_process_data_read.
-    DATA ld_metodo TYPE seocpdname.
 
     IF mo_exit_class IS BOUND.
 
-* Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_IN_PROCESS_DATA_READ' INTO ld_metodo.
-
       TRY.
-          CALL METHOD mo_exit_class->(ld_metodo)
+          CALL METHOD mo_exit_class->exit_in_process_data_read
             CHANGING
               cs_row_data = cs_row_data.
         CATCH cx_root.
@@ -1059,11 +1031,9 @@ CLASS zcl_al30_view IMPLEMENTATION.
   METHOD exit_process_catalog_of_field.
 
     IF mo_exit_class IS BOUND.
-      " Monto el método al cual se llamará de la clase de exit.
-      DATA(lv_metodo) = |{ zif_al30_data=>cv_intf_exit }~EXIT_PROCESS_CATALOG_OF_FIELD|.
 
       TRY.
-          CALL METHOD mo_exit_class->(lv_metodo)
+          CALL METHOD mo_exit_class->exit_process_catalog_of_field
             CHANGING
               cs_fieldcat = cs_fieldcat.
         CATCH cx_root.
@@ -1074,15 +1044,11 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD exit_set_edit_mode_alv.
-    DATA ld_metodo TYPE seocpdname.
 
     IF mo_exit_class IS BOUND.
 
-* Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_SET_EDIT_MODE_ALV' INTO ld_metodo.
-
       TRY.
-          CALL METHOD mo_exit_class->(ld_metodo)
+          CALL METHOD mo_exit_class->exit_set_edit_mode_alv
             EXPORTING
               it_data      = it_data
             IMPORTING
@@ -1096,17 +1062,13 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD exit_verify_change_row_data.
-    DATA ld_metodo TYPE seocpdname.
 
     CLEAR: et_return.
 
     IF mo_exit_class IS BOUND.
 
-* Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_VERIFY_CHANGE_ROW_DATA' INTO ld_metodo.
-
       TRY.
-          CALL METHOD mo_exit_class->(ld_metodo)
+          CALL METHOD mo_exit_class->exit_verify_change_row_data
             EXPORTING
               iv_row      = iv_row
               iv_langu    = mv_langu
@@ -1143,17 +1105,13 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
 
   METHOD exit_verify_field_data.
-    DATA ld_metodo TYPE seocpdname.
 
     CLEAR: es_return.
 
     IF mo_exit_class IS BOUND.
 
-* Monto el método al cual se llamará de la clase de exit.
-      CONCATENATE zif_al30_data=>cv_intf_exit '~EXIT_VERIFY_FIELD_DATA' INTO ld_metodo.
-
       TRY.
-          CALL METHOD mo_exit_class->(ld_metodo)
+          CALL METHOD mo_exit_class->exit_verify_field_data
             EXPORTING
               iv_fieldname = iv_fieldname
               iv_value     = iv_value
@@ -1207,6 +1165,7 @@ CLASS zcl_al30_view IMPLEMENTATION.
 
     ENDIF.
   ENDMETHOD.
+
 
   METHOD field_value_adjust_sql.
     FIELD-SYMBOLS: <field> TYPE any.
@@ -2278,6 +2237,40 @@ CLASS zcl_al30_view IMPLEMENTATION.
   ENDMETHOD.
 
 
+  METHOD verify_data.
+    FIELD-SYMBOLS: <lt_datos> TYPE STANDARD TABLE.
+    DATA lo_datos TYPE REF TO data.
+    CLEAR et_return.
+
+    " Se crea una tabla como la de entrada para pasarla con los datos modificados a las exit
+    CREATE DATA lo_datos LIKE ct_data.
+    ASSIGN lo_datos->* TO <lt_datos>.
+
+    " Se hacen las verificacion internas
+    DATA(lv_cond) = |{ zif_al30_data=>cs_control_fields_alv_data-updkz } IS NOT INITIAL|.
+
+    LOOP AT ct_data ASSIGNING FIELD-SYMBOL(<ls_data>) WHERE (lv_cond).
+      DATA(lv_tabix) = sy-tabix.
+
+      verify_row_data(
+        EXPORTING
+          iv_row          = lv_tabix
+          iv_save_process = abap_true
+        IMPORTING
+          et_return       = DATA(lt_return)
+        CHANGING
+          cs_row_data     = <ls_data> ).
+
+      INSERT LINES OF lt_return INTO TABLE et_return.
+      CLEAR lt_return.
+
+      INSERT <ls_data> INTO TABLE <lt_datos>.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
   METHOD verify_field_data.
 
 
@@ -2329,40 +2322,6 @@ CLASS zcl_al30_view IMPLEMENTATION.
     " del registro. De esta manera se podrá mejorar como se gestionan los errores a nivel de fila. Como estos registros
     " se alimentan en cada exit, el paso final es en base a los mensajes informados sacar el mensaje más crítico
     determine_row_status_from_row( CHANGING cs_row_data = cs_row_data ).
-
-  ENDMETHOD.
-
-
-  METHOD verify_data.
-    FIELD-SYMBOLS: <lt_datos> TYPE STANDARD TABLE.
-    DATA lo_datos TYPE REF TO data.
-    CLEAR et_return.
-
-    " Se crea una tabla como la de entrada para pasarla con los datos modificados a las exit
-    CREATE DATA lo_datos LIKE ct_data.
-    ASSIGN lo_datos->* TO <lt_datos>.
-
-    " Se hacen las verificacion internas
-    DATA(lv_cond) = |{ zif_al30_data=>cs_control_fields_alv_data-updkz } IS NOT INITIAL|.
-
-    LOOP AT ct_data ASSIGNING FIELD-SYMBOL(<ls_data>) WHERE (lv_cond).
-      DATA(lv_tabix) = sy-tabix.
-
-      verify_row_data(
-        EXPORTING
-          iv_row          = lv_tabix
-          iv_save_process = abap_true
-        IMPORTING
-          et_return       = DATA(lt_return)
-        CHANGING
-          cs_row_data     = <ls_data> ).
-
-      INSERT LINES OF lt_return INTO TABLE et_return.
-      CLEAR lt_return.
-
-      INSERT <ls_data> INTO TABLE <lt_datos>.
-
-    ENDLOOP.
 
   ENDMETHOD.
 
