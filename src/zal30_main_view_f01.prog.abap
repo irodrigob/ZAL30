@@ -453,7 +453,10 @@ FORM row_delete  USING pe_rows TYPE lvc_s_moce
                              OF STRUCTURE <ls_wa> TO <field>.
         IF sy-subrc = 0.
           <field> = zif_al30_data=>cv_mode_delete.
-          APPEND <ls_wa> TO <it_datos_del>.
+
+          INSERT INITIAL LINE INTO TABLE <it_datos_del> ASSIGNING FIELD-SYMBOL(<ls_datos_del>).
+
+          <ls_datos_del> = CORRESPONDING #( <ls_wa> ).
         ENDIF.
 
       ENDIF.
@@ -565,7 +568,7 @@ FORM row_insert_modify  CHANGING ps_data_changed TYPE REF TO cl_alv_changed_data
 *        ADD 1 TO ld_count.
 
 
-" Leo el registro modificado/insertado
+        " Leo el registro modificado/insertado
         READ TABLE <lt_datos_im> ASSIGNING <ls_datos_im> INDEX <ls_modif>-tabix.
 
         " Se resetea el campo de status
