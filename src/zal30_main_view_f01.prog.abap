@@ -414,14 +414,7 @@ FORM data_changed  CHANGING ps_data_changed TYPE REF TO cl_alv_changed_data_prot
 * Esta es la parte más compleja porque en "mp_mod_rows" están las líneas
 * tanto insertadas como borradas. Y pueden modificar líneas que han sido previamente
 * insertadas
-  PERFORM row_insert_modify CHANGING ps_data_changed
-                                     mv_datos_validos.
-
-  " Si hay mensajes de error los datos no serán validos
-  READ TABLE ps_data_changed->mt_protocol TRANSPORTING NO FIELDS WITH KEY msgty = zif_al30_data=>cs_msg_type-error.
-  IF sy-subrc = 0.
-    mv_datos_validos = abap_false.
-  ENDIF.
+  PERFORM row_insert_modify CHANGING ps_data_changed.
 
 ENDFORM.                    " DATA_CHANGED
 *&---------------------------------------------------------------------*
@@ -541,8 +534,7 @@ ENDFORM.                    " ROW_INSERT
 *&---------------------------------------------------------------------*
 *       text
 *----------------------------------------------------------------------*
-FORM row_insert_modify  CHANGING ps_data_changed TYPE REF TO cl_alv_changed_data_protocol
-                                 ps_datos_validos.
+FORM row_insert_modify  CHANGING ps_data_changed TYPE REF TO cl_alv_changed_data_protocol.
 * Tabla con datos insertados o modificados
   FIELD-SYMBOLS <lt_datos_im> TYPE table.
   FIELD-SYMBOLS <ls_datos_im> TYPE any.
@@ -583,23 +575,22 @@ FORM row_insert_modify  CHANGING ps_data_changed TYPE REF TO cl_alv_changed_data
                                 CHANGING ps_data_changed.
 
 * Compruebo que los camps claves  que se haya introducido/modificado no esten introducido
-        PERFORM check_key_duplicate USING <ls_datos_im>
+        PERFORM check_key_duplicate USING
                                           <ls_modif>
                                     CHANGING ps_data_changed
-                                             ps_datos_validos.
+                                            <ls_datos_im>.
 
       ENDAT.
-
-      PERFORM verify_content_fields USING <ls_modif>
-                                    CHANGING ps_data_changed
-                                             ps_datos_validos.
+      " NOTA IRB: 16/06/2020 - Esta exit queda como obsoleta. Se sustituye por la verify_change_row_data que lo aglutina todo
+*      PERFORM verify_content_fields USING <ls_modif>
+*                                    CHANGING ps_data_changed
+*                                             ps_datos_validos.
 
 * Al final de cada registro se lanza la verificacion a nivel de fila
       AT END OF row_id.
         PERFORM verify_change_row_data USING <ls_modif>
                                       <ls_datos_im>
-                                CHANGING ps_data_changed
-                                         ps_datos_validos.
+                                CHANGING ps_data_changed.
 
         " Si en la fila tiene un error, lo que se hará es añadir los errores del propio ALV al campo donde se acumula los mensajes de la fila
         IF <ls_modif>-error = abap_true.
@@ -688,16 +679,16 @@ ENDFORM.                    " TRAT_NEW_ROW_ID
 *&---------------------------------------------------------------------*
 *       text
 *----------------------------------------------------------------------*
-FORM check_key_duplicate  USING    pe_datos_im TYPE any
-                                   pe_modif TYPE lvc_s_modi
+FORM check_key_duplicate  USING    pe_modif TYPE lvc_s_modi
                           CHANGING ps_data_changed TYPE REF TO cl_alv_changed_data_protocol
-                                   ps_datos_validos TYPE sap_bool.
+                                   pe_datos_im TYPE any.
 
   FIELD-SYMBOLS <ls_datos> TYPE any.
 
   DATA ld_valor TYPE string.
   DATA ld_found TYPE sap_bool.
   DATA lv_cond TYPE string.
+  FIELD-SYMBOLS <lt_row_msg> TYPE zal30_i_row_status_msg.
 
 * Primero miro si el registro viene del diccionario. En caso afirmativo no compruebo
 * clave duplicada ya que no la pueden modificar
@@ -744,7 +735,6 @@ FORM check_key_duplicate  USING    pe_datos_im TYPE any
           EXIT.
         ENDLOOP.
         IF ld_found = abap_true.
-          ps_datos_validos = abap_false.
           CALL METHOD ps_data_changed->add_protocol_entry
             EXPORTING
               i_msgid     = zif_al30_data=>cv_msg_id
@@ -753,6 +743,21 @@ FORM check_key_duplicate  USING    pe_datos_im TYPE any
               i_fieldname = <ls_fields>-fieldname " Se escoge el último campo de la clave
               i_row_id    = pe_modif-row_id
               i_tabix     = pe_modif-tabix.
+
+          " Para poder guardar los errores necesito los campos donde se almacenan dichos mensajes y su campo de control
+          ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status_msg OF STRUCTURE pe_datos_im TO <lt_row_msg>.
+          IF sy-subrc = 0.
+            INSERT VALUE #( type = zif_al30_data=>cs_msg_type-error fieldname = <ls_fields>-fieldname ) INTO TABLE <lt_row_msg> ASSIGNING FIELD-SYMBOL(<ls_row_msg>).
+            <ls_row_msg>-message = zcl_al30_util=>fill_return( EXPORTING iv_type = zif_al30_data=>cs_msg_type-error
+                                                                         iv_number = '043'
+                                                                         iv_id = zif_al30_data=>cv_msg_id )-message.
+
+            ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status OF STRUCTURE pe_datos_im TO FIELD-SYMBOL(<row_status>).
+            IF sy-subrc = 0.
+              <row_status> = zif_al30_data=>cs_msg_type-error.
+            ENDIF.
+          ENDIF.
+
         ENDIF.
       ENDIF.
     ENDIF.
@@ -1023,22 +1028,21 @@ ENDFORM                    "transportar_datos
 *----------------------------------------------------------------------*
 FORM verify_change_row_data USING  pe_modif TYPE lvc_s_modi
                             ps_row_data TYPE any
-                     CHANGING ps_data_changed TYPE REF TO cl_alv_changed_data_protocol
-                               ps_datos_validos TYPE sap_bool.
+                     CHANGING ps_data_changed TYPE REF TO cl_alv_changed_data_protocol.
   FIELD-SYMBOLS <ls_row_data> TYPE any.
   FIELD-SYMBOLS <ls_fieldcat> TYPE lvc_s_fcat.
   FIELD-SYMBOLS <field> TYPE any.
   FIELD-SYMBOLS: <styles> TYPE lvc_t_styl.
-  DATA lo_wa TYPE REF TO data.
+*  DATA lo_wa TYPE REF TO data.
 
 * Creo una estructura identifica a la vista que se trata. * Creo una estructura identifica a los datos que se están tratando.
-  CREATE DATA lo_wa LIKE LINE OF <it_datos>.
+*  CREATE DATA lo_wa LIKE LINE OF <it_datos>.
 
-  IF lo_wa IS BOUND.
-    ASSIGN lo_wa->* TO <ls_row_data>.
+*  IF lo_wa IS BOUND.
+*    ASSIGN lo_wa->* TO <ls_row_data>.
 
 * Paso los datos
-    MOVE-CORRESPONDING ps_row_data TO <ls_row_data>.
+*    MOVE-CORRESPONDING ps_row_data TO <ls_row_data>.
 
     CALL METHOD mo_cnt_al30->verify_change_row_data
       EXPORTING
@@ -1046,7 +1050,7 @@ FORM verify_change_row_data USING  pe_modif TYPE lvc_s_modi
       IMPORTING
         et_return   = DATA(lt_return)
       CHANGING
-        cs_row_data = <ls_row_data>.
+        cs_row_data = ps_row_data.
 
 * Si hay mensaje lo devuelvo a la clase
     IF lt_return IS NOT INITIAL.
@@ -1064,9 +1068,6 @@ FORM verify_change_row_data USING  pe_modif TYPE lvc_s_modi
             i_row_id    = pe_modif-row_id
             i_tabix     = pe_modif-row_id.
 
-        " Si hay algún error se devuelve que los datos no son válidos
-        ps_datos_validos = COND #( WHEN <ls_return>-type = zif_al30_data=>cs_msg_type-error THEN abap_false ELSE ps_datos_validos ).
-
       ENDLOOP.
     ENDIF.
 
@@ -1082,7 +1083,7 @@ FORM verify_change_row_data USING  pe_modif TYPE lvc_s_modi
       ENDLOOP.
     ENDIF.
 
-  ENDIF.
+*  ENDIF.
 
 ENDFORM.                    " VERIFY_CHANGE_ROW_DATA
 *&---------------------------------------------------------------------*
