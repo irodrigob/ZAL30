@@ -684,11 +684,11 @@ FORM check_key_duplicate  USING    pe_modif TYPE lvc_s_modi
                                    pe_datos_im TYPE any.
 
   FIELD-SYMBOLS <ls_datos> TYPE any.
-
+  FIELD-SYMBOLS <lt_row_msg> TYPE zal30_i_row_status_msg.
   DATA ld_valor TYPE string.
   DATA ld_found TYPE sap_bool.
   DATA lv_cond TYPE string.
-  FIELD-SYMBOLS <lt_row_msg> TYPE zal30_i_row_status_msg.
+
 
 * Primero miro si el registro viene del diccionario. En caso afirmativo no compruebo
 * clave duplicada ya que no la pueden modificar
@@ -1033,55 +1033,68 @@ FORM verify_change_row_data USING  pe_modif TYPE lvc_s_modi
   FIELD-SYMBOLS <ls_fieldcat> TYPE lvc_s_fcat.
   FIELD-SYMBOLS <field> TYPE any.
   FIELD-SYMBOLS: <styles> TYPE lvc_t_styl.
-*  DATA lo_wa TYPE REF TO data.
+  FIELD-SYMBOLS <lt_row_msg> TYPE zal30_i_row_status_msg.
+*  data lt_row_msg type zal30_i_row_status_msg.
 
-* Creo una estructura identifica a la vista que se trata. * Creo una estructura identifica a los datos que se están tratando.
-*  CREATE DATA lo_wa LIKE LINE OF <it_datos>.
+  " Debido a que las validacion en las clases resetean los campos de control de status me los guardo variables locales para luego
+  " volver a mover en caso que haya habido errores
+  ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status_msg OF STRUCTURE ps_row_data TO <lt_row_msg>.
+  IF sy-subrc = 0.
+    DATA(lt_row_msg) = <lt_row_msg>.
+    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-row_status OF STRUCTURE ps_row_data TO FIELD-SYMBOL(<row_status>).
+    IF sy-subrc = 0.
+      DATA(lv_row_status) = CONV string( <row_status> ).
+    ENDIF.
+  ENDIF.
 
-*  IF lo_wa IS BOUND.
-*    ASSIGN lo_wa->* TO <ls_row_data>.
-
-* Paso los datos
-*    MOVE-CORRESPONDING ps_row_data TO <ls_row_data>.
-
-    CALL METHOD mo_cnt_al30->verify_change_row_data
-      EXPORTING
-        iv_row      = pe_modif-row_id
-      IMPORTING
-        et_return   = DATA(lt_return)
-      CHANGING
-        cs_row_data = ps_row_data.
+  CALL METHOD mo_cnt_al30->verify_change_row_data
+    EXPORTING
+      iv_row      = pe_modif-row_id
+    IMPORTING
+      et_return   = DATA(lt_return)
+    CHANGING
+      cs_row_data = ps_row_data.
 
 * Si hay mensaje lo devuelvo a la clase
-    IF lt_return IS NOT INITIAL.
-      LOOP AT lt_return ASSIGNING FIELD-SYMBOL(<ls_return>).
-        CALL METHOD ps_data_changed->add_protocol_entry
-          EXPORTING
-            i_msgid     = <ls_return>-id
-            i_msgno     = <ls_return>-number
-            i_msgty     = <ls_return>-type
-            i_msgv1     = <ls_return>-message_v1
-            i_msgv2     = <ls_return>-message_v2
-            i_msgv3     = <ls_return>-message_v3
-            i_msgv4     = <ls_return>-message_v4
-            i_fieldname = <ls_return>-field
-            i_row_id    = pe_modif-row_id
-            i_tabix     = pe_modif-row_id.
+  IF lt_return IS NOT INITIAL.
+    LOOP AT lt_return ASSIGNING FIELD-SYMBOL(<ls_return>).
+      CALL METHOD ps_data_changed->add_protocol_entry
+        EXPORTING
+          i_msgid     = <ls_return>-id
+          i_msgno     = <ls_return>-number
+          i_msgty     = <ls_return>-type
+          i_msgv1     = <ls_return>-message_v1
+          i_msgv2     = <ls_return>-message_v2
+          i_msgv3     = <ls_return>-message_v3
+          i_msgv4     = <ls_return>-message_v4
+          i_fieldname = <ls_return>-field
+          i_row_id    = pe_modif-row_id
+          i_tabix     = pe_modif-row_id.
 
-      ENDLOOP.
-    ENDIF.
+    ENDLOOP.
+  ENDIF.
+
+  " Una vez finalizado el proceso se añaden los mensajes previos de nuevo al campo
+  IF <lt_row_msg> IS ASSIGNED.
+    INSERT LINES OF lt_row_msg INTO TABLE <lt_row_msg>.
+  ENDIF.
+  " Si previamente hay error lo vuelvo a poner. Si en la validación ya viene con error pues se pondrá
+  " el mismo valor, pero así hago el código más simple.
+  IF <row_status> IS ASSIGNED AND lv_row_status = zif_al30_data=>cs_msg_type-error.
+    <row_status> = lv_row_status.
+  ENDIF.
 
 * Ahora se actualiza los estilos por si se hubiesen modificado en la exit
-    ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-style OF STRUCTURE <ls_row_data> TO <styles>.
-    IF sy-subrc = 0.
-      LOOP AT <styles> ASSIGNING FIELD-SYMBOL(<style>).
-        CALL METHOD ps_data_changed->modify_style
-          EXPORTING
-            i_row_id    = pe_modif-row_id
-            i_fieldname = <style>-fieldname
-            i_style     = <style>-style.
-      ENDLOOP.
-    ENDIF.
+  ASSIGN COMPONENT zif_al30_data=>cs_control_fields_alv_data-style OF STRUCTURE <ls_row_data> TO <styles>.
+  IF sy-subrc = 0.
+    LOOP AT <styles> ASSIGNING FIELD-SYMBOL(<style>).
+      CALL METHOD ps_data_changed->modify_style
+        EXPORTING
+          i_row_id    = pe_modif-row_id
+          i_fieldname = <style>-fieldname
+          i_style     = <style>-style.
+    ENDLOOP.
+  ENDIF.
 
 *  ENDIF.
 
